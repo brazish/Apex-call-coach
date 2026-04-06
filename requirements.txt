@@ -1,0 +1,6 @@
+streamlit>=1.32.0
+deepgram-sdk>=3.0.0
+anthropic>=0.25.0
+pyaudio>=0.2.14
+websockets>=12.0
+python-dotenv>=1.0.0
