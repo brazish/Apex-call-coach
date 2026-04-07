@@ -65,7 +65,7 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
   <button class="btn bx" id="bsp" onclick="stop()" disabled>◼ Stop</button>
   <button class="btn bc" onclick="clr()">🗑 Clear</button>
 </div>
-<div class="sb" id="sb">👆 Enter API keys in the sidebar then click Start Listening.</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
 <div class="ib" id="ib"></div>
 <div class="eb" id="eb"></div>
 <div class="cols">
@@ -79,7 +79,7 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
   </div>
 </div>
 <script>
-const DG="__DG__",CL="__CL__",LANG="__LANG__",PROD="__PROD__",PERS="__PERS__",CI=__CI__;
+const DG="__DG__",CL="__CL__",LANG="__LANG__",CI=__CI__;
 let sock,actx,proc,src,ms,rec=false,t0=null,tmr=null,W=0,O=0,I=0,WC=0,lines=[],pend="",lc=0;
 const $=x=>document.getElementById(x);
 const ts=()=>new Date().toLocaleTimeString("en-US",{hour12:false});
@@ -110,7 +110,7 @@ function addCoach(type,content,t){
 async function coach(chunk,full){
   if(!CL)return;
   try{
-    const sys="You are APEX, a real-time sales call coach.\nProduct: "+(PROD||"the product")+"\nPersona: "+(PERS||"a business decision-maker")+"\nTranscript: "+full.slice(-2000)+"\nLatest: "+chunk+'\nReply ONLY in raw JSON: {"type":"objection"|"tip"|"positive"|"coach"|"none","content":"1-3 sentence tip","urgency":"high"|"medium"|"low"}';
+    const sys="You are APEX, a real-time sales call coach.\nProduct: "+(getPROD()||"the product")+"\nPersona: "+(getPERS()||"a busiion-maker")+"\nTranscript: "+full.slice(-2000)+"\nLatest: "+chunk+'\nReply ONLY in raw JSON: {"type":"objection"|"tip"|"positive"|"coach"|"none","content":"1-3 sentence tip","urgency":"high"|"medium"|"low"}';
     const r=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
       headers:{"x-api-key":CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
