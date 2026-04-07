@@ -20,7 +20,7 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
 .bc{background:#131A22;color:#4A6070;border:1px solid #1E2D3D}
 .btn:disabled{opacity:0.35;cursor:not-allowed}
 .ctx{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.ctx-lbl{font-size:11px;color:#4A6070;margin-bottom:4px}
+.ctx-lbl{font-size:11px;color:#4A6070;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
 .ctx-input{width:100%;background:#090D11;border:1px solid #1E2D3D;border-radius:6px;padding:8px;color:#C8D8E4;font-family:monospace;font-size:12px}
 .sb{font-size:12px;color:#00E5FF;padding:5px 0;min-height:22px}
 .ib{font-size:12px;color:#4A6070;font-style:italic;min-height:18px;padding:3px 0}
@@ -49,12 +49,29 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
 .dg{background:#00FF9D;animation:blink 1.2s infinite}
 .dy{background:#4A6070}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.obj-section{margin-top:24px;border-top:1px solid #1E2D3D;padding-top:18px}
+.obj-title{font-size:15px;font-weight:700;color:#FF3B5C;margin-bottom:12px}
+.obj-card{background:#131A22;border:1px solid rgba(255,59,92,0.3);border-left:3px solid #FF3B5C;border-radius:9px;padding:14px;margin-bottom:12px}
+.obj-q{font-size:13px;color:#FF3B5C;font-weight:600;margin-bottom:8px}
+.obj-a{font-size:12px;color:#C8D8E4;line-height:1.7;background:#090D11;border-radius:6px;padding:10px;border-left:2px solid #00E5FF}
+.obj-a-lbl{font-size:9px;color:#00E5FF;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.obj-ts{font-size:9px;color:#4A6070;margin-top:6px}
+.scripts-section{margin-top:24px;border-top:1px solid #1E2D3D;padding-top:18px}
+.scripts-title{font-size:15px;font-weight:700;color:#FFD60A;margin-bottom:12px}
+.script-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:6px 14px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #1E2D3D;background:#131A22;color:#4A6070;font-family:monospace}
+.tab.active{background:rgba(255,214,10,0.15);color:#FFD60A;border-color:rgba(255,214,10,0.4)}
+.script-content{display:none}
+.script-content.active{display:block}
+.script-card{background:#131A22;border:1px solid #1E2D3D;border-left:3px solid #FFD60A;border-radius:9px;padding:14px;margin-bottom:10px}
+.script-lbl{font-size:9px;color:#FFD60A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.script-text{font-size:12px;color:#C8D8E4;line-height:1.8;font-style:italic}
 </style>
 </head>
 <body>
 <div class="hdr">
   <div class="logo">🎯</div>
-  <div><div class="t1">APEX Call Coach</div><div class="t2">Live AI Sales Intelligence</div></div>
+  <div><div class="t1">APEX Call Coach</div><div class="t2">Live AI Sales Intelligence — Substance Abuse & Mental Health</div></div>
 </div>
 <div class="metrics">
   <div class="mc"><div class="mv" id="md">00:00</div><div class="ml">Duration</div></div>
@@ -64,32 +81,144 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
   <div class="mc"><div id="ms"><span class="pl idle"><span class="dot dy"></span>IDLE</span></div><div class="ml" style="margin-top:5px">Status</div></div>
 </div>
 <div class="ctx">
-  <div><div class="ctx-lbl">PRODUCT / SERVICE</div><input id="prod" class="ctx-input" type="text" placeholder="e.g. SaaS CRM at $500/mo"></div>
-  <div><div class="ctx-lbl">PROSPECT PERSONA</div><input id="pers" class="ctx-input" type="text" placeholder="e.g. VP Sales, 200-person company"></div>
+  <div><div class="ctx-lbl">Product / Service</div><input id="prod" class="ctx-input" type="text" placeholder="e.g. 30-day residential program at $15,000"></div>
+  <div><div class="ctx-lbl">Prospect Persona</div><input id="pers" class="ctx-input" type="text" placeholder="e.g. Parent of 28yr old with opioid addiction"></div>
 </div>
 <div class="btns">
   <button class="btn bs" id="bst" onclick="go()">▶ Start Listening</button>
   <button class="btn bx" id="bsp" onclick="stop()" disabled>◼ Stop</button>
   <button class="btn bc" onclick="clr()">🗑 Clear</button>
 </div>
-<div class="sb" id="sb">👆 Enter API keys in the sidebar then click Start Listening.</div>
+<div class="sb" id="sb">👆 Fill in your program details above then click Start Listening.</div>
 <div class="ib" id="ib"></div>
 <div class="eb" id="eb"></div>
+
 <div class="cols">
   <div>
     <div class="st">🎙️ Live Transcript</div>
     <div class="box" id="tb"><div class="te">Transcript will appear here when you start listening...</div></div>
+
+    <!-- OBJECTION LOG -->
+    <div class="obj-section">
+      <div class="obj-title">🚨 Objection Log — Heard on This Call</div>
+      <div id="obj-log"><div class="te" style="font-size:12px;padding:10px 0">No objections detected yet. They will appear here with exact rebuttal scripts.</div></div>
+    </div>
   </div>
+
   <div>
     <div class="st">💡 Live Coaching Feed</div>
-    <div class="box" id="cb"><div class="ce">🎤<br><br>Coaching insights will appear here.<br><br><span style="color:#00E5FF">Start listening to begin.</span></div></div>
+    <div class="box" id="cb"><div class="ce">🎤<br><br>Real-time coaching will appear here.<br><br><span style="color:#00E5FF">Start listening to begin.</span></div></div>
+
+    <!-- CLOSER SCRIPTS LIBRARY -->
+    <div class="scripts-section">
+      <div class="scripts-title">📋 Closer Scripts Library</div>
+      <div class="script-tabs">
+        <div class="tab active" onclick="showTab('open')">Opening</div>
+        <div class="tab" onclick="showTab('cost')">Cost</div>
+        <div class="tab" onclick="showTab('think')">Think About It</div>
+        <div class="tab" onclick="showTab('ins')">Insurance</div>
+        <div class="tab" onclick="showTab('ready')">Not Ready</div>
+        <div class="tab" onclick="showTab('close')">Closing</div>
+      </div>
+
+      <div id="tab-open" class="script-content active">
+        <div class="script-card">
+          <div class="script-lbl">🎯 Opening — Build Urgency & Rapport</div>
+          <div class="script-text">"I want you to know — reaching out today took courage, and I'm really glad you did. Can you tell me a little about what's been going on? I want to make sure we find the absolute best solution for your loved one."</div>
+        </div>
+        <div class="script-card">
+          <div class="script-lbl">🎯 Establish Authority Early</div>
+          <div class="script-text">"We've helped hundreds of families in exactly your situation. What I've learned is that the families who act quickly are the ones who get their loved one back. So let's figure out together what's standing in the way."</div>
+        </div>
+        <div class="script-card">
+          <div class="script-lbl">🎯 Uncover the Pain</div>
+          <div class="script-text">"How long has this been going on? Because I find that families usually wait 2-3 years longer than they should — and every day costs them more than any program ever would."</div>
+        </div>
+      </div>
+
+      <div id="tab-cost" class="script-content">
+        <div class="script-card">
+          <div class="script-lbl">🚨 Objection: "It's too expensive"</div>
+          <div class="script-text">"I completely understand — and I want to ask you something. What has this addiction already cost your family? Between the bail, the ER visits, the lost jobs, the broken relationships — most families tell me they've already spent more than the cost of treatment. This isn't an expense. It's an investment in getting your family back."</div>
+        </div>
+        <div class="script-card">
+          <div class="script-lbl">🚨 Objection: "I can't afford it right now"</div>
+          <div class="script-text">"What does 'right now' mean to you — because addiction doesn't wait. Let me ask: if cost wasn't a factor, would you want your loved one to get help today? Good — then let's focus on making it work. We have financing options and our team works with families every day to find a way. What's your biggest concern about the investment?"</div>
+        </div>
+        <div class="script-card">
+          <div class="script-lbl">🚨 Objection: "That's more than I expected"</div>
+          <div class="script-text">"I hear you — and I want to be transparent. You could find cheaper options, but what you get here is a clinical team that specializes in exactly what your loved one is going through, 24/7 support, and a track record of real results. Can I ask — what's your loved one's life worth to you?"</div>
+        </div>
+      </div>
+
+      <div id="tab-think" class="script-content">
+        <div class="script-card">
+          <div class="script-lbl">🚨 Objection: "I need to think about it"</div>
+          <div class="script-text">"I respect that — and I also want to be honest with you as someone who does this every day. The families that say they need to think about it usually call back 3 months later after something bad happened. What specifically do you need to think through? Let's work through it together right now."</div>
+        </div>
+        <div class="script-card">
+          <div class="script-lbl">🚨 Objection: "I need to talk to my spouse"</div>
+          <div class="script-text">"Absolutely — this is a family decision. Can we get them on the phone right now? I'd love to answer their questions directly and make sure you're both on the same page. It only takes 10 minutes and it will make your conversation much easier."</div>
+        </div>
+        <div class="script-card">
+          <div class="script-lbl">🚨 Objection: "Let me do more research"</div>
+          <div class="script-text">"What are you hoping to find that would make you feel more confident? Because I'd rather answer those questions right now than have you spend hours on Google getting overwhelmed. What's the one thing that would make this a clear yes for you?"</div>
+        </div>
+      </div>
+
+      <div id="tab-ins" class="script-content">
+        <div class="script-card">
+          <div class="script-lbl">🚨 Objection: "Will insurance cover this?"</div>
+          <div class="script-text">"Great question — and the answer is it depends on your plan. What I can do is have our insurance specialist do a free verification right now while we're on the phone. It takes about 10 minutes and you'll know exactly what you're working with. Can I put you on a brief hold to get them?"</div>
+        </div>
+        <div class="script-card">
+          <div class="script-lbl">🚨 Objection: "Insurance denied it"</div>
+          <div class="script-text">"That happens — and we fight it. We have a team that handles insurance appeals every single day and we win most of them. Don't let an insurance company make this decision for your family. Let's get you enrolled and we'll handle the insurance battle on your behalf."</div>
+        </div>
+      </div>
+
+      <div id="tab-ready" class="script-content">
+        <div class="script-card">
+          <div class="script-lbl">🚨 Objection: "He's not ready"</div>
+          <div class="script-text">"You know what — most people who come through our doors weren't ready either. Readiness comes after admission, not before. What we specialize in is meeting people exactly where they are. The question isn't whether he's ready — it's whether YOU are ready to give him the best chance at life."</div>
+        </div>
+        <div class="script-card">
+          <div class="script-lbl">🚨 Objection: "She needs to want it herself"</div>
+          <div class="script-text">"I hear that all the time — and here's what 20 years of research tells us: waiting for someone to hit rock bottom costs lives. Intervention works. Structure works. Love works. You reaching out today IS her wanting help — she just doesn't know it yet. Let's get her in."</div>
+        </div>
+        <div class="script-card">
+          <div class="script-lbl">🚨 Objection: "We tried treatment before"</div>
+          <div class="script-text">"That actually tells me a lot — it means your loved one has shown they can engage with treatment. Most people need multiple attempts before recovery sticks — that's not failure, that's the nature of this disease. What was missing last time? Because we can build a plan specifically designed to address that."</div>
+        </div>
+      </div>
+
+      <div id="tab-close" class="script-content">
+        <div class="script-card">
+          <div class="script-lbl">🎯 Assumptive Close</div>
+          <div class="script-text">"Based on everything you've told me, it sounds like [program] is exactly what your family needs right now. Let's go ahead and get the admissions process started — I can have someone call you within the hour to handle the paperwork. Does that work?"</div>
+        </div>
+        <div class="script-card">
+          <div class="script-lbl">🎯 Urgency Close</div>
+          <div class="script-text">"I want to be transparent — we have limited beds available and this time of year fills up fast. I'd hate for you to call back next week and not have a spot for your loved one. Can we reserve a spot today while you finalize the details?"</div>
+        </div>
+        <div class="script-card">
+          <div class="script-lbl">🎯 Emotional Close</div>
+          <div class="script-text">"You called today because part of you knows this is the moment. You've been carrying this long enough. Let us carry it with you. What would it mean to your family to have your loved one back — really back — by the holidays?"</div>
+        </div>
+        <div class="script-card">
+          <div class="script-lbl">🎯 Final Objection Crusher</div>
+          <div class="script-text">"Let me ask you one final question — if your loved one doesn't get help today, what happens next week? Next month? You already know the answer. The only question is whether today is the day you change that story. I believe it is. Let's do this together."</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
 <script>
 const DG="__DG__",CL="__CL__",LANG="__LANG__",CI=__CI__;
 function getPROD(){return document.getElementById("prod").value;}
 function getPERS(){return document.getElementById("pers").value;}
-let sock,actx,proc,src,ms,rec=false,t0=null,tmr=null,W=0,O=0,I=0,WC=0,lines=[],pend="",lc=0;
+let sock,actx,proc,src,ms,rec=false,t0=null,tmr=null,W=0,O=0,I=0,WC=0,lines=[],pend="",lc=0,objections=[];
 const $=x=>document.getElementById(x);
 const ts=()=>new Date().toLocaleTimeString("en-US",{hour12:false});
 function ss(m,c="#00E5FF"){$("sb").style.color=c;$("sb").textContent=m;}
@@ -102,6 +231,12 @@ function live(on){
 function upd(){$("mw").textContent=W;$("mo").textContent=O;$("mi").textContent=I;}
 function stmr(){t0=Date.now();tmr=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);$("md").textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");},500);}
 function xtmr(){clearInterval(tmr);}
+function showTab(name){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".script-content").forEach(c=>c.classList.remove("active"));
+  document.getElementById("tab-"+name).classList.add("active");
+  event.target.classList.add("active");
+}
 function addLine(t,tx){
   const b=$("tb"),e=b.querySelector(".te");if(e)e.remove();
   const d=document.createElement("div");d.className="tl";
@@ -110,27 +245,42 @@ function addLine(t,tx){
 }
 function addCoach(type,content,t){
   const b=$("cb"),e=b.querySelector(".ce");if(e)e.remove();
-  const m={objection:["🚨","to","SAY THIS"],tip:["💡","tt","TIP"],positive:["✅","tp","GREAT MOVE"],coach:["🎯","tk","SAY THIS"]};
+  const m={objection:["🚨","to","SAY THIS — OBJECTION"],tip:["💡","tt","TIP"],positive:["✅","tp","GREAT MOVE"],coach:["🎯","tk","SAY THIS"]};
   const[icon,cls,lbl]=m[type]||m.coach;
   const d=document.createElement("div");d.className="cc "+type;
   d.innerHTML="<span class='ct "+cls+"'>"+icon+" "+lbl+"</span><span class='cts'>"+t+"</span><div style='clear:both;margin-top:4px'>"+content+"</div>";
   b.insertBefore(d,b.firstChild);
 }
+function addObjLog(objText,rebuttal,t){
+  const log=$("obj-log");
+  const empty=log.querySelector(".te");if(empty)empty.remove();
+  const d=document.createElement("div");d.className="obj-card";
+  d.innerHTML="<div class='obj-q'>🚨 \""+objText+"\"</div><div class='obj-a'><div class='obj-a-lbl'>Say This:</div>"+rebuttal+"</div><div class='obj-ts'>Heard at "+t+"</div>";
+  log.insertBefore(d,log.firstChild);
+}
 async function coach(chunk,full){
   if(!CL)return;
   try{
-    const prod=getPROD()||"the product";
-    const pers=getPERS()||"a business decision-maker";
-    const sys="You are APEX, an elite real-time sales coach for high-stakes closing calls using the Challenger Sale methodology.\n\nPRODUCT: "+prod+"\nPROSPECT: "+pers+"\n\nFULL TRANSCRIPT SO FAR:\n"+full.slice(-2000)+"\n\nLATEST WORDS SPOKEN:\n"+chunk+"\n\nYour job is to help the salesperson WIN this deal RIGHT NOW. Analyze what was just said and respond with ONE of the following:\n\n1. OBJECTION detected: Give the EXACT word-for-word script to say out loud to overcome it. Use Challenger techniques - reframe their thinking, teach them something new, take control. Start with empathy then redirect powerfully.\n\n2. BUYING SIGNAL detected (interest, price questions, next steps questions, positive language): Alert the rep with EXACT closing language to use immediately to advance the deal.\n\n3. COACHING NEEDED: Give a specific tactical tip with the EXACT words to say next to move the deal forward.\n\n4. GREAT MOVE by the rep: Reinforce what they did well in one sentence.\n\n5. Nothing notable: Return type none.\n\nCritical rules:\n- Always give EXACT word-for-word scripts, never vague advice\n- Keep content under 35 words\n- Sound natural and conversational, not robotic\n- Reference the specific product and prospect context\n- Be urgent and direct - this is a live closing call\n- Focus on closing the deal above all else\n\nReply ONLY in raw JSON with no markdown:\n{\"type\":\"objection\"|\"tip\"|\"positive\"|\"coach\"|\"none\",\"content\":\"exact script here\",\"urgency\":\"high\"|\"medium\"|\"low\"}";
+    const prod=getPROD()||"substance abuse and mental health treatment program";
+    const pers=getPERS()||"a family member of someone struggling with addiction";
+    const sys="You are APEX, an elite real-time sales coach specializing in substance abuse and mental health treatment admissions. You help coordinators close high-stakes calls using the Challenger Sale methodology.\n\nPROGRAM: "+prod+"\nPROSPECT: "+pers+"\n\nFULL TRANSCRIPT:\n"+full.slice(-2000)+"\n\nLATEST WORDS:\n"+chunk+"\n\nAnalyze what was just said and give ONE coaching response:\n\n1. OBJECTION detected: Give the EXACT word-for-word rebuttal script. Also include a field 'objection_text' with a short summary of the objection heard (under 10 words). Use empathy first, then reframe powerfully using addiction-specific language. Reference the cost of inaction.\n\n2. BUYING SIGNAL (price questions, asking about next steps, positive responses, asking about availability): Give exact closing language to advance to admission RIGHT NOW.\n\n3. COACHING NEEDED: Give exact words to say to move the call forward toward admission.\n\n4. GREAT MOVE: Reinforce in one sentence what they did well.\n\n5. Nothing notable: Return type none.\n\nRules:\n- Exact word-for-word scripts only, never vague advice\n- Under 40 words in content\n- Sound human and compassionate — this is a sensitive sale\n- Reference the specific program and prospect\n- Always move toward admission\n- For objections always include objection_text field\n\nReply ONLY in raw JSON:\n{\"type\":\"objection\"|\"tip\"|\"positive\"|\"coach\"|\"none\",\"content\":\"script here\",\"objection_text\":\"short objection summary or empty string\",\"urgency\":\"high\"|\"medium\"|\"low\"}";
     const r=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
       headers:{"x-api-key":CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:250,system:sys,messages:[{role:"user",content:"Coach me right now."}]})
+      body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:300,system:sys,messages:[{role:"user",content:"Coach me right now."}]})
     });
     const data=await r.json();
     const raw=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"");
     const res=JSON.parse(raw);
-    if(res.type&&res.type!=="none"){I++;addCoach(res.type,res.content,ts());if(res.type==="objection")O++;upd();}
+    if(res.type&&res.type!=="none"){
+      I++;
+      addCoach(res.type,res.content,ts());
+      if(res.type==="objection"){
+        O++;
+        addObjLog(res.objection_text||"Objection detected",res.content,ts());
+      }
+      upd();
+    }
   }catch(e){console.error(e);}
 }
 function final(tx){
@@ -182,11 +332,12 @@ function stop(){
   if(ms){ms.getTracks().forEach(t=>t.stop());ms=null;}
 }
 function clr(){
-  stop();W=0;O=0;I=0;WC=0;lines=[];pend="";lc=0;
+  stop();W=0;O=0;I=0;WC=0;lines=[];pend="";lc=0;objections=[];
   $("md").textContent="00:00";$("ib").textContent="";
   $("tb").innerHTML="<div class='te'>Transcript will appear here when you start listening...</div>";
-  $("cb").innerHTML="<div class='ce'>🎤<br><br>Coaching insights will appear here.<br><br><span style='color:#00E5FF'>Start listening to begin.</span></div>";
-  cerr();upd();ss("👆 Enter API keys in the sidebar then click Start Listening.");
+  $("cb").innerHTML="<div class='ce'>🎤<br><br>Real-time coaching will appear here.<br><br><span style='color:#00E5FF'>Start listening to begin.</span></div>";
+  $("obj-log").innerHTML="<div class='te' style='font-size:12px;padding:10px 0'>No objections detected yet. They will appear here with exact rebuttal scripts.</div>";
+  cerr();upd();ss("👆 Fill in your program details above then click Start Listening.");
 }
 </script>
 </body>
