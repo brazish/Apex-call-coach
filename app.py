@@ -4,11 +4,12 @@ Run: streamlit run app.py
 """
 
 import streamlit as st
-import streamlit.components.v1 as components
 import json
 import time
 import os
 import re
+import queue
+import threading
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -61,7 +62,7 @@ for k, v in {
     "recording": False, "lines": [], "interim": "", "coaching": [],
     "objections": [], "words": 0, "obj_count": 0, "coach_count": 0,
     "pending": "", "last_coach": 0, "start_time": None, "error": "",
-    "transcript_json": None,
+    "transcript_q": None, "dg_ws": None, "dg_thread": None,
 }.items():
     if k not in st.session_state:
         st.session_state[k] = v
@@ -94,62 +95,60 @@ def elapsed():
     s = int(time.time() - ss.start_time)
     return f"{s//60:02d}:{s%60:02d}"
 
-# ── Process incoming transcript from browser ───────────────────────────────────
-def process_transcript(data, claude_key, persona_ctx, product_ctx, coach_interval):
-    txt = data.get("text", "").strip()
-    is_final = data.get("final", False)
-    if not txt:
-        return
-    if is_final:
-        ss.interim = ""
-        ss.lines.append({"ts": datetime.now().strftime("%H:%M:%S"), "text": txt})
-        ss.words += len(txt.split())
-        ss.pending += " " + txt
-        now = time.time()
-        pending = ss.pending.strip()
-        if len(pending.split()) >= coach_interval and (now - ss.last_coach) > 8 and claude_key:
-            full_tx = " ".join(l["text"] for l in ss.lines)
-            result = get_coaching(pending, full_tx, persona_ctx, product_ctx, claude_key)
-            ss.last_coach = now
-            if result.get("type") != "none":
-                ss.coach_count += 1
-                ss.coaching.append({"type": result.get("type", "coach"), "content": result.get("content", ""), "ts": datetime.now().strftime("%H:%M:%S")})
-            if result.get("type") == "objection":
-                ss.obj_count += 1
-                ss.objections.append({"text": result["content"], "ts": datetime.now().strftime("%H:%M:%S")})
-            ss.pending = ""
-    else:
-        ss.interim = txt
+def start_deepgram(dg_key, language):
+    import websocket
+    q = queue.Queue()
+    ws_holder = {"ws": None}
 
-# ── Check for transcript data coming from browser component ───────────────────
-if ss.get("transcript_json"):
-    data = ss.transcript_json
-    ss.transcript_json = None
-    dg_key = os.getenv("DEEPGRAM_API_KEY", "")
-    claude_key = os.getenv("ANTHROPIC_API_KEY", "")
-    # Get sidebar values - we'll use session state to pass them
-    process_transcript(data, ss.get("claude_key_val",""), ss.get("persona_val",""), ss.get("product_val",""), ss.get("coach_interval_val", 20))
+    url = (
+        f"wss://api.deepgram.com/v1/listen"
+        f"?encoding=linear16&sample_rate=16000&channels=1"
+        f"&model=nova-2&smart_format=true&interim_results=true"
+        f"&punctuate=true&endpointing=300&language={language}"
+    )
+
+    def on_message(ws, message):
+        try:
+            d = json.loads(message)
+            if d.get("type") == "Results":
+                alt = (d.get("channel", {}).get("alternatives", [{}]))[0]
+                txt = alt.get("transcript", "").strip()
+                if txt:
+                    q.put({"text": txt, "final": d.get("is_final", False)})
+        except Exception:
+            pass
+
+    def on_error(ws, error):
+        q.put({"error": str(error)})
+
+    def on_open(ws):
+        ws_holder["ws"] = ws
+
+    ws = websocket.WebSocketApp(
+        url,
+        header={"Authorization": f"Token {dg_key}"},
+        on_open=on_open,
+        on_message=on_message,
+        on_error=on_error,
+    )
+    t = threading.Thread(target=ws.run_forever, daemon=True)
+    t.start()
+    time.sleep(1)
+    return ws_holder, q, t
 
 # ── Sidebar ────────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("### ⚙️ Configuration")
     with st.expander("🔑 API Keys", expanded=True):
-        dg_key    = st.text_input("Deepgram API Key",   value=os.getenv("DEEPGRAM_API_KEY",""),   type="password")
+        dg_key     = st.text_input("Deepgram API Key",  value=os.getenv("DEEPGRAM_API_KEY",""),  type="password")
         claude_key = st.text_input("Anthropic API Key", value=os.getenv("ANTHROPIC_API_KEY",""), type="password")
-        ss.claude_key_val = claude_key
-    st.markdown("---")
-    st.markdown("**🎤 Microphone**")
-    st.info("Microphone access is handled via your browser below.")
     st.markdown("---")
     st.markdown("**📞 Call Context**")
     product_ctx = st.text_area("Product / Service", placeholder="e.g. SaaS CRM at $500/mo", height=70)
     persona_ctx = st.text_area("Prospect Persona",  placeholder="e.g. VP Sales, 200-person company", height=70)
-    ss.product_val = product_ctx
-    ss.persona_val = persona_ctx
     st.markdown("---")
     language       = st.selectbox("Language", ["en-US","en-GB","es","fr","de","pt"])
     coach_interval = st.slider("Coach every N words", 10, 60, 20, 5)
-    ss.coach_interval_val = coach_interval
 
 # ── Header ─────────────────────────────────────────────────────────────────────
 st.markdown("""
@@ -176,9 +175,9 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 # ── Buttons ────────────────────────────────────────────────────────────────────
 b1,b2,b3 = st.columns([2,2,3])
-with b1: btn_start = st.button("▶  Start Listening", disabled=ss.recording,      key="start")
-with b2: btn_stop  = st.button("◼  Stop",            disabled=not ss.recording,  key="stop", type="secondary")
-with b3: btn_clear = st.button("🗑  Clear Session",   disabled=ss.recording,      key="clear")
+with b1: btn_start = st.button("▶  Start Listening", disabled=ss.recording,     key="start")
+with b2: btn_stop  = st.button("◼  Stop",            disabled=not ss.recording, key="stop", type="secondary")
+with b3: btn_clear = st.button("🗑  Clear Session",   disabled=ss.recording,     key="clear")
 
 if btn_start:
     if not dg_key:
@@ -189,16 +188,23 @@ if btn_start:
         ss.error = ""
         ss.recording = True
         ss.start_time = time.time()
+        ws_holder, q, t = start_deepgram(dg_key, language)
+        ss.dg_ws = ws_holder
+        ss.transcript_q = q
+        ss.dg_thread = t
         st.rerun()
 
 if btn_stop:
     ss.recording = False
     ss.interim   = ""
+    if ss.dg_ws and ss.dg_ws.get("ws"):
+        try: ss.dg_ws["ws"].close()
+        except: pass
     st.rerun()
 
 if btn_clear:
     for k in ["lines","coaching","objections"]: ss[k] = []
-    for k in ["interim","error","pending"]:      ss[k] = ""
+    for k in ["interim","error","pending"]:     ss[k] = ""
     for k in ["words","obj_count","coach_count","last_coach"]: ss[k] = 0
     ss.start_time = None
     ss.recording  = False
@@ -207,89 +213,67 @@ if btn_clear:
 if ss.error:
     st.error(ss.error)
 
-# ── Browser microphone component ───────────────────────────────────────────────
+# ── WebRTC streamer (sends mic audio to Deepgram) ──────────────────────────────
 if ss.recording and dg_key:
-    recorder_html = f"""
-<!DOCTYPE html>
-<html>
-<head>
-<style>
-  body {{ margin:0; padding:12px; font-family: 'DM Mono', monospace; background: #090D11; color: #C8D8E4; }}
-  #status {{ font-size:12px; color:#00E5FF; margin-bottom:8px; letter-spacing:1px; }}
-  #interim {{ font-size:13px; color:#4A6070; font-style:italic; min-height:20px; }}
-  .err {{ color: #FF3B5C; }}
-</style>
-</head>
-<body>
-<div id="status">🔴 Connecting to microphone...</div>
-<div id="interim"></div>
-<script>
-const DG_KEY = "{dg_key}";
-const LANG   = "{language}";
-let mediaRecorder, socket, stream;
+    try:
+        from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
+        import av, numpy as np, websocket as ws_lib
 
-async function start() {{
-  try {{
-    stream = await navigator.mediaDevices.getUserMedia({{ audio: true }});
-    document.getElementById('status').textContent = '🎙️ Mic open — connecting to Deepgram...';
+        RTC_CONFIG = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
 
-    const url = `wss://api.deepgram.com/v1/listen?encoding=linear16&sample_rate=16000&channels=1&model=nova-2&smart_format=true&interim_results=true&punctuate=true&endpointing=300&language=${{LANG}}`;
-    socket = new WebSocket(url, ['token', DG_KEY]);
+        def audio_frame_callback(frame: av.AudioFrame):
+            if ss.dg_ws and ss.dg_ws.get("ws"):
+                try:
+                    pcm = frame.to_ndarray().flatten().astype(np.int16)
+                    ss.dg_ws["ws"].send(pcm.tobytes(), ws_lib.ABNF.OPCODE_BINARY)
+                except Exception:
+                    pass
+            return frame
 
-    socket.onopen = () => {{
-      document.getElementById('status').textContent = '✅ LIVE — listening...';
-      mediaRecorder = new MediaRecorder(stream, {{ mimeType: 'audio/webm' }});
-      mediaRecorder.ondataavailable = e => {{
-        if (socket.readyState === WebSocket.OPEN && e.data.size > 0) {{
-          socket.send(e.data);
-        }}
-      }};
-      mediaRecorder.start(250);
-    }};
+        webrtc_streamer(
+            key="apex-mic",
+            mode=WebRtcMode.SENDONLY,
+            rtc_configuration=RTC_CONFIG,
+            media_stream_constraints={"audio": True, "video": False},
+            audio_frame_callback=audio_frame_callback,
+            async_processing=True,
+        )
 
-    socket.onmessage = (msg) => {{
-      const d = JSON.parse(msg.data);
-      if (d.type !== 'Results') return;
-      const alt = (d.channel?.alternatives || [{{}}])[0];
-      const txt = (alt.transcript || '').trim();
-      if (!txt) return;
-      const isFinal = d.is_final;
-      document.getElementById('interim').textContent = isFinal ? '' : txt;
+        # Drain transcript queue
+        if ss.transcript_q:
+            while not ss.transcript_q.empty():
+                item = ss.transcript_q.get_nowait()
+                if "error" in item:
+                    ss.error = f"Deepgram error: {item['error']}"
+                elif "text" in item:
+                    txt, final = item["text"], item["final"]
+                    if final:
+                        ss.interim = ""
+                        ss.lines.append({"ts": datetime.now().strftime("%H:%M:%S"), "text": txt})
+                        ss.words += len(txt.split())
+                        ss.pending += " " + txt
+                        now = time.time()
+                        pending = ss.pending.strip()
+                        if len(pending.split()) >= coach_interval and (now - ss.last_coach) > 8:
+                            full_tx = " ".join(l["text"] for l in ss.lines)
+                            result = get_coaching(pending, full_tx, persona_ctx, product_ctx, claude_key)
+                            ss.last_coach = now
+                            if result.get("type") != "none":
+                                ss.coach_count += 1
+                                ss.coaching.append({
+                                    "type": result.get("type","coach"),
+                                    "content": result.get("content",""),
+                                    "ts": datetime.now().strftime("%H:%M:%S")
+                                })
+                            if result.get("type") == "objection":
+                                ss.obj_count += 1
+                                ss.objections.append({"text": result["content"], "ts": datetime.now().strftime("%H:%M:%S")})
+                            ss.pending = ""
+                    else:
+                        ss.interim = txt
 
-      // Send transcript back to Streamlit
-      window.parent.postMessage({{
-        type: 'streamlit:setComponentValue',
-        value: JSON.stringify({{ text: txt, final: isFinal }})
-      }}, '*');
-    }};
-
-    socket.onerror = (e) => {{
-      document.getElementById('status').innerHTML = '<span class="err">❌ Deepgram connection error. Check your API key.</span>';
-    }};
-
-    socket.onclose = () => {{
-      document.getElementById('status').textContent = '⏹ Stopped.';
-    }};
-
-  }} catch(e) {{
-    document.getElementById('status').innerHTML = `<span class="err">❌ Mic error: ${{e.message}}</span>`;
-  }}
-}}
-
-start();
-</script>
-</body>
-</html>
-"""
-    result = components.html(recorder_html, height=80)
-    if result:
-        try:
-            ss.transcript_json = json.loads(result)
-            process_transcript(ss.transcript_json, claude_key, persona_ctx, product_ctx, coach_interval)
-            ss.transcript_json = None
-            st.rerun()
-        except Exception:
-            pass
+    except Exception as e:
+        st.warning(f"Audio component error: {e}")
 
 # ── Two columns ────────────────────────────────────────────────────────────────
 left, right = st.columns([5,4], gap="large")
@@ -328,7 +312,7 @@ with right:
     if not ss.recording and not ss.coaching:
         st.info("👆 Add API keys, then click **Start Listening**.")
 
-# ── Auto refresh while recording ───────────────────────────────────────────────
+# ── Auto refresh ───────────────────────────────────────────────────────────────
 if ss.recording:
     time.sleep(0.5)
     st.rerun()
