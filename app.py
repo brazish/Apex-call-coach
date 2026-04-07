@@ -4,12 +4,11 @@ Run: streamlit run app.py
 """
 
 import streamlit as st
+import streamlit.components.v1 as components
 import json
 import time
 import os
 import re
-import queue
-import threading
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -62,7 +61,7 @@ for k, v in {
     "recording": False, "lines": [], "interim": "", "coaching": [],
     "objections": [], "words": 0, "obj_count": 0, "coach_count": 0,
     "pending": "", "last_coach": 0, "start_time": None, "error": "",
-    "transcript_q": None, "dg_ws": None, "dg_thread": None,
+    "pending_transcripts": [],
 }.items():
     if k not in st.session_state:
         st.session_state[k] = v
@@ -94,47 +93,6 @@ def elapsed():
     if not ss.start_time: return "00:00"
     s = int(time.time() - ss.start_time)
     return f"{s//60:02d}:{s%60:02d}"
-
-def start_deepgram(dg_key, language):
-    import websocket
-    q = queue.Queue()
-    ws_holder = {"ws": None}
-
-    url = (
-        f"wss://api.deepgram.com/v1/listen"
-        f"?encoding=linear16&sample_rate=16000&channels=1"
-        f"&model=nova-2&smart_format=true&interim_results=true"
-        f"&punctuate=true&endpointing=300&language={language}"
-    )
-
-    def on_message(ws, message):
-        try:
-            d = json.loads(message)
-            if d.get("type") == "Results":
-                alt = (d.get("channel", {}).get("alternatives", [{}]))[0]
-                txt = alt.get("transcript", "").strip()
-                if txt:
-                    q.put({"text": txt, "final": d.get("is_final", False)})
-        except Exception:
-            pass
-
-    def on_error(ws, error):
-        q.put({"error": str(error)})
-
-    def on_open(ws):
-        ws_holder["ws"] = ws
-
-    ws = websocket.WebSocketApp(
-        url,
-        header={"Authorization": f"Token {dg_key}"},
-        on_open=on_open,
-        on_message=on_message,
-        on_error=on_error,
-    )
-    t = threading.Thread(target=ws.run_forever, daemon=True)
-    t.start()
-    time.sleep(1)
-    return ws_holder, q, t
 
 # ── Sidebar ────────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -188,23 +146,16 @@ if btn_start:
         ss.error = ""
         ss.recording = True
         ss.start_time = time.time()
-        ws_holder, q, t = start_deepgram(dg_key, language)
-        ss.dg_ws = ws_holder
-        ss.transcript_q = q
-        ss.dg_thread = t
         st.rerun()
 
 if btn_stop:
     ss.recording = False
     ss.interim   = ""
-    if ss.dg_ws and ss.dg_ws.get("ws"):
-        try: ss.dg_ws["ws"].close()
-        except: pass
     st.rerun()
 
 if btn_clear:
-    for k in ["lines","coaching","objections"]: ss[k] = []
-    for k in ["interim","error","pending"]:     ss[k] = ""
+    for k in ["lines","coaching","objections","pending_transcripts"]: ss[k] = []
+    for k in ["interim","error","pending"]: ss[k] = ""
     for k in ["words","obj_count","coach_count","last_coach"]: ss[k] = 0
     ss.start_time = None
     ss.recording  = False
@@ -213,67 +164,133 @@ if btn_clear:
 if ss.error:
     st.error(ss.error)
 
-# ── WebRTC streamer (sends mic audio to Deepgram) ──────────────────────────────
+# ── Live mic recorder using Deepgram JS SDK ────────────────────────────────────
 if ss.recording and dg_key:
-    try:
-        from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
-        import av, numpy as np, websocket as ws_lib
+    transcript_area = st.empty()
+    
+    html_code = f"""
+    <div id="status" style="font-family:monospace;font-size:13px;color:#00E5FF;padding:8px 0;">
+      🔴 Connecting...
+    </div>
+    <div id="interim" style="font-family:monospace;font-size:13px;color:#4A6070;font-style:italic;min-height:20px;padding:4px 0;"></div>
+    <div id="finals" style="display:none;"></div>
 
-        RTC_CONFIG = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
+    <script>
+      const DG_KEY  = "{dg_key}";
+      const LANG    = "{language}";
+      let socket, mediaRecorder, stream;
 
-        def audio_frame_callback(frame: av.AudioFrame):
-            if ss.dg_ws and ss.dg_ws.get("ws"):
-                try:
-                    pcm = frame.to_ndarray().flatten().astype(np.int16)
-                    ss.dg_ws["ws"].send(pcm.tobytes(), ws_lib.ABNF.OPCODE_BINARY)
-                except Exception:
-                    pass
-            return frame
+      async function startRecording() {{
+        try {{
+          stream = await navigator.mediaDevices.getUserMedia({{ audio: true, video: false }});
+          document.getElementById('status').textContent = '🎙️ Mic open — connecting to Deepgram...';
 
-        webrtc_streamer(
-            key="apex-mic",
-            mode=WebRtcMode.SENDONLY,
-            rtc_configuration=RTC_CONFIG,
-            media_stream_constraints={"audio": True, "video": False},
-            audio_frame_callback=audio_frame_callback,
-            async_processing=True,
-        )
+          const params = new URLSearchParams({{
+            language: LANG,
+            model: 'nova-2',
+            smart_format: 'true',
+            interim_results: 'true',
+            punctuate: 'true',
+            endpointing: '300',
+            encoding: 'linear16',
+            sample_rate: '16000',
+          }});
 
-        # Drain transcript queue
-        if ss.transcript_q:
-            while not ss.transcript_q.empty():
-                item = ss.transcript_q.get_nowait()
-                if "error" in item:
-                    ss.error = f"Deepgram error: {item['error']}"
-                elif "text" in item:
-                    txt, final = item["text"], item["final"]
-                    if final:
-                        ss.interim = ""
-                        ss.lines.append({"ts": datetime.now().strftime("%H:%M:%S"), "text": txt})
-                        ss.words += len(txt.split())
-                        ss.pending += " " + txt
-                        now = time.time()
-                        pending = ss.pending.strip()
-                        if len(pending.split()) >= coach_interval and (now - ss.last_coach) > 8:
-                            full_tx = " ".join(l["text"] for l in ss.lines)
-                            result = get_coaching(pending, full_tx, persona_ctx, product_ctx, claude_key)
-                            ss.last_coach = now
-                            if result.get("type") != "none":
-                                ss.coach_count += 1
-                                ss.coaching.append({
-                                    "type": result.get("type","coach"),
-                                    "content": result.get("content",""),
-                                    "ts": datetime.now().strftime("%H:%M:%S")
-                                })
-                            if result.get("type") == "objection":
-                                ss.obj_count += 1
-                                ss.objections.append({"text": result["content"], "ts": datetime.now().strftime("%H:%M:%S")})
-                            ss.pending = ""
-                    else:
-                        ss.interim = txt
+          socket = new WebSocket(`wss://api.deepgram.com/v1/listen?${{params}}`, ['token', DG_KEY]);
+          socket.binaryType = 'arraybuffer';
 
-    except Exception as e:
-        st.warning(f"Audio component error: {e}")
+          socket.onopen = () => {{
+            document.getElementById('status').textContent = '✅ LIVE — Listening...';
+
+            const audioCtx = new AudioContext({{ sampleRate: 16000 }});
+            const source   = audioCtx.createMediaStreamSource(stream);
+            const processor = audioCtx.createScriptProcessor(4096, 1, 1);
+
+            source.connect(processor);
+            processor.connect(audioCtx.destination);
+
+            processor.onaudioprocess = (e) => {{
+              if (socket.readyState !== WebSocket.OPEN) return;
+              const float32 = e.inputBuffer.getChannelData(0);
+              const int16   = new Int16Array(float32.length);
+              for (let i = 0; i < float32.length; i++) {{
+                int16[i] = Math.max(-32768, Math.min(32767, float32[i] * 32768));
+              }}
+              socket.send(int16.buffer);
+            }};
+          }};
+
+          socket.onmessage = (event) => {{
+            const data = JSON.parse(event.data);
+            if (data.type !== 'Results') return;
+            const alt  = (data.channel?.alternatives || [{{}}])[0];
+            const text = (alt.transcript || '').trim();
+            if (!text) return;
+
+            if (data.is_final) {{
+              document.getElementById('interim').textContent = '';
+              // Store final transcript for Streamlit to pick up
+              const finals = document.getElementById('finals');
+              finals.textContent = JSON.stringify({{text: text, final: true}});
+              // Notify Streamlit
+              window.parent.postMessage({{
+                isStreamlitMessage: true,
+                type: 'streamlit:setComponentValue',
+                value: JSON.stringify({{text: text, final: true}})
+              }}, '*');
+            }} else {{
+              document.getElementById('interim').textContent = '… ' + text;
+            }}
+          }};
+
+          socket.onerror = (err) => {{
+            document.getElementById('status').innerHTML = '<span style="color:#FF3B5C">❌ Connection error — check your Deepgram API key</span>';
+          }};
+
+          socket.onclose = (e) => {{
+            document.getElementById('status').textContent = '⏹ Stopped.';
+          }};
+
+        }} catch(err) {{
+          document.getElementById('status').innerHTML = `<span style="color:#FF3B5C">❌ Mic error: ${{err.message}}</span>`;
+        }}
+      }}
+
+      startRecording();
+    </script>
+    """
+    
+    result = components.html(html_code, height=80)
+    
+    # Process any transcript that came back
+    if result:
+        try:
+            data = json.loads(result)
+            txt = data.get("text","").strip()
+            is_final = data.get("final", False)
+            if txt and is_final:
+                ss.lines.append({"ts": datetime.now().strftime("%H:%M:%S"), "text": txt})
+                ss.words += len(txt.split())
+                ss.pending += " " + txt
+                now = time.time()
+                pending = ss.pending.strip()
+                if len(pending.split()) >= coach_interval and (now - ss.last_coach) > 8:
+                    full_tx = " ".join(l["text"] for l in ss.lines)
+                    result_c = get_coaching(pending, full_tx, persona_ctx, product_ctx, claude_key)
+                    ss.last_coach = now
+                    if result_c.get("type") != "none":
+                        ss.coach_count += 1
+                        ss.coaching.append({
+                            "type": result_c.get("type","coach"),
+                            "content": result_c.get("content",""),
+                            "ts": datetime.now().strftime("%H:%M:%S")
+                        })
+                    if result_c.get("type") == "objection":
+                        ss.obj_count += 1
+                        ss.objections.append({"text": result_c["content"], "ts": datetime.now().strftime("%H:%M:%S")})
+                    ss.pending = ""
+        except Exception:
+            pass
 
 # ── Two columns ────────────────────────────────────────────────────────────────
 left, right = st.columns([5,4], gap="large")
