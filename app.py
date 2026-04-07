@@ -5,11 +5,9 @@ Run: streamlit run app.py
 
 import streamlit as st
 import streamlit.components.v1 as components
-import json
-import time
 import os
 import re
-from datetime import datetime
+import json
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,81 +16,13 @@ st.set_page_config(page_title="Apex Call Coach", page_icon="🎯", layout="wide"
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Inter:wght@400;500&display=swap');
-:root {
-    --black:#080C10;--card:#131A22;--border:#1E2D3D;
-    --accent:#00E5FF;--green:#00FF9D;--red:#FF3B5C;--yellow:#FFD60A;
-    --muted:#4A6070;--text:#C8D8E4;--white:#EFF6FB;
-}
-html,body,[data-testid="stAppViewContainer"]{background:var(--black)!important;color:var(--text)!important;}
-[data-testid="stSidebar"]{background:#0E1318!important;border-right:1px solid var(--border)!important;}
-#MainMenu,footer,header,[data-testid="stToolbar"]{display:none!important;visibility:hidden!important;}
-.metric-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
-.metric-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--white);}
-.metric-lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
-.tx-box{background:#090D11;border:1px solid var(--border);border-radius:8px;padding:16px;min-height:220px;max-height:360px;overflow-y:auto;font-family:'DM Mono',monospace;font-size:13px;line-height:1.8;}
-.tx-box::-webkit-scrollbar{width:4px;}
-.tx-box::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-.tx-speaker{color:var(--accent);font-weight:500;}
-.tx-interim{color:var(--muted);font-style:italic;}
-.tx-empty{color:var(--muted);font-style:italic;}
-.coach-card{border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid var(--accent);background:var(--card);font-size:14px;line-height:1.6;color:var(--text);}
-.coach-card.objection{border-left-color:var(--red);}
-.coach-card.tip{border-left-color:var(--yellow);}
-.coach-card.positive{border-left-color:var(--green);}
-.coach-tag{font-family:'DM Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:4px;margin-bottom:6px;display:inline-block;}
-.tag-objection{background:rgba(255,59,92,0.15);color:var(--red);}
-.tag-tip{background:rgba(255,214,10,0.15);color:var(--yellow);}
-.tag-positive{background:rgba(0,255,157,0.15);color:var(--green);}
-.tag-coach{background:rgba(0,229,255,0.10);color:var(--accent);}
-.pill-live{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;background:rgba(0,255,157,0.12);color:var(--green);border:1px solid rgba(0,255,157,0.3);font-family:'DM Mono',monospace;font-size:12px;}
-.pill-idle{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;background:rgba(74,96,112,0.2);color:var(--muted);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:12px;}
-.dot-green{width:8px;height:8px;border-radius:50%;background:var(--green);animation:blink 1.2s infinite;display:inline-block;}
-.dot-grey{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
-div[data-testid="stButton"]>button{background:linear-gradient(135deg,#00B8CC,#0080FF)!important;color:#000!important;font-weight:700!important;border:none!important;border-radius:8px!important;width:100%!important;}
-div[data-testid="stButton"]>button[kind="secondary"]{background:var(--card)!important;color:var(--red)!important;border:1px solid rgba(255,59,92,0.4)!important;}
-div[data-testid="stTextInput"] input,div[data-testid="stTextArea"] textarea{background:#090D11!important;border:1px solid var(--border)!important;color:var(--text)!important;}
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
+html,body,[data-testid="stAppViewContainer"]{background:#080C10!important;color:#C8D8E4!important;}
+[data-testid="stSidebar"]{background:#0E1318!important;border-right:1px solid #1E2D3D!important;}
+#MainMenu,footer,header,[data-testid="stToolbar"]{display:none!important;}
+div[data-testid="stTextInput"] input,div[data-testid="stTextArea"] textarea{background:#090D11!important;border:1px solid #1E2D3D!important;color:#C8D8E4!important;}
 </style>
 """, unsafe_allow_html=True)
-
-# ── Session state ──────────────────────────────────────────────────────────────
-for k, v in {
-    "recording": False, "lines": [], "interim": "", "coaching": [],
-    "objections": [], "words": 0, "obj_count": 0, "coach_count": 0,
-    "pending": "", "last_coach": 0, "start_time": None, "error": "",
-    "pending_transcripts": [],
-}.items():
-    if k not in st.session_state:
-        st.session_state[k] = v
-
-ss = st.session_state
-
-# ── Claude coaching ────────────────────────────────────────────────────────────
-def get_coaching(chunk, full_tx, persona, product, api_key):
-    try:
-        import anthropic
-        client = anthropic.Anthropic(api_key=api_key)
-        system = f"""You are APEX, a real-time sales call coach.
-Product: {product or "the product"}
-Persona: {persona or "a business decision-maker"}
-Full transcript so far: {full_tx[-2000:]}
-Latest chunk: {chunk}
-Reply ONLY in raw JSON (no markdown fences):
-{{"type":"objection"|"tip"|"positive"|"coach"|"none","content":"1-3 sentence coaching tip","urgency":"high"|"medium"|"low"}}"""
-        msg = client.messages.create(
-            model="claude-opus-4-5", max_tokens=200, system=system,
-            messages=[{"role": "user", "content": "Coach me now."}],
-        )
-        raw = re.sub(r"^```[a-z]*\n?|\n?```$", "", msg.content[0].text.strip())
-        return json.loads(raw)
-    except Exception as e:
-        return {"type": "none", "content": str(e), "urgency": "low"}
-
-def elapsed():
-    if not ss.start_time: return "00:00"
-    s = int(time.time() - ss.start_time)
-    return f"{s//60:02d}:{s%60:02d}"
 
 # ── Sidebar ────────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -108,228 +38,372 @@ with st.sidebar:
     language       = st.selectbox("Language", ["en-US","en-GB","es","fr","de","pt"])
     coach_interval = st.slider("Coach every N words", 10, 60, 20, 5)
 
-# ── Header ─────────────────────────────────────────────────────────────────────
-st.markdown("""
-<div style="display:flex;align-items:center;gap:16px;padding:20px 0 16px;border-bottom:1px solid #1E2D3D;margin-bottom:20px">
-  <div style="width:48px;height:48px;background:linear-gradient(135deg,#00E5FF,#0080FF);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">🎯</div>
+# ── Main App (fully browser-based) ────────────────────────────────────────────
+components.html(f"""
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ background: #080C10; color: #C8D8E4; font-family: 'DM Mono', monospace; padding: 20px; }}
+
+  .header {{ display:flex; align-items:center; gap:16px; padding-bottom:16px; border-bottom:1px solid #1E2D3D; margin-bottom:20px; }}
+  .logo {{ width:48px; height:48px; background:linear-gradient(135deg,#00E5FF,#0080FF); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; }}
+  .title {{ font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:#EFF6FB; }}
+  .subtitle {{ font-size:11px; color:#00E5FF; letter-spacing:2px; text-transform:uppercase; }}
+
+  .metrics {{ display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:20px; }}
+  .metric {{ background:#131A22; border:1px solid #1E2D3D; border-radius:10px; padding:14px; text-align:center; }}
+  .metric-val {{ font-family:'Syne',sans-serif; font-size:24px; font-weight:800; color:#EFF6FB; }}
+  .metric-lbl {{ font-size:10px; color:#4A6070; letter-spacing:1.5px; text-transform:uppercase; margin-top:2px; }}
+
+  .buttons {{ display:flex; gap:12px; margin-bottom:16px; }}
+  .btn {{ flex:1; padding:10px; border:none; border-radius:8px; font-weight:700; font-size:14px; cursor:pointer; font-family:'DM Mono',monospace; }}
+  .btn-start {{ background:linear-gradient(135deg,#00B8CC,#0080FF); color:#000; }}
+  .btn-stop  {{ background:#131A22; color:#FF3B5C; border:1px solid rgba(255,59,92,0.4); }}
+  .btn-clear {{ background:#131A22; color:#4A6070; border:1px solid #1E2D3D; }}
+  .btn:disabled {{ opacity:0.4; cursor:not-allowed; }}
+
+  .status-bar {{ font-size:13px; color:#00E5FF; padding:6px 0; min-height:24px; }}
+  .interim {{ font-size:13px; color:#4A6070; font-style:italic; min-height:20px; padding:4px 0; }}
+
+  .columns {{ display:grid; grid-template-columns:5fr 4fr; gap:24px; margin-top:20px; }}
+
+  .section-title {{ font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:#EFF6FB; margin-bottom:12px; }}
+  .tx-box {{ background:#090D11; border:1px solid #1E2D3D; border-radius:8px; padding:16px; min-height:240px; max-height:380px; overflow-y:auto; font-size:13px; line-height:1.8; }}
+  .tx-line {{ margin:4px 0; }}
+  .tx-speaker {{ color:#00E5FF; font-weight:500; }}
+  .tx-empty {{ color:#4A6070; font-style:italic; }}
+
+  .coach-card {{ border-radius:10px; padding:14px; margin-bottom:10px; border-left:3px solid #00E5FF; background:#131A22; font-size:14px; line-height:1.6; }}
+  .coach-card.objection {{ border-left-color:#FF3B5C; }}
+  .coach-card.tip {{ border-left-color:#FFD60A; }}
+  .coach-card.positive {{ border-left-color:#00FF9D; }}
+  .coach-tag {{ font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; padding:2px 8px; border-radius:4px; margin-bottom:6px; display:inline-block; }}
+  .tag-objection {{ background:rgba(255,59,92,0.15); color:#FF3B5C; }}
+  .tag-tip {{ background:rgba(255,214,10,0.15); color:#FFD60A; }}
+  .tag-positive {{ background:rgba(0,255,157,0.15); color:#00FF9D; }}
+  .tag-coach {{ background:rgba(0,229,255,0.10); color:#00E5FF; }}
+  .coach-ts {{ font-size:10px; color:#4A6070; float:right; }}
+  .coach-empty {{ text-align:center; padding:30px 0; color:#4A6070; font-size:13px; }}
+
+  .pill-live {{ display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:100px; background:rgba(0,255,157,0.12); color:#00FF9D; border:1px solid rgba(0,255,157,0.3); font-size:12px; }}
+  .pill-idle {{ display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:100px; background:rgba(74,96,112,0.2); color:#4A6070; border:1px solid #1E2D3D; font-size:12px; }}
+  .dot {{ width:8px; height:8px; border-radius:50%; display:inline-block; }}
+  .dot-green {{ background:#00FF9D; animation:blink 1.2s infinite; }}
+  .dot-grey  {{ background:#4A6070; }}
+  @keyframes blink {{0%,100%{{opacity:1}}50%{{opacity:0.2}}}}
+
+  .error-box {{ background:rgba(255,59,92,0.1); border:1px solid rgba(255,59,92,0.3); border-radius:8px; padding:12px; color:#FF3B5C; font-size:13px; margin:8px 0; }}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">🎯</div>
   <div>
-    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#EFF6FB;letter-spacing:-0.5px">APEX Call Coach</div>
-    <div style="font-family:'DM Mono',monospace;font-size:11px;color:#00E5FF;letter-spacing:2px;text-transform:uppercase">Live AI Sales Intelligence</div>
+    <div class="title">APEX Call Coach</div>
+    <div class="subtitle">Live AI Sales Intelligence</div>
   </div>
 </div>
-""", unsafe_allow_html=True)
 
-# ── Metrics ────────────────────────────────────────────────────────────────────
-m1,m2,m3,m4,m5 = st.columns(5)
-with m1: st.markdown(f'<div class="metric-box"><div class="metric-val">{elapsed()}</div><div class="metric-lbl">Duration</div></div>', unsafe_allow_html=True)
-with m2: st.markdown(f'<div class="metric-box"><div class="metric-val">{ss.words}</div><div class="metric-lbl">Words</div></div>', unsafe_allow_html=True)
-with m3: st.markdown(f'<div class="metric-box"><div class="metric-val" style="color:#FF3B5C">{ss.obj_count}</div><div class="metric-lbl">Objections</div></div>', unsafe_allow_html=True)
-with m4: st.markdown(f'<div class="metric-box"><div class="metric-val" style="color:#00E5FF">{ss.coach_count}</div><div class="metric-lbl">Insights</div></div>', unsafe_allow_html=True)
-with m5:
-    pill = '<span class="pill-live"><span class="dot-green"></span>LIVE</span>' if ss.recording else '<span class="pill-idle"><span class="dot-grey"></span>IDLE</span>'
-    st.markdown(f'<div class="metric-box"><div style="display:flex;align-items:center;justify-content:center;height:24px">{pill}</div><div class="metric-lbl" style="margin-top:6px">Status</div></div>', unsafe_allow_html=True)
+<div class="metrics">
+  <div class="metric"><div class="metric-val" id="m-duration">00:00</div><div class="metric-lbl">Duration</div></div>
+  <div class="metric"><div class="metric-val" id="m-words">0</div><div class="metric-lbl">Words</div></div>
+  <div class="metric"><div class="metric-val" id="m-obj" style="color:#FF3B5C">0</div><div class="metric-lbl">Objections</div></div>
+  <div class="metric"><div class="metric-val" id="m-insights" style="color:#00E5FF">0</div><div class="metric-lbl">Insights</div></div>
+  <div class="metric"><div id="m-status"><span class="pill-idle"><span class="dot dot-grey"></span>IDLE</span></div><div class="metric-lbl" style="margin-top:6px">Status</div></div>
+</div>
 
-st.markdown("<br>", unsafe_allow_html=True)
+<div class="buttons">
+  <button class="btn btn-start" id="btn-start" onclick="startListening()">▶ Start Listening</button>
+  <button class="btn btn-stop"  id="btn-stop"  onclick="stopListening()" disabled>◼ Stop</button>
+  <button class="btn btn-clear" id="btn-clear" onclick="clearSession()">🗑 Clear Session</button>
+</div>
 
-# ── Buttons ────────────────────────────────────────────────────────────────────
-b1,b2,b3 = st.columns([2,2,3])
-with b1: btn_start = st.button("▶  Start Listening", disabled=ss.recording,     key="start")
-with b2: btn_stop  = st.button("◼  Stop",            disabled=not ss.recording, key="stop", type="secondary")
-with b3: btn_clear = st.button("🗑  Clear Session",   disabled=ss.recording,     key="clear")
+<div class="status-bar" id="status">👆 Add API keys in the sidebar, then click Start Listening.</div>
+<div class="interim" id="interim"></div>
+<div id="error-area"></div>
 
-if btn_start:
-    if not dg_key:
-        ss.error = "⚠️ Add your Deepgram API key in the sidebar."
-    elif not claude_key:
-        ss.error = "⚠️ Add your Anthropic API key in the sidebar."
-    else:
-        ss.error = ""
-        ss.recording = True
-        ss.start_time = time.time()
-        st.rerun()
-
-if btn_stop:
-    ss.recording = False
-    ss.interim   = ""
-    st.rerun()
-
-if btn_clear:
-    for k in ["lines","coaching","objections","pending_transcripts"]: ss[k] = []
-    for k in ["interim","error","pending"]: ss[k] = ""
-    for k in ["words","obj_count","coach_count","last_coach"]: ss[k] = 0
-    ss.start_time = None
-    ss.recording  = False
-    st.rerun()
-
-if ss.error:
-    st.error(ss.error)
-
-# ── Live mic recorder using Deepgram JS SDK ────────────────────────────────────
-if ss.recording and dg_key:
-    transcript_area = st.empty()
-    
-    html_code = f"""
-    <div id="status" style="font-family:monospace;font-size:13px;color:#00E5FF;padding:8px 0;">
-      🔴 Connecting...
+<div class="columns">
+  <div>
+    <div class="section-title">🎙️ Live Transcript</div>
+    <div class="tx-box" id="tx-box">
+      <div class="tx-empty">Transcript will appear here when you start listening…</div>
     </div>
-    <div id="interim" style="font-family:monospace;font-size:13px;color:#4A6070;font-style:italic;min-height:20px;padding:4px 0;"></div>
-    <div id="finals" style="display:none;"></div>
+  </div>
+  <div>
+    <div class="section-title">💡 Live Coaching Feed</div>
+    <div class="tx-box" id="coach-box">
+      <div class="coach-empty">🎤<br><br>Coaching insights will appear here.<br><br><span style="color:#00E5FF">Start listening to begin.</span></div>
+    </div>
+  </div>
+</div>
 
-    <script>
-      const DG_KEY  = "{dg_key}";
-      const LANG    = "{language}";
-      let socket, mediaRecorder, stream;
+<script>
+  // ── Config from Streamlit ──────────────────────────────────────────────────
+  const DG_KEY        = `{dg_key}`;
+  const CLAUDE_KEY    = `{claude_key}`;
+  const LANGUAGE      = `{language}`;
+  const COACH_EVERY   = {coach_interval};
+  const PRODUCT       = `{product_ctx}`;
+  const PERSONA       = `{persona_ctx}`;
 
-      async function startRecording() {{
-        try {{
-          stream = await navigator.mediaDevices.getUserMedia({{ audio: true, video: false }});
-          document.getElementById('status').textContent = '🎙️ Mic open — connecting to Deepgram...';
+  // ── State ──────────────────────────────────────────────────────────────────
+  let socket, audioCtx, processor, source, stream;
+  let recording    = false;
+  let startTime    = null;
+  let timerInterval= null;
+  let words        = 0;
+  let objCount     = 0;
+  let insightCount = 0;
+  let lines        = [];
+  let pending      = '';
+  let lastCoach    = 0;
+  let wordCount    = 0;
 
-          const params = new URLSearchParams({{
-            language: LANG,
-            model: 'nova-2',
-            smart_format: 'true',
-            interim_results: 'true',
-            punctuate: 'true',
-            endpointing: '300',
-            encoding: 'linear16',
-            sample_rate: '16000',
-          }});
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function now() {{ return new Date().toLocaleTimeString('en-US',{{hour12:false}}); }}
 
-          socket = new WebSocket(`wss://api.deepgram.com/v1/listen?${{params}}`, ['token', DG_KEY]);
-          socket.binaryType = 'arraybuffer';
+  function setStatus(msg, color='#00E5FF') {{
+    document.getElementById('status').style.color = color;
+    document.getElementById('status').textContent = msg;
+  }}
 
-          socket.onopen = () => {{
-            document.getElementById('status').textContent = '✅ LIVE — Listening...';
+  function showError(msg) {{
+    document.getElementById('error-area').innerHTML =
+      `<div class="error-box">❌ ${{msg}}</div>`;
+  }}
 
-            const audioCtx = new AudioContext({{ sampleRate: 16000 }});
-            const source   = audioCtx.createMediaStreamSource(stream);
-            const processor = audioCtx.createScriptProcessor(4096, 1, 1);
+  function clearError() {{
+    document.getElementById('error-area').innerHTML = '';
+  }}
 
-            source.connect(processor);
-            processor.connect(audioCtx.destination);
+  function updateMetrics() {{
+    document.getElementById('m-words').textContent = words;
+    document.getElementById('m-obj').textContent   = objCount;
+    document.getElementById('m-insights').textContent = insightCount;
+  }}
 
-            processor.onaudioprocess = (e) => {{
-              if (socket.readyState !== WebSocket.OPEN) return;
-              const float32 = e.inputBuffer.getChannelData(0);
-              const int16   = new Int16Array(float32.length);
-              for (let i = 0; i < float32.length; i++) {{
-                int16[i] = Math.max(-32768, Math.min(32767, float32[i] * 32768));
-              }}
-              socket.send(int16.buffer);
-            }};
-          }};
+  function setLive(live) {{
+    document.getElementById('m-status').innerHTML = live
+      ? '<span class="pill-live"><span class="dot dot-green"></span>LIVE</span>'
+      : '<span class="pill-idle"><span class="dot dot-grey"></span>IDLE</span>';
+    document.getElementById('btn-start').disabled = live;
+    document.getElementById('btn-stop').disabled  = !live;
+  }}
 
-          socket.onmessage = (event) => {{
-            const data = JSON.parse(event.data);
-            if (data.type !== 'Results') return;
-            const alt  = (data.channel?.alternatives || [{{}}])[0];
-            const text = (alt.transcript || '').trim();
-            if (!text) return;
+  function startTimer() {{
+    startTime = Date.now();
+    timerInterval = setInterval(() => {{
+      const s = Math.floor((Date.now() - startTime) / 1000);
+      const m = Math.floor(s / 60);
+      document.getElementById('m-duration').textContent =
+        String(m).padStart(2,'0') + ':' + String(s % 60).padStart(2,'0');
+    }}, 500);
+  }}
 
-            if (data.is_final) {{
-              document.getElementById('interim').textContent = '';
-              // Store final transcript for Streamlit to pick up
-              const finals = document.getElementById('finals');
-              finals.textContent = JSON.stringify({{text: text, final: true}});
-              // Notify Streamlit
-              window.parent.postMessage({{
-                isStreamlitMessage: true,
-                type: 'streamlit:setComponentValue',
-                value: JSON.stringify({{text: text, final: true}})
-              }}, '*');
-            }} else {{
-              document.getElementById('interim').textContent = '… ' + text;
-            }}
-          }};
+  function stopTimer() {{
+    clearInterval(timerInterval);
+  }}
 
-          socket.onerror = (err) => {{
-            document.getElementById('status').innerHTML = '<span style="color:#FF3B5C">❌ Connection error — check your Deepgram API key</span>';
-          }};
+  function addTranscriptLine(ts, text) {{
+    const box = document.getElementById('tx-box');
+    // Remove empty placeholder
+    const empty = box.querySelector('.tx-empty');
+    if (empty) empty.remove();
+    const div = document.createElement('div');
+    div.className = 'tx-line';
+    div.innerHTML = `<span class="tx-speaker">[${{ts}}] You</span>: ${{text}}`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }}
 
-          socket.onclose = (e) => {{
-            document.getElementById('status').textContent = '⏹ Stopped.';
-          }};
+  function addCoachCard(type, content, ts) {{
+    const box = document.getElementById('coach-box');
+    const empty = box.querySelector('.coach-empty');
+    if (empty) empty.remove();
 
-        }} catch(err) {{
-          document.getElementById('status').innerHTML = `<span style="color:#FF3B5C">❌ Mic error: ${{err.message}}</span>`;
-        }}
+    const tagMap = {{
+      objection: ['🚨', 'tag-objection', 'OBJECTION'],
+      tip:       ['💡', 'tag-tip',       'TIP'],
+      positive:  ['✅', 'tag-positive',  'GREAT MOVE'],
+      coach:     ['🎯', 'tag-coach',     'COACHING'],
+    }};
+    const [icon, tagCls, label] = tagMap[type] || ['🎯','tag-coach','COACHING'];
+
+    const div = document.createElement('div');
+    div.className = `coach-card ${{type}}`;
+    div.innerHTML = `
+      <span class="coach-tag ${{tagCls}}">${{icon}} ${{label}}</span>
+      <span class="coach-ts">${{ts}}</span>
+      <div style="clear:both;margin-top:4px">${{content}}</div>`;
+    box.insertBefore(div, box.firstChild);
+  }}
+
+  // ── Claude coaching via Anthropic API ──────────────────────────────────────
+  async function getCoaching(chunk, fullTx) {{
+    if (!CLAUDE_KEY) return;
+    try {{
+      const system = `You are APEX, a real-time sales call coach.
+Product: ${{PRODUCT || 'the product'}}
+Persona: ${{PERSONA || 'a business decision-maker'}}
+Full transcript so far: ${{fullTx.slice(-2000)}}
+Latest chunk: ${{chunk}}
+Reply ONLY in raw JSON (no markdown fences):
+{{"type":"objection"|"tip"|"positive"|"coach"|"none","content":"1-3 sentence coaching tip","urgency":"high"|"medium"|"low"}}`;
+
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {{
+        method: 'POST',
+        headers: {{
+          'x-api-key': CLAUDE_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        }},
+        body: JSON.stringify({{
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 200,
+          system: system,
+          messages: [{{role:'user', content:'Coach me now.'}}],
+        }}),
+      }});
+      const data = await resp.json();
+      const raw  = (data.content?.[0]?.text || '').trim().replace(/^```[a-z]*\n?|\n?```$/g,'');
+      const result = JSON.parse(raw);
+      if (result.type && result.type !== 'none') {{
+        insightCount++;
+        addCoachCard(result.type, result.content, now());
+        if (result.type === 'objection') objCount++;
+        updateMetrics();
       }}
+    }} catch(e) {{
+      console.error('Coaching error:', e);
+    }}
+  }}
 
-      startRecording();
-    </script>
-    """
-    
-    result = components.html(html_code, height=80)
-    
-    # Process any transcript that came back
-    if result:
-        try:
-            data = json.loads(result)
-            txt = data.get("text","").strip()
-            is_final = data.get("final", False)
-            if txt and is_final:
-                ss.lines.append({"ts": datetime.now().strftime("%H:%M:%S"), "text": txt})
-                ss.words += len(txt.split())
-                ss.pending += " " + txt
-                now = time.time()
-                pending = ss.pending.strip()
-                if len(pending.split()) >= coach_interval and (now - ss.last_coach) > 8:
-                    full_tx = " ".join(l["text"] for l in ss.lines)
-                    result_c = get_coaching(pending, full_tx, persona_ctx, product_ctx, claude_key)
-                    ss.last_coach = now
-                    if result_c.get("type") != "none":
-                        ss.coach_count += 1
-                        ss.coaching.append({
-                            "type": result_c.get("type","coach"),
-                            "content": result_c.get("content",""),
-                            "ts": datetime.now().strftime("%H:%M:%S")
-                        })
-                    if result_c.get("type") == "objection":
-                        ss.obj_count += 1
-                        ss.objections.append({"text": result_c["content"], "ts": datetime.now().strftime("%H:%M:%S")})
-                    ss.pending = ""
-        except Exception:
-            pass
+  // ── Process final transcript ───────────────────────────────────────────────
+  function processFinal(text) {{
+    const ts = now();
+    addTranscriptLine(ts, text);
+    lines.push(text);
+    const newWords = text.trim().split(/\s+/).length;
+    words     += newWords;
+    wordCount += newWords;
+    pending   += ' ' + text;
+    updateMetrics();
 
-# ── Two columns ────────────────────────────────────────────────────────────────
-left, right = st.columns([5,4], gap="large")
+    const now2 = Date.now();
+    if (wordCount >= COACH_EVERY && (now2 - lastCoach) > 8000) {{
+      const fullTx = lines.join(' ');
+      getCoaching(pending.trim(), fullTx);
+      lastCoach  = now2;
+      wordCount  = 0;
+      pending    = '';
+    }}
+  }}
 
-with left:
-    st.markdown("#### 🎙️ Live Transcript")
-    lines_html = ""
-    for line in ss.lines[-60:]:
-        lines_html += f'<div style="margin:4px 0"><span class="tx-speaker">[{line["ts"]}] You</span>: {line["text"]}</div>'
-    if ss.interim:
-        lines_html += f'<div style="margin:4px 0" class="tx-interim">… {ss.interim}</div>'
-    if not lines_html:
-        lines_html = '<div class="tx-empty">Transcript will appear here when you start listening…</div>'
-    st.markdown(f'<div class="tx-box">{lines_html}</div>', unsafe_allow_html=True)
+  // ── Start listening ────────────────────────────────────────────────────────
+  async function startListening() {{
+    clearError();
+    if (!DG_KEY) {{ showError('Add your Deepgram API key in the sidebar.'); return; }}
+    if (!CLAUDE_KEY) {{ showError('Add your Anthropic API key in the sidebar.'); return; }}
 
-    if ss.objections:
-        st.markdown("#### 🚨 Objection Log")
-        for obj in reversed(ss.objections[-5:]):
-            st.markdown(f'<div style="margin:4px 0;padding:8px 12px;background:#1a0a0f;border-left:3px solid #FF3B5C;border-radius:6px;font-size:13px"><span style="color:#4A6070;font-size:11px">[{obj["ts"]}]</span> {obj["text"]}</div>', unsafe_allow_html=True)
+    try {{
+      stream   = await navigator.mediaDevices.getUserMedia({{audio:true, video:false}});
+      setStatus('🎙️ Mic open — connecting to Deepgram...');
 
-with right:
-    st.markdown("#### 💡 Live Coaching Feed")
-    tag_map = {
-        "objection": ("🚨","objection","tag-objection","OBJECTION"),
-        "tip":       ("💡","tip",      "tag-tip",      "TIP"),
-        "positive":  ("✅","positive", "tag-positive", "GREAT MOVE"),
-        "coach":     ("🎯","",         "tag-coach",    "COACHING"),
-    }
-    if not ss.coaching:
-        st.markdown('<div style="text-align:center;padding:30px 0;color:#4A6070;font-family:\'DM Mono\',monospace;font-size:13px">🎤<br><br>Coaching insights will appear here.<br><br><span style="color:#00E5FF">Start listening to begin.</span></div>', unsafe_allow_html=True)
-    else:
-        for item in reversed(ss.coaching[-12:]):
-            icon,cls,tag_cls,label = tag_map.get(item["type"],("🎯","","tag-coach","COACHING"))
-            st.markdown(f'<div class="coach-card {cls}"><span class="coach-tag {tag_cls}">{icon} {label}</span><span style="font-family:\'DM Mono\',monospace;font-size:10px;color:#4A6070;float:right">{item["ts"]}</span><div style="clear:both;margin-top:4px">{item["content"]}</div></div>', unsafe_allow_html=True)
+      const params = new URLSearchParams({{
+        language: LANGUAGE, model:'nova-2', smart_format:'true',
+        interim_results:'true', punctuate:'true', endpointing:'300',
+        encoding:'linear16', sample_rate:'16000',
+      }});
 
-    if not ss.recording and not ss.coaching:
-        st.info("👆 Add API keys, then click **Start Listening**.")
+      socket = new WebSocket(`wss://api.deepgram.com/v1/listen?${{params}}`, ['token', DG_KEY]);
+      socket.binaryType = 'arraybuffer';
 
-# ── Auto refresh ───────────────────────────────────────────────────────────────
-if ss.recording:
-    time.sleep(0.5)
-    st.rerun()
+      socket.onopen = () => {{
+        setStatus('✅ LIVE — Listening...');
+        setLive(true);
+        recording = true;
+        startTimer();
+
+        audioCtx  = new AudioContext({{sampleRate:16000}});
+        source    = audioCtx.createMediaStreamSource(stream);
+        processor = audioCtx.createScriptProcessor(4096, 1, 1);
+        source.connect(processor);
+        processor.connect(audioCtx.destination);
+
+        processor.onaudioprocess = (e) => {{
+          if (socket.readyState !== WebSocket.OPEN) return;
+          const f32  = e.inputBuffer.getChannelData(0);
+          const i16  = new Int16Array(f32.length);
+          for (let i=0; i<f32.length; i++)
+            i16[i] = Math.max(-32768, Math.min(32767, f32[i]*32768));
+          socket.send(i16.buffer);
+        }};
+      }};
+
+      socket.onmessage = (event) => {{
+        const d   = JSON.parse(event.data);
+        if (d.type !== 'Results') return;
+        const alt = (d.channel?.alternatives || [{{}}])[0];
+        const txt = (alt.transcript || '').trim();
+        if (!txt) return;
+        if (d.is_final) {{
+          document.getElementById('interim').textContent = '';
+          processFinal(txt);
+        }} else {{
+          document.getElementById('interim').textContent = '… ' + txt;
+        }}
+      }};
+
+      socket.onerror = () => {{
+        showError('Deepgram connection error. Check your API key.');
+        stopListening();
+      }};
+
+      socket.onclose = () => {{
+        if (recording) setStatus('⏹ Disconnected.');
+        setLive(false);
+        recording = false;
+        stopTimer();
+      }};
+
+    }} catch(err) {{
+      showError('Microphone error: ' + err.message);
+    }}
+  }}
+
+  // ── Stop listening ─────────────────────────────────────────────────────────
+  function stopListening() {{
+    recording = false;
+    stopTimer();
+    setLive(false);
+    setStatus('⏹ Stopped.');
+    document.getElementById('interim').textContent = '';
+    if (socket) socket.close();
+    if (processor) {{ processor.disconnect(); processor = null; }}
+    if (source)    {{ source.disconnect();    source    = null; }}
+    if (audioCtx)  {{ audioCtx.close();       audioCtx  = null; }}
+    if (stream)    {{ stream.getTracks().forEach(t => t.stop()); stream = null; }}
+  }}
+
+  // ── Clear session ──────────────────────────────────────────────────────────
+  function clearSession() {{
+    stopListening();
+    words = 0; objCount = 0; insightCount = 0; wordCount = 0;
+    lines = []; pending = ''; lastCoach = 0;
+    document.getElementById('m-duration').textContent = '00:00';
+    document.getElementById('interim').textContent = '';
+    document.getElementById('tx-box').innerHTML = '<div class="tx-empty">Transcript will appear here when you start listening…</div>';
+    document.getElementById('coach-box').innerHTML = '<div class="coach-empty">🎤<br><br>Coaching insights will appear here.<br><br><span style="color:#00E5FF">Start listening to begin.</span></div>';
+    clearError();
+    updateMetrics();
+    setStatus('👆 Add API keys in the sidebar, then click Start Listening.');
+  }}
+</script>
+</body>
+</html>
+""", height=900, scrolling=False)
