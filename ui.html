@@ -11,7 +11,7 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
 .t2{font-size:10px;color:#00E5FF;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
 .metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px}
 .mc{background:#131A22;border:1px solid #1E2D3D;border-radius:9px;padding:12px;text-align:center}
-.mv{font-size:22px;font-weight:800;color:#EFF6FB}
+.mv{font-size:20px;font-weight:800;color:#EFF6FB}
 .ml{font-size:9px;color:#4A6070;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
 .btns{display:flex;gap:10px;margin-bottom:10px}
 .btn{flex:1;padding:11px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
@@ -53,7 +53,7 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
 .obj-section{margin-top:20px;border-top:1px solid #1E2D3D;padding-top:16px}
 .obj-title{font-size:14px;font-weight:700;color:#FF3B5C;margin-bottom:10px}
 .obj-log-box{max-height:300px;overflow-y:auto}
-.obj-card{background:#131A22;border:1px solid rgba(255,59,92,0.3);border-left:3px solid #FF3B5C;border-radius:9px;padding:12px;margin-bottom:10px;transition:border-color 0.3s}
+.obj-card{background:#131A22;border:1px solid rgba(255,59,92,0.3);border-left:3px solid #FF3B5C;border-radius:9px;padding:12px;margin-bottom:10px}
 .obj-card.won{border-color:rgba(0,255,157,0.4);border-left-color:#00FF9D}
 .obj-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
 .obj-q{font-size:12px;color:#FF3B5C;font-weight:600}
@@ -88,6 +88,9 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
   <div class="mc"><div class="mv" id="mh" style="color:#00FF9D">0</div><div class="ml">Handled</div></div>
   <div class="mc"><div class="mv" id="mi" style="color:#00E5FF">0</div><div class="ml">Insights</div></div>
   <div class="mc"><div class="mv" id="mw2" style="color:#FFD60A">—</div><div class="ml">Win Rate</div></div>
+</div>
+<div class="mc" style="margin-bottom:16px;padding:10px">
+  <div id="mstat"><span class="pl idle"><span class="dot dy"></span>IDLE</span></div>
 </div>
 <div class="ctx">
   <div><div class="ctx-lbl">Program / Service</div><input id="prod" class="ctx-input" type="text" placeholder="e.g. 30-day residential program at $15,000"></div>
@@ -178,15 +181,17 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
 const DG="__DG__",CL="__CL__",LANG="__LANG__",CI=__CI__;
 function getPROD(){return document.getElementById("prod").value;}
 function getPERS(){return document.getElementById("pers").value;}
-let sock,actx,proc,src,ms,rec=false,t0=null,tmr=null;
+let sock,actx,proc,src,ms2,rec=false,t0=null,tmr=null;
 let W=0,O=0,H=0,I=0,WC=0,lines=[],pend="",lc=0,objections=[];
 const $=x=>document.getElementById(x);
 const ts=()=>new Date().toLocaleTimeString("en-US",{hour12:false});
 function ss(m,c="#00E5FF"){$("sb").style.color=c;$("sb").textContent=m;}
 function err(m){$("eb").textContent="❌ "+m;$("eb").style.display="block";}
 function cerr(){$("eb").style.display="none";}
-function live(on){
-  $("ms").innerHTML=on?"<span class='pl live'><span class='dot dg'></span>LIVE</span>":"<span class='pl idle'><span class='dot dy'></span>IDLE</span>";
+function setLive(on){
+  const el=$("mstat");
+  if(!el)return;
+  el.innerHTML=on?"<span class='pl live'><span class='dot dg'></span>LIVE</span>":"<span class='pl idle'><span class='dot dy'></span>IDLE</span>";
   $("bst").disabled=on;$("bsp").disabled=!on;
 }
 function upd(){
@@ -236,7 +241,7 @@ async function coach(chunk,full){
     const prod=getPROD()||"substance abuse and mental health treatment program";
     const pers=getPERS()||"a family member of someone struggling with addiction";
     const openObjs=objections.filter(o=>!o.won).map(o=>o.text).join(", ");
-    const sys="You are APEX, an elite real-time admissions coach for substance abuse and mental health treatment centers. You use the Challenger Sale methodology with compassionate motivational interviewing.\n\nPROGRAM: "+prod+"\nPROSPECT: "+pers+"\nOPEN OBJECTIONS STILL UNRESOLVED: "+(openObjs||"none")+"\n\nFULL CALL TRANSCRIPT:\n"+full.slice(-3000)+"\n\nLATEST WORDS JUST SPOKEN:\n"+chunk+"\n\nYou MUST always respond with a coaching tip. Check in this order:\n\n1. OBJECTION RESOLVED: If an open objection was previously raised and the prospect now sounds accepting or has moved past it, set objection_resolved to the text of the resolved objection.\n\n2. NEW OBJECTION detected (price, timing, readiness, insurance, previous treatment, needs spouse approval, wants to research, doubts effectiveness): Return type 'objection' with exact rebuttal and objection_text.\n\n3. BUYING SIGNAL (asking about next steps, availability, timeline, expressing hope): Return type 'coach' with exact closing language.\n\n4. PROACTIVE SAY THIS: Give a specific script to advance toward admission. Return type 'coach'.\n\n5. GREAT MOVE: Reinforce something excellent. Return type 'positive'.\n\nRules:\n- ALWAYS return a response — never skip\n- Exact word-for-word scripts only\n- Under 40 words in content\n- Compassionate but urgent\n- Always move toward admission\n\nReply ONLY in raw JSON:\n{\"type\":\"objection\"|\"tip\"|\"positive\"|\"coach\",\"content\":\"script\",\"objection_text\":\"objection heard or empty\",\"objection_resolved\":\"resolved objection text or empty\",\"urgency\":\"high\"|\"medium\"|\"low\"}";
+    const sys="You are APEX, an elite real-time admissions coach for substance abuse and mental health treatment centers. You use the Challenger Sale methodology with compassionate motivational interviewing.\n\nPROGRAM: "+prod+"\nPROSPECT: "+pers+"\nOPEN OBJECTIONS STILL UNRESOLVED: "+(openObjs||"none")+"\n\nFULL CALL TRANSCRIPT:\n"+full.slice(-3000)+"\n\nLATEST WORDS JUST SPOKEN:\n"+chunk+"\n\nYou MUST always respond with a coaching tip. Check in this order:\n\n1. OBJECTION RESOLVED: If an open objection was previously raised and the prospect now sounds accepting or has moved past it, set objection_resolved to the text of the resolved objection.\n\n2. NEW OBJECTION detected (price, timing, readiness, insurance, previous treatment, needs spouse approval, wants to research, doubts effectiveness): Return type objection with exact rebuttal and objection_text.\n\n3. BUYING SIGNAL (asking about next steps, availability, timeline, expressing hope): Return type coach with exact closing language.\n\n4. PROACTIVE SAY THIS: Give a specific script to advance toward admission. Return type coach.\n\n5. GREAT MOVE: Reinforce something excellent. Return type positive.\n\nRules:\n- ALWAYS return a response\n- Exact word-for-word scripts only\n- Under 40 words in content\n- Compassionate but urgent\n- Always move toward admission\n\nReply ONLY in raw JSON:\n{\"type\":\"objection\",\"content\":\"script\",\"objection_text\":\"objection or empty\",\"objection_resolved\":\"resolved objection or empty\",\"urgency\":\"high\"}";
     const r=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
       headers:{"x-api-key":CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
@@ -271,15 +276,15 @@ async function go(){
   if(!DG){err("Add your Deepgram API key in the sidebar.");return;}
   if(!CL){err("Add your Anthropic API key in the sidebar.");return;}
   try{
-    ms=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+    ms2=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
     ss("🎙️ Connecting to Deepgram...");
     const p=new URLSearchParams({language:LANG,model:"nova-2",smart_format:"true",interim_results:"true",punctuate:"true",endpointing:"300",encoding:"linear16",sample_rate:"16000"});
     sock=new WebSocket("wss://api.deepgram.com/v1/listen?"+p,["token",DG]);
     sock.binaryType="arraybuffer";
     sock.onopen=()=>{
-      ss("✅ LIVE — Listening...");live(true);rec=true;stmr();
+      ss("✅ LIVE — Listening...");setLive(true);rec=true;stmr();
       actx=new AudioContext({sampleRate:16000});
-      src=actx.createMediaStreamSource(ms);
+      src=actx.createMediaStreamSource(ms2);
       proc=actx.createScriptProcessor(4096,1,1);
       src.connect(proc);proc.connect(actx.destination);
       proc.onaudioprocess=e=>{
@@ -297,16 +302,16 @@ async function go(){
       else{$("ib").textContent="… "+tx;}
     };
     sock.onerror=()=>{err("Deepgram error — check your API key.");stop();};
-    sock.onclose=()=>{if(rec)ss("⏹ Disconnected.");live(false);rec=false;xtmr();};
+    sock.onclose=()=>{if(rec)ss("⏹ Disconnected.");setLive(false);rec=false;xtmr();};
   }catch(e){err("Mic error: "+e.message);}
 }
 function stop(){
-  rec=false;xtmr();live(false);ss("⏹ Stopped.");$("ib").textContent="";
+  rec=false;xtmr();setLive(false);ss("⏹ Stopped.");$("ib").textContent="";
   if(sock)sock.close();
   if(proc){proc.disconnect();proc=null;}
   if(src){src.disconnect();src=null;}
   if(actx){actx.close();actx=null;}
-  if(ms){ms.getTracks().forEach(t=>t.stop());ms=null;}
+  if(ms2){ms2.getTracks().forEach(t=>t.stop());ms2=null;}
 }
 function clr(){
   stop();W=0;O=0;H=0;I=0;WC=0;lines=[];pend="";lc=0;objections=[];
