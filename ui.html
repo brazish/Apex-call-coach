@@ -9,10 +9,11 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
 .logo{width:46px;height:46px;background:linear-gradient(135deg,#00E5FF,#0080FF);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:22px}
 .t1{font-size:20px;font-weight:800;color:#EFF6FB}
 .t2{font-size:10px;color:#00E5FF;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
-.metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px}
+.metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:10px}
 .mc{background:#131A22;border:1px solid #1E2D3D;border-radius:9px;padding:12px;text-align:center}
 .mv{font-size:20px;font-weight:800;color:#EFF6FB}
 .ml{font-size:9px;color:#4A6070;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+.status-bar{background:#131A22;border:1px solid #1E2D3D;border-radius:9px;padding:10px;text-align:center;margin-bottom:10px}
 .btns{display:flex;gap:10px;margin-bottom:10px}
 .btn{flex:1;padding:11px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
 .bs{background:linear-gradient(135deg,#00B8CC,#0080FF);color:#000}
@@ -56,7 +57,7 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
 .obj-card{background:#131A22;border:1px solid rgba(255,59,92,0.3);border-left:3px solid #FF3B5C;border-radius:9px;padding:12px;margin-bottom:10px}
 .obj-card.won{border-color:rgba(0,255,157,0.4);border-left-color:#00FF9D}
 .obj-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
-.obj-q{font-size:12px;color:#FF3B5C;font-weight:600}
+.obj-q{font-size:12px;color:#FF3B5C;font-weight:600;flex:1}
 .obj-badge{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:100px;flex-shrink:0;margin-left:8px}
 .badge-open{background:rgba(255,214,10,0.15);color:#FFD60A;border:1px solid rgba(255,214,10,0.3)}
 .badge-won{background:rgba(0,255,157,0.15);color:#00FF9D;border:1px solid rgba(0,255,157,0.3)}
@@ -87,11 +88,9 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
   <div class="mc"><div class="mv" id="mo" style="color:#FF3B5C">0</div><div class="ml">Objections</div></div>
   <div class="mc"><div class="mv" id="mh" style="color:#00FF9D">0</div><div class="ml">Handled</div></div>
   <div class="mc"><div class="mv" id="mi" style="color:#00E5FF">0</div><div class="ml">Insights</div></div>
-  <div class="mc"><div class="mv" id="mw2" style="color:#FFD60A">—</div><div class="ml">Win Rate</div></div>
+  <div class="mc"><div class="mv" id="mwr" style="color:#FFD60A">—</div><div class="ml">Win Rate</div></div>
 </div>
-<div class="mc" style="margin-bottom:16px;padding:10px">
-  <div id="mstat"><span class="pl idle"><span class="dot dy"></span>IDLE</span></div>
-</div>
+<div class="status-bar" id="mstat"><span class="pl idle"><span class="dot dy"></span>IDLE</span></div>
 <div class="ctx">
   <div><div class="ctx-lbl">Program / Service</div><input id="prod" class="ctx-input" type="text" placeholder="e.g. 30-day residential program at $15,000"></div>
   <div><div class="ctx-lbl">Prospect Persona</div><input id="pers" class="ctx-input" type="text" placeholder="e.g. Parent of 28yr old with opioid addiction"></div>
@@ -110,7 +109,7 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
     <div class="box" id="tb"><div class="te">Transcript will appear here when you start listening...</div></div>
     <div class="obj-section">
       <div class="obj-title">🚨 Objection Tracker — Live Win Rate</div>
-      <div class="obj-log-box" id="obj-log"><div class="te" style="font-size:12px;padding:8px 0">No objections detected yet. Each objection will be tracked and automatically marked Won or Open.</div></div>
+      <div class="obj-log-box" id="obj-log"><div class="te" style="font-size:12px;padding:8px 0">No objections detected yet. Every objection will be logged here with a rebuttal and tracked as Won or Open.</div></div>
     </div>
   </div>
   <div>
@@ -179,26 +178,30 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
 </div>
 <script>
 const DG="__DG__",CL="__CL__",LANG="__LANG__",CI=__CI__;
-function getPROD(){return document.getElementById("prod").value;}
-function getPERS(){return document.getElementById("pers").value;}
+function getPROD(){return document.getElementById("prod").value||"substance abuse and mental health treatment program";}
+function getPERS(){return document.getElementById("pers").value||"a family member of someone struggling with addiction";}
 let sock,actx,proc,src,ms2,rec=false,t0=null,tmr=null;
 let W=0,O=0,H=0,I=0,WC=0,lines=[],pend="",lc=0,objections=[];
 const $=x=>document.getElementById(x);
 const ts=()=>new Date().toLocaleTimeString("en-US",{hour12:false});
 function ss(m,c="#00E5FF"){$("sb").style.color=c;$("sb").textContent=m;}
-function err(m){$("eb").textContent="❌ "+m;$("eb").style.display="block";}
+function showerr(m){$("eb").textContent="❌ "+m;$("eb").style.display="block";}
 function cerr(){$("eb").style.display="none";}
 function setLive(on){
-  const el=$("mstat");
-  if(!el)return;
-  el.innerHTML=on?"<span class='pl live'><span class='dot dg'></span>LIVE</span>":"<span class='pl idle'><span class='dot dy'></span>IDLE</span>";
+  $("mstat").innerHTML=on?"<span class='pl live'><span class='dot dg'></span>LIVE — Listening...</span>":"<span class='pl idle'><span class='dot dy'></span>IDLE</span>";
   $("bst").disabled=on;$("bsp").disabled=!on;
 }
 function upd(){
   $("mw").textContent=W;$("mo").textContent=O;$("mh").textContent=H;$("mi").textContent=I;
-  $("mw2").textContent=O>0?Math.round((H/O)*100)+"%":"—";
+  $("mwr").textContent=O>0?Math.round((H/O)*100)+"%":"—";
 }
-function stmr(){t0=Date.now();tmr=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);$("md").textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");},500);}
+function stmr(){
+  t0=Date.now();
+  tmr=setInterval(()=>{
+    const s=Math.floor((Date.now()-t0)/1000);
+    $("md").textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+  },500);
+}
 function xtmr(){clearInterval(tmr);}
 function showTab(name,el){
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
@@ -214,7 +217,12 @@ function addLine(t,tx){
 }
 function addCoach(type,content,t){
   const b=$("cb"),e=b.querySelector(".ce");if(e)e.remove();
-  const m={objection:["🚨","to","SAY THIS — OBJECTION"],tip:["💡","tt","TIP"],positive:["✅","tp","GREAT MOVE"],coach:["🎯","tk","SAY THIS"]};
+  const m={
+    objection:["🚨","to","SAY THIS — OBJECTION"],
+    tip:["💡","tt","TIP"],
+    positive:["✅","tp","GREAT MOVE"],
+    coach:["🎯","tk","SAY THIS"]
+  };
   const[icon,cls,lbl]=m[type]||m.coach;
   const d=document.createElement("div");d.className="cc "+type;
   d.innerHTML="<span class='ct "+cls+"'>"+icon+" "+lbl+"</span><span class='cts'>"+t+"</span><div style='clear:both;margin-top:4px'>"+content+"</div>";
@@ -231,50 +239,105 @@ function markObjWon(id){
   const card=document.getElementById("obj-"+id);
   const badge=document.getElementById("badge-"+id);
   if(card&&badge&&!card.classList.contains("won")){
-    card.classList.add("won");badge.className="obj-badge badge-won";badge.textContent="✅ HANDLED";
+    card.classList.add("won");
+    badge.className="obj-badge badge-won";
+    badge.textContent="✅ HANDLED";
     H++;upd();
   }
 }
 async function coach(chunk,full){
   if(!CL)return;
   try{
-    const prod=getPROD()||"substance abuse and mental health treatment program";
-    const pers=getPERS()||"a family member of someone struggling with addiction";
-    const openObjs=objections.filter(o=>!o.won).map(o=>o.text).join(", ");
-    const sys="You are APEX, an elite real-time admissions coach for substance abuse and mental health treatment centers. You use the Challenger Sale methodology with compassionate motivational interviewing.\n\nPROGRAM: "+prod+"\nPROSPECT: "+pers+"\nOPEN OBJECTIONS STILL UNRESOLVED: "+(openObjs||"none")+"\n\nFULL CALL TRANSCRIPT:\n"+full.slice(-3000)+"\n\nLATEST WORDS JUST SPOKEN:\n"+chunk+"\n\nYou MUST always respond with a coaching tip. Check in this order:\n\n1. OBJECTION RESOLVED: If an open objection was previously raised and the prospect now sounds accepting or has moved past it, set objection_resolved to the text of the resolved objection.\n\n2. NEW OBJECTION detected (price, timing, readiness, insurance, previous treatment, needs spouse approval, wants to research, doubts effectiveness): Return type objection with exact rebuttal and objection_text.\n\n3. BUYING SIGNAL (asking about next steps, availability, timeline, expressing hope): Return type coach with exact closing language.\n\n4. PROACTIVE SAY THIS: Give a specific script to advance toward admission. Return type coach.\n\n5. GREAT MOVE: Reinforce something excellent. Return type positive.\n\nRules:\n- ALWAYS return a response\n- Exact word-for-word scripts only\n- Under 40 words in content\n- Compassionate but urgent\n- Always move toward admission\n\nReply ONLY in raw JSON:\n{\"type\":\"objection\",\"content\":\"script\",\"objection_text\":\"objection or empty\",\"objection_resolved\":\"resolved objection or empty\",\"urgency\":\"high\"}";
+    const prod=getPROD();
+    const pers=getPERS();
+    const openObjs=objections.filter(o=>!o.won).map(o=>o.text).join("; ");
+    const sys=`You are APEX, an elite real-time admissions coach for substance abuse and mental health treatment centers.
+
+PROGRAM: ${prod}
+PROSPECT: ${pers}
+OPEN UNRESOLVED OBJECTIONS: ${openObjs||"none"}
+
+FULL TRANSCRIPT:
+${full.slice(-3000)}
+
+LATEST WORDS SPOKEN:
+${chunk}
+
+CRITICAL INSTRUCTION: You must classify ANY resistance, negative statement, concern, demand, threat, or pushback from the prospect as type "objection". This includes:
+- Price or cost concerns ("too expensive", "can't afford")
+- Timing resistance ("need to think", "call back later", "not ready")
+- Treatment resistance ("not coming", "won't go", "doesn't want help")  
+- Specific demands ("I won't come if you don't have X")
+- Threats to hang up or end the call
+- Doubt about effectiveness ("does it work", "tried before")
+- Insurance concerns
+- Needing spouse or family approval
+- Wanting to research other options
+- ANY negative or skeptical statement
+
+For objections: provide exact word-for-word rebuttal script and set objection_text to a SHORT summary (under 8 words) of what the prospect said.
+
+If no objection: check if an open objection was resolved (prospect sounds agreeable or moves forward) - set objection_resolved.
+
+If no objection and none resolved: give a proactive SAY THIS coaching tip to advance toward admission (type "coach").
+
+If coordinator said something excellent: type "positive".
+
+RULES:
+- ALWAYS return a response
+- Exact scripts only, under 40 words
+- Compassionate but urgent tone
+- Always move toward admission
+
+Reply ONLY in this exact JSON format:
+{"type":"objection","content":"exact script","objection_text":"short summary","objection_resolved":"","urgency":"high"}`;
+
     const r=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
       headers:{"x-api-key":CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:300,system:sys,messages:[{role:"user",content:"Analyze and coach me now."}]})
+      body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:300,system:sys,messages:[{role:"user",content:"Analyze the latest words and respond now."}]})
     });
     const data=await r.json();
     const raw=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"");
     const res=JSON.parse(raw);
+
     if(res.objection_resolved&&res.objection_resolved.length>2){
-      const match=objections.find(o=>!o.won&&res.objection_resolved.toLowerCase().includes(o.text.toLowerCase().slice(0,15)));
+      const match=objections.find(o=>!o.won&&o.text.toLowerCase().includes(res.objection_resolved.toLowerCase().slice(0,10)));
       if(match)markObjWon(match.id);
     }
+
     if(res.type){
-      I++;addCoach(res.type,res.content,ts());
-      if(res.type==="objection"&&res.objection_text&&res.objection_text.length>2){
-        O++;const id=Date.now();
+      I++;
+      addCoach(res.type,res.content,ts());
+      if(res.type==="objection"&&res.objection_text&&res.objection_text.length>1){
+        O++;
+        const id=Date.now();
         objections.push({id,text:res.objection_text,won:false});
         addObjLog(id,res.objection_text,res.content,ts());
       }
       upd();
     }
-  }catch(e){console.error(e);}
+  }catch(e){console.error("Coach error:",e);}
 }
+
 function final(tx){
-  const t=ts();addLine(t,tx);lines.push(tx);
-  const w=tx.trim().split(/\s+/).length;W+=w;WC+=w;pend+=" "+tx;upd();
+  const t=ts();
+  addLine(t,tx);
+  lines.push(tx);
+  const w=tx.trim().split(/\s+/).length;
+  W+=w;WC+=w;pend+=" "+tx;
+  upd();
   const now=Date.now();
-  if(WC>=CI&&(now-lc)>8000){coach(pend.trim(),lines.join(" "));lc=now;WC=0;pend="";}
+  if(WC>=CI&&(now-lc)>8000){
+    coach(pend.trim(),lines.join(" "));
+    lc=now;WC=0;pend="";
+  }
 }
+
 async function go(){
   cerr();
-  if(!DG){err("Add your Deepgram API key in the sidebar.");return;}
-  if(!CL){err("Add your Anthropic API key in the sidebar.");return;}
+  if(!DG){showerr("Add your Deepgram API key in the sidebar.");return;}
+  if(!CL){showerr("Add your Anthropic API key in the sidebar.");return;}
   try{
     ms2=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
     ss("🎙️ Connecting to Deepgram...");
@@ -301,10 +364,11 @@ async function go(){
       if(d.is_final){$("ib").textContent="";final(tx);}
       else{$("ib").textContent="… "+tx;}
     };
-    sock.onerror=()=>{err("Deepgram error — check your API key.");stop();};
+    sock.onerror=()=>{showerr("Deepgram error — check your API key.");stop();};
     sock.onclose=()=>{if(rec)ss("⏹ Disconnected.");setLive(false);rec=false;xtmr();};
-  }catch(e){err("Mic error: "+e.message);}
+  }catch(e){showerr("Mic error: "+e.message);}
 }
+
 function stop(){
   rec=false;xtmr();setLive(false);ss("⏹ Stopped.");$("ib").textContent="";
   if(sock)sock.close();
@@ -313,12 +377,13 @@ function stop(){
   if(actx){actx.close();actx=null;}
   if(ms2){ms2.getTracks().forEach(t=>t.stop());ms2=null;}
 }
+
 function clr(){
   stop();W=0;O=0;H=0;I=0;WC=0;lines=[];pend="";lc=0;objections=[];
   $("md").textContent="00:00";$("ib").textContent="";
   $("tb").innerHTML="<div class='te'>Transcript will appear here when you start listening...</div>";
   $("cb").innerHTML="<div class='ce'>🎤<br><br>Real-time coaching will appear here.<br><br><span style='color:#00E5FF'>Start listening to begin.</span></div>";
-  $("obj-log").innerHTML="<div class='te' style='font-size:12px;padding:8px 0'>No objections detected yet. Each objection will be tracked and automatically marked Won or Open.</div>";
+  $("obj-log").innerHTML="<div class='te' style='font-size:12px;padding:8px 0'>No objections detected yet. Every objection will be logged here with a rebuttal and tracked as Won or Open.</div>";
   cerr();upd();ss("👆 Fill in your program details above then click Start Listening.");
 }
 </script>
