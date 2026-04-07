@@ -19,6 +19,9 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
 .bx{background:#131A22;color:#FF3B5C;border:1px solid rgba(255,59,92,0.4)}
 .bc{background:#131A22;color:#4A6070;border:1px solid #1E2D3D}
 .btn:disabled{opacity:0.35;cursor:not-allowed}
+.ctx{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.ctx-lbl{font-size:11px;color:#4A6070;margin-bottom:4px}
+.ctx-input{width:100%;background:#090D11;border:1px solid #1E2D3D;border-radius:6px;padding:8px;color:#C8D8E4;font-family:monospace;font-size:12px}
 .sb{font-size:12px;color:#00E5FF;padding:5px 0;min-height:22px}
 .ib{font-size:12px;color:#4A6070;font-style:italic;min-height:18px;padding:3px 0}
 .eb{background:rgba(255,59,92,0.1);border:1px solid rgba(255,59,92,0.3);border-radius:7px;padding:9px 13px;color:#FF3B5C;font-size:12px;margin:6px 0;display:none}
@@ -60,12 +63,16 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
   <div class="mc"><div class="mv" id="mi" style="color:#00E5FF">0</div><div class="ml">Insights</div></div>
   <div class="mc"><div id="ms"><span class="pl idle"><span class="dot dy"></span>IDLE</span></div><div class="ml" style="margin-top:5px">Status</div></div>
 </div>
+<div class="ctx">
+  <div><div class="ctx-lbl">PRODUCT / SERVICE</div><input id="prod" class="ctx-input" type="text" placeholder="e.g. SaaS CRM at $500/mo"></div>
+  <div><div class="ctx-lbl">PROSPECT PERSONA</div><input id="pers" class="ctx-input" type="text" placeholder="e.g. VP Sales, 200-person company"></div>
+</div>
 <div class="btns">
   <button class="btn bs" id="bst" onclick="go()">▶ Start Listening</button>
   <button class="btn bx" id="bsp" onclick="stop()" disabled>◼ Stop</button>
   <button class="btn bc" onclick="clr()">🗑 Clear</button>
 </div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+<div class="sb" id="sb">👆 Enter API keys in the sidebar then click Start Listening.</div>
 <div class="ib" id="ib"></div>
 <div class="eb" id="eb"></div>
 <div class="cols">
@@ -80,6 +87,8 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
 </div>
 <script>
 const DG="__DG__",CL="__CL__",LANG="__LANG__",CI=__CI__;
+function getPROD(){return document.getElementById("prod").value;}
+function getPERS(){return document.getElementById("pers").value;}
 let sock,actx,proc,src,ms,rec=false,t0=null,tmr=null,W=0,O=0,I=0,WC=0,lines=[],pend="",lc=0;
 const $=x=>document.getElementById(x);
 const ts=()=>new Date().toLocaleTimeString("en-US",{hour12:false});
@@ -110,7 +119,7 @@ function addCoach(type,content,t){
 async function coach(chunk,full){
   if(!CL)return;
   try{
-    const sys="You are APEX, a real-time sales call coach.\nProduct: "+(getPROD()||"the product")+"\nPersona: "+(getPERS()||"a busiion-maker")+"\nTranscript: "+full.slice(-2000)+"\nLatest: "+chunk+'\nReply ONLY in raw JSON: {"type":"objection"|"tip"|"positive"|"coach"|"none","content":"1-3 sentence tip","urgency":"high"|"medium"|"low"}';
+    const sys="You are APEX, a real-time sales call coach.\nProduct: "+(getPROD()||"the product")+"\nPersona: "+(getPERS()||"a business decision-maker")+"\nTranscript: "+full.slice(-2000)+"\nLatest: "+chunk+"\nReply ONLY in raw JSON: {\"type\":\"objection\"|\"tip\"|\"positive\"|\"coach\"|\"none\",\"content\":\"1-3 sentence tip\",\"urgency\":\"high\"|\"medium\"|\"low\"}";
     const r=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
       headers:{"x-api-key":CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
