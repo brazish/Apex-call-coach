@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-size:14px}
+html,body{width:100%;overflow-x:hidden}
+body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-size:14px}
 .hdr{display:flex;align-items:center;gap:14px;padding-bottom:16px;border-bottom:1px solid #1E2D3D;margin-bottom:18px}
 .logo{width:46px;height:46px;background:linear-gradient(135deg,#00E5FF,#0080FF);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:22px}
 .t1{font-size:20px;font-weight:800;color:#EFF6FB}
@@ -20,6 +21,53 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
 .bx{background:#131A22;color:#FF3B5C;border:1px solid rgba(255,59,92,0.4)}
 .bc{background:#131A22;color:#4A6070;border:1px solid #1E2D3D}
 .btn:disabled{opacity:0.35;cursor:not-allowed}
+.bpdf{background:#131A22;color:#00FF9D;border:1px solid rgba(0,255,157,0.4);font-size:12px}
+.bpdf:hover{background:rgba(0,255,157,0.08)}
+
+/* ── PRINT / PDF STYLES ── */
+#pdf-report{display:none}
+@media print{
+  body *{visibility:hidden!important}
+  #pdf-report,#pdf-report *{visibility:visible!important}
+  #pdf-report{
+    display:block!important;position:fixed;top:0;left:0;width:100%;
+    background:#fff;color:#111;font-family:Arial,sans-serif;font-size:11pt;
+    padding:32px 40px;
+  }
+  .pr-logo{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .pr-logo-icon{width:38px;height:38px;background:linear-gradient(135deg,#00B8CC,#0055CC);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;flex-shrink:0}
+  .pr-title{font-size:18pt;font-weight:800;color:#0a1628}
+  .pr-sub{font-size:8pt;color:#0080CC;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+  .pr-divider{border:none;border-top:2px solid #0055CC;margin:10px 0 18px}
+  .pr-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin-bottom:18px;font-size:9pt}
+  .pr-meta-item{display:flex;gap:6px}
+  .pr-meta-label{font-weight:700;color:#444;white-space:nowrap}
+  .pr-meta-val{color:#111}
+  .pr-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px}
+  .pr-stat{background:#f4f8ff;border:1px solid #d0ddf0;border-radius:6px;padding:8px;text-align:center}
+  .pr-stat-val{font-size:16pt;font-weight:800;color:#0055CC}
+  .pr-stat-lbl{font-size:7pt;color:#666;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+  .pr-section-title{font-size:11pt;font-weight:800;color:#0a1628;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #dde6f4;text-transform:uppercase;letter-spacing:1px}
+  .pr-obj-card{border:1px solid #dde6f4;border-left:4px solid #CC2244;border-radius:6px;padding:10px 12px;margin-bottom:8px;page-break-inside:avoid}
+  .pr-obj-card.won{border-left-color:#00995C}
+  .pr-obj-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px}
+  .pr-obj-q{font-weight:700;color:#CC2244;font-size:10pt;flex:1}
+  .pr-obj-q.won{color:#00995C}
+  .pr-badge{font-size:7pt;font-weight:700;letter-spacing:1px;padding:2px 8px;border-radius:100px;border:1px solid;white-space:nowrap;margin-left:8px}
+  .pr-badge.open{background:#fff9e0;color:#996600;border-color:#ccaa00}
+  .pr-badge.handled{background:#e0fff2;color:#00773D;border-color:#00BB5C}
+  .pr-rebuttal-lbl{font-size:7pt;color:#0055CC;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+  .pr-rebuttal{font-size:9.5pt;color:#222;line-height:1.6;background:#f8faff;border-left:2px solid #0055CC;padding:6px 10px;border-radius:0 4px 4px 0}
+  .pr-ts{font-size:7.5pt;color:#888;margin-top:4px}
+  .pr-transcript{background:#f8f9fb;border:1px solid #dde6f4;border-radius:6px;padding:10px 14px;font-size:9pt;line-height:1.8;white-space:pre-wrap;max-height:none}
+  .pr-coaching-card{border:1px solid #dde6f4;border-radius:6px;padding:8px 12px;margin-bottom:6px;page-break-inside:avoid}
+  .pr-coaching-lbl{font-size:7pt;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:3px;display:inline-block;margin-bottom:4px}
+  .pr-lbl-obj{background:#fde8ec;color:#CC2244}
+  .pr-lbl-coach{background:#e6f4ff;color:#0055CC}
+  .pr-lbl-pos{background:#e0fff2;color:#00773D}
+  .pr-coaching-body{font-size:9.5pt;color:#222;line-height:1.6}
+  .pr-footer{margin-top:24px;padding-top:10px;border-top:1px solid #dde6f4;font-size:7.5pt;color:#888;display:flex;justify-content:space-between}
+}
 .ctx{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 .ctx-lbl{font-size:11px;color:#4A6070;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
 .ctx-input{width:100%;background:#090D11;border:1px solid #1E2D3D;border-radius:6px;padding:8px;color:#C8D8E4;font-family:monospace;font-size:12px}
@@ -51,9 +99,12 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
 .dg{background:#00FF9D;animation:blink 1.2s infinite}
 .dy{background:#4A6070}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+/* ── OBJECTION TRACKER ── */
 .obj-section{margin-top:20px;border-top:1px solid #1E2D3D;padding-top:16px}
 .obj-title{font-size:14px;font-weight:700;color:#FF3B5C;margin-bottom:10px}
-.obj-log-box{max-height:300px;overflow-y:auto}
+/* No max-height — scrolls naturally with the page */
+.obj-log-box{display:flex;flex-direction:column;gap:0}
 .obj-card{background:#131A22;border:1px solid rgba(255,59,92,0.3);border-left:3px solid #FF3B5C;border-radius:9px;padding:12px;margin-bottom:10px}
 .obj-card.won{border-color:rgba(0,255,157,0.4);border-left-color:#00FF9D}
 .obj-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
@@ -64,23 +115,36 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
 .obj-a-lbl{font-size:9px;color:#00E5FF;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
 .obj-a{font-size:12px;color:#C8D8E4;line-height:1.7;background:#090D11;border-radius:6px;padding:8px;border-left:2px solid #00E5FF}
 .obj-ts{font-size:9px;color:#4A6070;margin-top:5px}
+
+/* ── SCRIPTS LIBRARY ── */
 .scripts-section{margin-top:20px;border-top:1px solid #1E2D3D;padding-top:16px}
 .scripts-title{font-size:14px;font-weight:700;color:#FFD60A;margin-bottom:10px}
 .script-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-.tab{padding:5px 12px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #1E2D3D;background:#131A22;color:#4A6070;font-family:monospace}
+.tab{padding:5px 12px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #1E2D3D;background:#131A22;color:#4A6070;font-family:monospace;transition:all 0.15s}
+.tab:hover{color:#C8D8E4;border-color:#2E4055}
 .tab.active{background:rgba(255,214,10,0.15);color:#FFD60A;border-color:rgba(255,214,10,0.4)}
-.script-box{height:500px;overflow-y:scroll;border:1px solid #1E2D3D;border-radius:8px;padding:10px;background:#090D11}
+/* script-box: no fixed height, scrolls naturally */
+.script-box{border:1px solid #1E2D3D;border-radius:8px;padding:10px;background:#090D11}
 .script-content{display:none}
 .script-content.active{display:block}
 .script-card{background:#131A22;border:1px solid #1E2D3D;border-left:3px solid #FFD60A;border-radius:9px;padding:12px;margin-bottom:10px}
+.script-card:last-child{margin-bottom:0}
 .script-lbl{font-size:9px;color:#FFD60A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
 .script-text{font-size:12px;color:#C8D8E4;line-height:1.8;font-style:italic}
+
+/* ── PPR PROGRAM QUICK-REF ── */
+.ppr-section{margin-top:20px;border-top:1px solid #1E2D3D;padding-top:16px}
+.ppr-title{font-size:14px;font-weight:700;color:#00FF9D;margin-bottom:10px}
+.ppr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ppr-card{background:#0A1208;border:1px solid rgba(0,255,157,0.15);border-left:3px solid #00FF9D;border-radius:8px;padding:10px}
+.ppr-card-title{font-size:9px;color:#00FF9D;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.ppr-card-body{font-size:11px;color:#C8D8E4;line-height:1.7}
 </style>
 </head>
 <body>
 <div class="hdr">
   <div class="logo">🎯</div>
-  <div><div class="t1">APEX Call Coach</div><div class="t2">Live AI Sales Intelligence — Substance Abuse & Mental Health</div></div>
+  <div><div class="t1">APEX Call Coach — Pinnacle Peak Recovery</div><div class="t2">Live AI Admissions Intelligence — McCormick Ranch, Scottsdale AZ</div></div>
 </div>
 <div class="metrics">
   <div class="mc"><div class="mv" id="md">00:00</div><div class="ml">Duration</div></div>
@@ -92,29 +156,74 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
 </div>
 <div class="status-bar" id="mstat"><span class="pl idle"><span class="dot dy"></span>IDLE</span></div>
 <div class="ctx">
-  <div><div class="ctx-lbl">Program / Service</div><input id="prod" class="ctx-input" type="text" placeholder="e.g. 30-day residential program at $15,000"></div>
-  <div><div class="ctx-lbl">Prospect Persona</div><input id="pers" class="ctx-input" type="text" placeholder="e.g. Parent of 28yr old with opioid addiction"></div>
+  <div><div class="ctx-lbl">Caller Situation</div><input id="prod" class="ctx-input" type="text" placeholder="e.g. Parent calling about son with opioid addiction, self-pay"></div>
+  <div><div class="ctx-lbl">Prospect Persona</div><input id="pers" class="ctx-input" type="text" placeholder="e.g. Desperate mother, 45yr old, son 24, 2 prior failed attempts"></div>
 </div>
 <div class="btns">
   <button class="btn bs" id="bst" onclick="go()">▶ Start Listening</button>
   <button class="btn bx" id="bsp" onclick="stop()" disabled>◼ Stop</button>
   <button class="btn bc" onclick="clr()">🗑 Clear</button>
+  <button class="btn bpdf" onclick="exportPDF()">⬇ Download Call Report</button>
 </div>
-<div class="sb" id="sb">👆 Fill in your program details above then click Start Listening.</div>
+<div class="sb" id="sb">👆 Fill in the caller situation above then click Start Listening.</div>
 <div class="ib" id="ib"></div>
 <div class="eb" id="eb"></div>
 <div class="cols">
   <div>
     <div class="st">🎙️ Live Transcript</div>
     <div class="box" id="tb"><div class="te">Transcript will appear here when you start listening...</div></div>
+
+    <!-- OBJECTION TRACKER — no max-height, scrolls with page -->
     <div class="obj-section">
       <div class="obj-title">🚨 Objection Tracker — Live Win Rate</div>
       <div class="obj-log-box" id="obj-log"><div class="te" style="font-size:12px;padding:8px 0">No objections detected yet. Every objection will be logged here with a rebuttal and tracked as Won or Open.</div></div>
     </div>
+
+    <!-- PPR PROGRAM QUICK-REF -->
+    <div class="ppr-section">
+      <div class="ppr-title">🏥 Pinnacle Peak Recovery — Quick Reference</div>
+      <div class="ppr-grid">
+        <div class="ppr-card">
+          <div class="ppr-card-title">📍 Location & Levels of Care</div>
+          <div class="ppr-card-body">McCormick Ranch, Scottsdale AZ<br>Full continuum: Detox → Inpatient → Outpatient (IOP/PHP)<br>Small group sizes — individualized care</div>
+        </div>
+        <div class="ppr-card">
+          <div class="ppr-card-title">🧠 Clinical Differentiators</div>
+          <div class="ppr-card-body">Trauma-focused / root-cause model<br>Master's level therapists<br>EMDR · Somatic Experiencing · Psychodrama (10yr cert) · ART · CPT · DBT · Holistic Groups</div>
+        </div>
+        <div class="ppr-card">
+          <div class="ppr-card-title">🏨 Detox FAQs</div>
+          <div class="ppr-card-body">Provider seen within 12hrs of arrival<br>Length varies by substance/usage history<br>Medically assisted — individualized detox plan<br>Non-narcotic available for opiates; NOT for alcohol/benzos</div>
+        </div>
+        <div class="ppr-card">
+          <div class="ppr-card-title">📱 Phone Policy</div>
+          <div class="ppr-card-body"><strong>Detox:</strong> No personal phone (case mgrs handle calls)<br><strong>Residential:</strong> House phone access<br><strong>After 7–10 days</strong> + clinical approval: full electronics after clinical hours</div>
+        </div>
+        <div class="ppr-card">
+          <div class="ppr-card-title">🛏️ Rooms & Amenities</div>
+          <div class="ppr-card-body">World-class facility, spacious shared rooms (large beds)<br>Private rooms available at added cost<br>Private chef — accommodates dietary needs (notify admissions first)</div>
+        </div>
+        <div class="ppr-card">
+          <div class="ppr-card-title">👨‍👩‍👧 Family Involvement</div>
+          <div class="ppr-card-body">Family therapy sessions, update calls from therapist/CM<br>Family workshops for residential clients<br>All involvement requires client consent & ROI — never mandatory</div>
+        </div>
+        <div class="ppr-card">
+          <div class="ppr-card-title">💼 Work / FMLA</div>
+          <div class="ppr-card-body">Case managers handle outside stressors & LOA<br>FMLA: up to 12 wks job-protected unpaid leave<br>ADA protections if FMLA doesn't apply</div>
+        </div>
+        <div class="ppr-card">
+          <div class="ppr-card-title">⏱️ Admissions Process</div>
+          <div class="ppr-card-body">1. Gather insurance → VOB (30–45 min callback)<br>2. 15–20 min pre-assessment over phone<br>3. Schedule admission date</div>
+        </div>
+      </div>
+    </div>
   </div>
+
   <div>
     <div class="st">💡 Live Coaching Feed</div>
     <div class="box" id="cb"><div class="ce">🎤<br><br>Real-time coaching will appear here.<br><br><span style="color:#00E5FF">Start listening to begin.</span></div></div>
+
+    <!-- CLOSER SCRIPTS — full expandable, scrolls with page -->
     <div class="scripts-section">
       <div class="scripts-title">📋 Closer Scripts Library</div>
       <div class="script-tabs">
@@ -124,62 +233,103 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:20px;font-si
         <div class="tab" onclick="showTab('ins',this)">Insurance</div>
         <div class="tab" onclick="showTab('ready',this)">Not Ready</div>
         <div class="tab" onclick="showTab('close',this)">Closing</div>
+        <div class="tab" onclick="showTab('ppr',this)">PPR-Specific</div>
       </div>
       <div class="script-box">
+
+        <!-- ═══════════════════ OPENING ═══════════════════ -->
         <div id="tab-open" class="script-content active">
-          <div class="script-card"><div class="script-lbl">🎯 Opening — Build Urgency & Rapport</div><div class="script-text">"I want you to know — reaching out today took courage, and I'm really glad you did. Can you tell me a little about what's been going on? I want to make sure we find the absolute best solution for your loved one."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Establish Authority Early</div><div class="script-text">"We've helped hundreds of families in exactly your situation. What I've learned is that the families who act quickly are the ones who get their loved one back. So let's figure out together what's standing in the way."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Uncover the Pain</div><div class="script-text">"How long has this been going on? Because I find that families usually wait 2-3 years longer than they should — and every day costs them more than any program ever would."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Build Trust</div><div class="script-text">"My job isn't to sell you anything. My job is to help you figure out if we're the right fit for your loved one. So I'm going to ask you some questions and I need you to be completely honest with me. Can you do that?"</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Qualify the Pain</div><div class="script-text">"On a scale of 1-10, how urgent is this situation? Because the families I work with who have the best outcomes are the ones who treat this like the emergency it is. Where are you on that scale?"</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Create Urgency Early</div><div class="script-text">"I want to be upfront with you — the longer someone waits to get into treatment, the harder recovery becomes. The brain changes with prolonged use. Every day matters. So let's figure out together how to make this happen as quickly as possible."</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 Warm Opener — Acknowledge Courage</div><div class="script-text">"I want you to know — reaching out today took real courage, and I'm genuinely glad you did. Can you tell me a little about what's been going on? I want to make sure we find the absolute best path forward for your loved one."</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 PPR Introduction — Lead with Clinical Strength</div><div class="script-text">"Let me tell you a little bit about our program. Pinnacle Peak Recovery is known for having one of the strongest clinical programs in Arizona. We primarily focus on trauma and the underlying conditions that drive addiction — because when you treat the root cause, the substance use becomes much easier to address. We're a world-class facility in McCormick Ranch, Scottsdale, offering full continuum care: detox, inpatient, and outpatient."</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 What Makes PPR Different — The Clinical Edge</div><div class="script-text">"What separates us from other programs is our depth of clinical care. Our master's level therapists are trained in modalities most centers don't even offer — EMDR, Somatic Experiencing, Psychodrama, ART, CPT, and DBT. We pair that with small group sizes so every person gets truly individualized attention. We go deeper, and that's why our outcomes are stronger."</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 Establish Trust Early</div><div class="script-text">"My job isn't to sell you on anything. My job is to help you figure out if we're the right fit. I'm going to ask you a few questions, and I just need you to be completely honest with me — can you do that?"</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 Uncover the Pain</div><div class="script-text">"How long has this been going on? Because in my experience, families usually wait two or three years longer than they should — and every day of delay costs them more than any treatment program ever would."</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 Urgency Framing</div><div class="script-text">"I want to be upfront with you — the longer someone waits to get into treatment, the harder recovery becomes. The brain actually changes with prolonged use. Every single day matters. So let's figure out together how to make this happen as quickly as possible."</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 Rate the Urgency</div><div class="script-text">"On a scale of 1 to 10, how urgent is this situation right now? Because the families I work with who get the best outcomes are the ones who treat this like the emergency it truly is. Where are you on that scale?"</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 Gather Insurance — Transition</div><div class="script-text">"Our admissions process is quick and easy. I'd start by gathering your insurance information and doing a verification of benefits so I can tell you exactly what we're working with. Are you or your loved one covered under any type of insurance?"</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 VOB Callback Wrap-Up</div><div class="script-text">"Okay great — I'm going to look into this right now and I'll be calling you back at [number] in about 30 to 45 minutes with everything I find. After that, the next step is a quick 15 to 20 minute pre-assessment over the phone so we can get a full picture of what's going on and how we can help."</div></div>
         </div>
+
+        <!-- ═══════════════════ COST ═══════════════════ -->
         <div id="tab-cost" class="script-content">
-          <div class="script-card"><div class="script-lbl">🚨 "It's too expensive"</div><div class="script-text">"I completely understand — and I want to ask you something. What has this addiction already cost your family? Between the bail, the ER visits, the lost jobs, the broken relationships — most families tell me they've already spent more than the cost of treatment. This isn't an expense. It's an investment in getting your family back."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "I can't afford it right now"</div><div class="script-text">"What does 'right now' mean to you — because addiction doesn't wait. If cost wasn't a factor, would you want your loved one to get help today? Good — then let's focus on making it work. We have financing options and our team works with families every day to find a way."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "That's more than I expected"</div><div class="script-text">"I hear you — and I want to be transparent. You could find cheaper options, but what you get here is a clinical team that specializes in exactly what your loved one is going through, 24/7 support, and a track record of real results. What's your loved one's life worth to you?"</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "Can you lower the price?"</div><div class="script-text">"I wish I could — but what I can do is help you maximize every dollar. Let's look at your insurance first, then explore our payment plans. Most families are surprised by how manageable it becomes when we break it down together."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 Cost vs. Consequences</div><div class="script-text">"Let me put this in perspective — the average family spends $35,000 a year managing an active addiction. One ER visit alone can cost $10,000. Our program pays for itself when you look at what you stop spending. Can we look at the numbers together?"</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "It's too expensive"</div><div class="script-text">"I completely understand — and I want to ask you something. What has this addiction already cost your family? Between the ER visits, the bail, the lost jobs, the broken trust — most families tell me they've already spent more than the cost of treatment. This isn't an expense. It's an investment in getting your family back."</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "I can't afford it right now"</div><div class="script-text">"What does 'right now' mean to you — because addiction doesn't wait for the right financial moment. If cost wasn't a factor, would you want your loved one to get help today? Good. Then let's focus on making it work — we have payment plans, and our team works with families every single day to find a path forward."</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "That's more than I expected"</div><div class="script-text">"I hear you — and I want to be transparent. You could find cheaper options, but what you get here is a clinical team trained in EMDR, Somatic Experiencing, and Psychodrama — modalities most centers don't even offer. Small group sizes. Master's level therapists. A trauma-focused approach that actually treats the root cause. What's your loved one's life worth to you?"</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "Can you lower the price?"</div><div class="script-text">"What I can do is help you maximize every dollar. Let's look at your insurance first — you may be more covered than you think. Then we can explore payment options. Most families are surprised at how manageable it becomes once we break it down together."</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 Cost of Inaction</div><div class="script-text">"Here's another way to look at it — the average family spends $35,000 a year managing an active addiction. One ER visit can cost $10,000 alone. Our program pays for itself when you factor in what stops. And more importantly — you get your loved one back. Can we look at the numbers together?"</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "I need to figure out finances first"</div><div class="script-text">"I respect that completely — and that's exactly why I want to get you a verification of benefits right now. Many families are shocked by what their insurance actually covers. Let me do the homework for you so you're making this decision with real numbers, not assumptions. Can I get your insurance information?"</div></div>
         </div>
+
+        <!-- ═══════════════════ THINK ABOUT IT ═══════════════════ -->
         <div id="tab-think" class="script-content">
-          <div class="script-card"><div class="script-lbl">🚨 "I need to think about it"</div><div class="script-text">"I respect that — and I also want to be honest with you. The families that say they need to think about it usually call back 3 months later after something bad happened. What specifically do you need to think through? Let's work through it together right now."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "I need to talk to my spouse"</div><div class="script-text">"Absolutely — this is a family decision. Can we get them on the phone right now? I'd love to answer their questions directly. It only takes 10 minutes and it will make your conversation much easier."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "Let me do more research"</div><div class="script-text">"What are you hoping to find that would make you feel more confident? I'd rather answer those questions right now than have you spend hours on Google getting overwhelmed. What's the one thing that would make this a clear yes for you?"</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "Call me back next week"</div><div class="script-text">"I'll absolutely follow up — and I want to ask: what changes next week? Because the situation your loved one is in right now will likely be worse next week, not better. What would need to happen for you to feel ready today?"</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 The Cost of Waiting</div><div class="script-text">"I completely understand needing time — and I want to share something. In my experience, every week of delay increases the risk of a crisis event. Overdose, arrest, hospitalization. I don't say that to scare you — I say it because I want your loved one to have every possible chance."</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "I need to think about it"</div><div class="script-text">"I completely respect that — and I have to be honest with you, because I care. Families who say they need to think about it almost always call back two or three months later, after something much worse happened. What specifically do you need to think through? Let's work through it together right now, while I have you."</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "I need to talk to my spouse first"</div><div class="script-text">"Absolutely — this is a family decision and it should be made together. Can we get them on the phone right now? I'd love to answer their questions directly. It only takes 10 minutes and it'll make your conversation much easier tonight. Are they available?"</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "Let me do more research"</div><div class="script-text">"What are you hoping to find that would make you feel more confident? I'd rather answer those questions right now than have you spend hours on Google getting overwhelmed with places that aren't right for your loved one. What's the one thing that would make this a clear yes for you?"</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "Call me back next week"</div><div class="script-text">"I'll absolutely follow up — and I want to ask you honestly: what changes next week? Because the situation your loved one is in today will most likely be worse next week, not better. What would need to happen for you to feel ready to move forward today?"</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 The Real Cost of Waiting</div><div class="script-text">"I understand needing time — and I want to share something I've seen too many times. Every week of delay increases the risk of a crisis: an overdose, an arrest, a hospitalization. I don't say that to scare you. I say it because I want your loved one to have every possible chance. Pinnacle Peak is ready to help right now."</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "I'm just not sure this is the right place"</div><div class="script-text">"That's a fair thing to feel — and here's what I'd tell you. We have one of the strongest clinical programs in Arizona. Master's level therapists. Trauma-focused care. Small groups. Modalities like EMDR and Somatic Experiencing that most programs don't even have. What would make you feel confident this is the right fit? Let me answer that directly."</div></div>
         </div>
+
+        <!-- ═══════════════════ INSURANCE ═══════════════════ -->
         <div id="tab-ins" class="script-content">
-          <div class="script-card"><div class="script-lbl">🚨 "Will insurance cover this?"</div><div class="script-text">"Great question — and the answer depends on your plan. What I can do is have our insurance specialist do a free verification right now while we're on the phone. It takes about 10 minutes and you'll know exactly what you're working with. Can I put you on a brief hold?"</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "Insurance denied it"</div><div class="script-text">"That happens — and we fight it. We have a team that handles insurance appeals every single day and we win most of them. Don't let an insurance company make this decision for your family. Let's get your loved one enrolled and we'll handle the insurance battle on your behalf."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "I only have Medicaid/Medicare"</div><div class="script-text">"We work with Medicaid and Medicare regularly. Let me get our insurance team to do a quick verification — you might be more covered than you think. Can I get your insurance ID number so we can check right now?"</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "I don't have insurance"</div><div class="script-text">"You're not alone — a lot of families are in the same situation. We have self-pay rates, payment plans, and financing options. Some families also qualify for scholarships. Let me connect you with our financial team right now to find the best path forward."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 Insurance Appeal Script</div><div class="script-text">"Here's what most people don't know — insurance companies are legally required to cover substance abuse treatment under the Mental Health Parity Act. If they denied you, they may be in violation. Our team has overturned hundreds of denials. Let us fight this for you."</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 "Will insurance cover this?" — Standard</div><div class="script-text">"Great question — and the answer depends on your specific plan. What I can do is have our team run a free verification of benefits while we're on the phone. It takes about 10 minutes and you'll know exactly what you're working with before you make any decisions. Can I get your insurance information?"</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "Insurance denied it"</div><div class="script-text">"That happens — and we fight it. We have a team that handles insurance appeals every single day and we win most of them. Insurance companies are legally required to cover substance abuse treatment under the Mental Health Parity Act — if they denied you, they may be in violation. Don't let an insurance company make this life-or-death decision for your family. Let us handle that battle."</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "I only have Medicaid or Medicare"</div><div class="script-text">"We work with Medicaid and Medicare regularly. You might be more covered than you think — let me get our insurance team to do a quick verification right now. Can I get your insurance ID so we can check immediately?"</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "I don't have insurance"</div><div class="script-text">"You're not alone — a lot of families are in that exact situation. We have self-pay rates, payment plans, and financing options. Some families also qualify for assistance. Let me connect you with our financial team right now so we can find the best path forward together. There's always a way."</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "I'm not sure my insurance will cover it"</div><div class="script-text">"That's exactly why we do the verification before anything else — so there are no surprises. I'll gather your information right now and call you back in 30 to 45 minutes with the full picture. You won't have to guess. Let me take that off your plate."</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 VOB Callback Script</div><div class="script-text">"Okay, I've got what I need. I'm going to reach out to your insurance right now and I'll call you back at [number] in about 30 to 45 minutes with exactly what's covered. Once we have those numbers, the next step is a quick 15 to 20 minute pre-assessment over the phone — and then we'll schedule a time to get your loved one in."</div></div>
         </div>
+
+        <!-- ═══════════════════ NOT READY ═══════════════════ -->
         <div id="tab-ready" class="script-content">
-          <div class="script-card"><div class="script-lbl">🚨 "He's not ready"</div><div class="script-text">"Most people who come through our doors weren't ready either. Readiness comes after admission, not before. We specialize in meeting people exactly where they are. The question isn't whether he's ready — it's whether YOU are ready to give him the best chance at life."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "She needs to want it herself"</div><div class="script-text">"I hear that all the time — and here's what research tells us: waiting for someone to hit rock bottom costs lives. Intervention works. Structure works. Love works. You reaching out today IS her wanting help — she just doesn't know it yet. Let's get her in."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "We tried treatment before"</div><div class="script-text">"That tells me your loved one has shown they can engage with treatment. Most people need multiple attempts before recovery sticks — that's not failure, that's the nature of this disease. What was missing last time? Because we can build a plan specifically designed to address that."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "I don't want to force them"</div><div class="script-text">"You're not forcing them — you're giving them a choice they can't make clearly right now because of the disease. That's what families do. Our team specializes in working with people who come in resistant and turning that around within days."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "They'll just leave AMA"</div><div class="script-text">"That's a real concern — and here's what I've seen. Most people who come in resistant leave changed. Our clinical team is specifically trained in engagement and motivation. The first 72 hours are the hardest — after that, most people choose to stay. Let's get them through that door."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "What if it doesn't work?"</div><div class="script-text">"That's the right question to ask — and here's the honest answer: recovery is a journey, not a single event. What I can tell you is that doing nothing has a 100% failure rate. Getting help gives your loved one a fighting chance. And we'll be with your family every step of the way."</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "He's not ready"</div><div class="script-text">"Most people who come through our doors weren't ready either — and they got better anyway. Readiness comes after admission, not before. Our clinical team at Pinnacle Peak is specifically trained to meet people exactly where they are, even when they're resistant. The question isn't whether he's ready. It's whether you're ready to give him his best chance."</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "She needs to want it herself"</div><div class="script-text">"I hear that so often — and here's what the research actually tells us: waiting for someone to hit rock bottom costs lives. Intervention works. Structure works. Love works. The fact that you're on this call right now IS her wanting help — she just can't see it yet through the disease. Let's get her in."</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "We tried treatment before and it didn't work"</div><div class="script-text">"That tells me your loved one has already shown they can engage with treatment. Most people need multiple attempts before recovery truly sticks — that's not failure, that's the nature of this disease. What was missing last time? Because we build individualized plans specifically designed to address what didn't work before. What we do here goes deeper."</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "I don't want to force them"</div><div class="script-text">"You're not forcing them — you're giving them a choice they can't make clearly right now because of the disease. That's what families do. Our clinical team specializes in working with people who come in resistant and turning that around within the first few days. They've seen it hundreds of times."</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "They'll just leave AMA"</div><div class="script-text">"That's a legitimate concern — and here's what I've seen happen at Pinnacle Peak. Most people who come in resistant leave changed. Our therapists are trained in engagement and motivation — getting people to want to stay is part of what we do. The first 72 hours are the hardest. After that, most people choose to stay. Let's get them through that door."</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "What if it doesn't work?"</div><div class="script-text">"That's exactly the right question — and here's the honest answer. Recovery is a journey, not a single event. What I can tell you is that doing nothing has a 100% failure rate. Getting help at a program that treats trauma and root causes — with master's level therapists and real clinical depth — gives your loved one a real fighting chance. And we'll be with your family every step of the way."</div></div>
+          <div class="script-card"><div class="script-lbl">🚨 "I don't think they'll go willingly"</div><div class="script-text">"That's more common than you'd think — and it's something we help families navigate every day. Our team can walk you through how to have that conversation, and what the first 24 hours here look like to help ease that fear. What matters most right now is having a plan ready when the moment comes. Let's build that together."</div></div>
         </div>
+
+        <!-- ═══════════════════ CLOSING ═══════════════════ -->
         <div id="tab-close" class="script-content">
-          <div class="script-card"><div class="script-lbl">🎯 Assumptive Close</div><div class="script-text">"Based on everything you've told me, it sounds like our program is exactly what your family needs right now. Let's go ahead and get the admissions process started — I can have someone call you within the hour to handle the paperwork. Does that work?"</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Urgency Close</div><div class="script-text">"I want to be transparent — we have limited beds available and this time of year fills up fast. I'd hate for you to call back next week and not have a spot for your loved one. Can we reserve a spot today while you finalize the details?"</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Emotional Close</div><div class="script-text">"You called today because part of you knows this is the moment. You've been carrying this long enough. Let us carry it with you. What would it mean to your family to have your loved one back — really back — by the holidays?"</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Final Objection Crusher</div><div class="script-text">"Let me ask you one final question — if your loved one doesn't get help today, what happens next week? Next month? You already know the answer. The only question is whether today is the day you change that story. I believe it is. Let's do this together."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Buying Signal Response</div><div class="script-text">"It sounds like you're ready to take this next step — and I think that's the right call. Let me get our admissions coordinator on the line right now. They'll walk you through everything in about 15 minutes and we can have a bed ready as early as tomorrow."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 The Permission Close</div><div class="script-text">"Can I ask you something? If I could show you a way to get your loved one help this week — with a payment plan that works for your budget and a bed available now — would you be willing to move forward today? Because I think I can make that happen."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 The Vision Close</div><div class="script-text">"Close your eyes for a second. Picture your loved one six months from now — sober, present, reconnected with your family. That's what we do every single day. That future is possible. It starts with one phone call — and you've already made it. Let's take the next step together."</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 Assumptive Close</div><div class="script-text">"Based on everything you've shared with me, it sounds like Pinnacle Peak is exactly what your loved one needs right now. Let's start the admissions process — the next step is a quick 15 to 20 minute pre-assessment over the phone. I can have someone reach out to you within the hour. Does that work?"</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 Urgency Close — Limited Beds</div><div class="script-text">"I want to be transparent with you — our bed availability changes daily and we fill up fast, especially this time of year. I'd hate for you to call back next week and not have a spot available for your loved one. Can we reserve a place today while you finalize the details?"</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 Emotional Close</div><div class="script-text">"You called today because part of you knows this is the moment. You've been carrying this long enough — and so has your loved one. Let us carry it with you. What would it mean to your family to have them back — really back — showing up, present, themselves again?"</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 The Permission Close</div><div class="script-text">"Can I ask you something? If I could show you a way to get your loved one into one of the strongest clinical programs in Arizona this week — with insurance handled and a bed available — would you be willing to move forward today? Because I think I can make that happen."</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 Buying Signal Response</div><div class="script-text">"It sounds like you're ready to take this step — and I think that's the right call. Let me get our admissions team on the line right now. They'll walk you through everything in about 15 minutes, and we can have a bed ready as early as tomorrow."</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 Final Objection Crusher</div><div class="script-text">"Let me ask you one last question. If your loved one doesn't get help today — what happens next week? Next month? You already know the answer. The only question is whether today is the day you change that story. I believe it is. Pinnacle Peak is ready. Let's do this together."</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 The Vision Close</div><div class="script-text">"Picture your loved one six months from now — sober, present, reconnected with your family, back to who they really are. That's what we create every single day at Pinnacle Peak Recovery. That future is possible. It starts with one decision — and you've already taken the hardest step by making this call. Let's take the next one together."</div></div>
+          <div class="script-card"><div class="script-lbl">🎯 Pre-Assessment Close</div><div class="script-text">"Here's where we are — the next step is just a 15 to 20 minute pre-assessment call so we can get a full picture of what's going on and put together a plan specific to your loved one. Once that's done, we'll schedule the admission. I can set that up right now. Are you available today or would tomorrow morning work better?"</div></div>
         </div>
+
+        <!-- ═══════════════════ PPR-SPECIFIC ═══════════════════ -->
+        <div id="tab-ppr" class="script-content">
+          <div class="script-card"><div class="script-lbl">🏥 "What makes you different from other programs?"</div><div class="script-text">"We go deeper than other programs — and the reason we can is our clinical team. Our master's level therapists are trained in modalities most treatment centers don't even offer: Somatic Experiencing, Psychodrama — which takes 10 years of training to certify in — EMDR, ART, CPT, and DBT. We pair that with small group sizes and holistic programming so every person gets truly individualized care. We're not treating the surface. We're treating the root cause."</div></div>
+          <div class="script-card"><div class="script-lbl">🏥 "How long will they be in treatment?"</div><div class="script-text">"The length of stay is genuinely different for everyone — it depends on medical progress, clinical progress, and what insurance authorizes. When your loved one arrives, they'll be fully assessed and an individualized treatment plan will be created specifically for them. We don't put anyone on a cookie-cutter timeline."</div></div>
+          <div class="script-card"><div class="script-lbl">🏥 "How long does detox take?"</div><div class="script-text">"Detox looks different for everyone. Our provider will see your loved one within 12 hours of arrival and create an individualized detox plan. The length depends on the substance, how much and how long they've been using, and how they're presenting. We offer medically assisted detox with comfort medications to make it as safe and manageable as possible."</div></div>
+          <div class="script-card"><div class="script-lbl">🏥 "Do you offer non-narcotic detox?"</div><div class="script-text">"We do offer non-narcotic detox for certain substances. For opiate users, we use non-narcotic alternatives alongside vitamins and supplements to support the process. For alcohol and benzodiazepines, we're not able to offer that approach because the severity of withdrawals requires medical management — but our team will make sure it's handled safely and comfortably."</div></div>
+          <div class="script-card"><div class="script-lbl">🏥 "Can they keep their phone?"</div><div class="script-text">"We have an extremely flexible phone policy. During detox, there's no personal phone — but your loved one will have a full team of case managers who can make calls and handle outside stressors on their behalf. Once they move to residential, they have house phone access. After 7 to 10 days with clinical approval, they can use all electronics after clinical hours. It's designed to keep them focused while staying connected."</div></div>
+          <div class="script-card"><div class="script-lbl">🏥 "What about their job — can they get fired?"</div><div class="script-text">"That's something we help navigate every single day. Your loved one will have a full team of case managers to handle outside stressors and manage their leave of absence. FMLA provides up to 12 weeks of job-protected unpaid leave for treatment. If they don't qualify for FMLA, the ADA still provides protections — substance use disorders can be classified as a disability. They won't have to face any of that alone."</div></div>
+          <div class="script-card"><div class="script-lbl">🏥 "Can they continue their medications?"</div><div class="script-text">"Our provider does a full assessment on arrival. For medications like Adderall or benzos, we'll find a non-narcotic alternative — our doctors are highly experienced with this and most patients do very well with the transition. For testosterone, we'll run a full blood panel and the provider will evaluate for continuation. Just don't bring any existing prescriptions."</div></div>
+          <div class="script-card"><div class="script-lbl">🏥 "Will they have a roommate?"</div><div class="script-text">"Rooms are typically shared — they're spacious with large beds and plenty of room to feel comfortable. Having a roommate is actually a meaningful part of the recovery process — connecting with someone who understands what you're going through can be incredibly powerful. That said, if privacy is a priority, we do have private rooms available at an additional cost."</div></div>
+          <div class="script-card"><div class="script-lbl">🏥 "What's the food like?"</div><div class="script-text">"All meals are prepared and catered by our private chef using quality ingredients — it's honestly one of the highlights of our program. We can accommodate most dietary needs: allergies, intolerances, vegan, gluten-free, and more. Just let us know before admission so we can have everything set up when your loved one arrives."</div></div>
+          <div class="script-card"><div class="script-lbl">🏥 "How involved can our family be?"</div><div class="script-text">"Family involvement can be a powerful part of recovery — and we take it seriously. We offer dedicated family therapy sessions, regular update calls from your loved one's therapist or case manager, and family workshops for residential clients. Everything is based on your loved one's consent, so it's collaborative — never forced. How involved would you like to be?"</div></div>
+          <div class="script-card"><div class="script-lbl">🏥 Trauma / Root Cause Close</div><div class="script-text">"Here's what makes Pinnacle Peak different at the core: we don't just treat the addiction — we treat the underlying trauma and conditions driving it. When you address the root cause, the substance use becomes much easier to treat and recovery actually sticks. That's the reason our clinical outcomes are stronger. That's why families choose us."</div></div>
+        </div>
+
       </div>
     </div>
   </div>
 </div>
+
+<!-- Hidden PDF report — revealed only during print -->
+<div id="pdf-report"></div>
+
 <script>
 const DG="__DG__",CL="__CL__",LANG="__LANG__",CI=__CI__;
-function getPROD(){return document.getElementById("prod").value||"substance abuse and mental health treatment program";}
-function getPERS(){return document.getElementById("pers").value||"a family member of someone struggling with addiction";}
+function getPROD(){return document.getElementById("prod").value||"caller asking about substance abuse treatment";}
+function getPERS(){return document.getElementById("pers").value||"a family member or individual seeking addiction treatment help";}
 let sock,actx,proc,src,ms2,rec=false,t0=null,tmr=null;
 let W=0,O=0,H=0,I=0,WC=0,lines=[],pend="",lc=0,objections=[];
 const $=x=>document.getElementById(x);
@@ -251,9 +401,65 @@ async function coach(chunk,full){
     const prod=getPROD();
     const pers=getPERS();
     const openObjs=objections.filter(o=>!o.won).map(o=>o.text).join("; ");
-    const sys=`You are APEX, an elite real-time admissions coach for substance abuse and mental health treatment centers.
+    const sys=`You are APEX, an elite real-time admissions coach for PINNACLE PEAK RECOVERY (PPR) — a premier substance abuse and mental health treatment center in McCormick Ranch, Scottsdale, Arizona.
 
-PROGRAM: ${prod}
+=== PINNACLE PEAK RECOVERY — PROGRAM KNOWLEDGE BASE ===
+
+CLINICAL IDENTITY:
+- One of the strongest clinical programs in Arizona
+- Trauma-focused / root-cause model: treat underlying conditions → addiction becomes easier to treat
+- Master's level therapists (not just counselors)
+- Small group sizes — highly individualized care
+- Modalities: EMDR, Somatic Experiencing, Psychodrama (requires 10 yrs training to certify), ART (Accelerated Resolution Therapy), CPT (Cognitive Processing Therapy), DBT (Dialectical Behavioral Therapy)
+- Holistic and psychoeducational group programming
+
+LEVELS OF CARE (full continuum):
+- Medical Detox → Residential Inpatient → PHP → IOP
+
+LOCATION: McCormick Ranch, Scottsdale AZ — world-class facility
+
+DETOX:
+- Provider sees patient within 12 hours of arrival
+- Individualized detox plan — length varies by substance, amount, duration of use, presentation
+- Medically assisted with comfort medications (safe + comfortable)
+- Non-narcotic detox: available for opiates (non-narcotic alternatives + vitamins/supplements)
+- NOT available for alcohol or benzos — too dangerous, medical management required
+
+PHONE POLICY:
+- Detox: No personal phone (case managers handle calls, outside stressors)
+- Residential: House phone access
+- After 7-10 days + clinical approval: full electronics access after clinical hours
+
+ROOMS: Spacious shared rooms (large beds). Private rooms available at added cost. Having a roommate is clinically beneficial.
+
+FOOD: Private chef, high-quality ingredients. Accommodates dietary restrictions (allergies, vegan, gluten-free, etc.) — must notify admissions before arrival.
+
+MEDICATIONS:
+- Adderall/benzos/controlled substances: provider will prescribe non-narcotic alternatives
+- Testosterone: full blood panel on arrival, provider evaluates for continuation — don't bring existing Rx
+- All meds: provider does full assessment on arrival
+
+FAMILY INVOLVEMENT:
+- Family therapy sessions, update calls from therapist/case manager
+- Family groups and workshops for residential clients
+- All involvement requires client consent + ROI (release of information) — NOT mandatory
+
+WORK / FMLA:
+- Case managers handle LOA, outside stressors, communication with employer
+- FMLA: up to 12 weeks job-protected unpaid leave (eligible employees)
+- ADA: substance use = disability protection if FMLA doesn't apply
+
+ADMISSIONS PROCESS:
+1. Gather insurance info → VOB (call back in 30-45 min with coverage details)
+2. 15-20 min pre-assessment phone call
+3. Schedule admission date
+
+TREATMENT LENGTH:
+- Individualized — based on medical progress, clinical progress, insurance authorization
+- No one-size-fits-all timeline
+
+=== CALL CONTEXT ===
+SITUATION: ${prod}
 PROSPECT: ${pers}
 OPEN UNRESOLVED OBJECTIONS: ${openObjs||"none"}
 
@@ -263,31 +469,34 @@ ${full.slice(-3000)}
 LATEST WORDS SPOKEN:
 ${chunk}
 
-CRITICAL INSTRUCTION: You must classify ANY resistance, negative statement, concern, demand, threat, or pushback from the prospect as type "objection". This includes:
-- Price or cost concerns ("too expensive", "can't afford")
+=== COACHING INSTRUCTIONS ===
+
+CRITICAL: Classify ANY resistance, concern, pushback, or negative statement as type "objection". This includes:
+- Price/cost concerns ("too expensive", "can't afford")
 - Timing resistance ("need to think", "call back later", "not ready")
-- Treatment resistance ("not coming", "won't go", "doesn't want help")  
-- Specific demands ("I won't come if you don't have X")
+- Treatment resistance ("won't go", "doesn't want help")
+- Specific demands or concerns about PPR policies (phone, roommates, food, meds, length of stay)
 - Threats to hang up or end the call
-- Doubt about effectiveness ("does it work", "tried before")
-- Insurance concerns
-- Needing spouse or family approval
+- Doubt about effectiveness ("tried before", "does it work")
+- Insurance concerns or denials
+- Needing spouse/family approval
 - Wanting to research other options
-- ANY negative or skeptical statement
+- ANY negative, skeptical, or hesitant statement
 
-For objections: provide exact word-for-word rebuttal script and set objection_text to a SHORT summary (under 8 words) of what the prospect said.
+For objections: provide a word-for-word rebuttal script that USES PPR-SPECIFIC information where relevant (reference our clinical modalities, our detox approach, our family program, our FMLA support, etc.). Set objection_text to a SHORT summary under 8 words.
 
-If no objection: check if an open objection was resolved (prospect sounds agreeable or moves forward) - set objection_resolved.
+If no objection: check if an open objection was resolved (prospect sounds agreeable/moves forward) — set objection_resolved.
 
-If no objection and none resolved: give a proactive SAY THIS coaching tip to advance toward admission (type "coach").
+If no objection and none resolved: give a proactive SAY THIS coaching tip to advance toward admission, using PPR-specific language and differentiators where applicable (type "coach").
 
 If coordinator said something excellent: type "positive".
 
 RULES:
 - ALWAYS return a response
-- Exact scripts only, under 40 words
-- Compassionate but urgent tone
-- Always move toward admission
+- Exact scripts only, under 50 words
+- Compassionate, confident, expert tone
+- Always move toward admission and the next step (VOB → pre-assessment → bed date)
+- Use PPR program knowledge — never generic answers when a PPR-specific answer is better
 
 Reply ONLY in this exact JSON format:
 {"type":"objection","content":"exact script","objection_text":"short summary","objection_resolved":"","urgency":"high"}`;
@@ -295,7 +504,7 @@ Reply ONLY in this exact JSON format:
     const r=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
       headers:{"x-api-key":CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:300,system:sys,messages:[{role:"user",content:"Analyze the latest words and respond now."}]})
+      body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:350,system:sys,messages:[{role:"user",content:"Analyze the latest words and respond now."}]})
     });
     const data=await r.json();
     const raw=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"");
@@ -384,7 +593,113 @@ function clr(){
   $("tb").innerHTML="<div class='te'>Transcript will appear here when you start listening...</div>";
   $("cb").innerHTML="<div class='ce'>🎤<br><br>Real-time coaching will appear here.<br><br><span style='color:#00E5FF'>Start listening to begin.</span></div>";
   $("obj-log").innerHTML="<div class='te' style='font-size:12px;padding:8px 0'>No objections detected yet. Every objection will be logged here with a rebuttal and tracked as Won or Open.</div>";
-  cerr();upd();ss("👆 Fill in your program details above then click Start Listening.");
+  cerr();upd();ss("👆 Fill in the caller situation above then click Start Listening.");
+}
+
+function exportPDF(){
+  const now=new Date();
+  const dateStr=now.toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  const timeStr=now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
+  const duration=$("md").textContent;
+  const situation=document.getElementById("prod").value||"—";
+  const persona=document.getElementById("pers").value||"—";
+  const winRate=O>0?Math.round((H/O)*100)+"%":"N/A";
+
+  // Build objection cards
+  const objCards=$("obj-log").querySelectorAll(".obj-card");
+  let objHTML="";
+  if(objCards.length===0){
+    objHTML="<p style='color:#888;font-size:9pt;font-style:italic'>No objections were detected during this call.</p>";
+  } else {
+    objCards.forEach(card=>{
+      const won=card.classList.contains("won");
+      const q=card.querySelector(".obj-q")?.textContent||"";
+      const rebuttal=card.querySelector(".obj-a")?.textContent||"";
+      const ts=card.querySelector(".obj-ts")?.textContent||"";
+      objHTML+=`<div class="pr-obj-card${won?" won":""}">
+        <div class="pr-obj-row">
+          <div class="pr-obj-q${won?" won":""}">${q}</div>
+          <span class="pr-badge ${won?"handled":"open"}">${won?"✅ HANDLED":"⏳ OPEN"}</span>
+        </div>
+        <div class="pr-rebuttal-lbl">Suggested Response:</div>
+        <div class="pr-rebuttal">${rebuttal}</div>
+        <div class="pr-ts">${ts}</div>
+      </div>`;
+    });
+  }
+
+  // Build coaching insights
+  const coachCards=$("cb").querySelectorAll(".cc");
+  let coachHTML="";
+  if(coachCards.length===0){
+    coachHTML="<p style='color:#888;font-size:9pt;font-style:italic'>No coaching insights were generated during this call.</p>";
+  } else {
+    // Show last 10 coaching items (they're inserted newest-first so reverse)
+    const items=[...coachCards].reverse().slice(-10);
+    items.forEach(card=>{
+      const isObj=card.classList.contains("objection");
+      const isPos=card.classList.contains("positive");
+      const lblEl=card.querySelector(".ct");
+      const lbl=lblEl?lblEl.textContent:"COACHING";
+      const tsEl=card.querySelector(".cts");
+      const t=tsEl?tsEl.textContent:"";
+      const body=card.querySelector("div[style]")?.textContent||card.textContent.replace(lbl,"").replace(t,"").trim();
+      const lblClass=isObj?"pr-lbl-obj":isPos?"pr-lbl-pos":"pr-lbl-coach";
+      coachHTML+=`<div class="pr-coaching-card">
+        <span class="pr-coaching-lbl ${lblClass}">${lbl}</span>
+        <span style="font-size:7.5pt;color:#888;float:right">${t}</span>
+        <div style="clear:both"></div>
+        <div class="pr-coaching-body">${body}</div>
+      </div>`;
+    });
+  }
+
+  // Build transcript
+  const transcriptLines=$("tb").querySelectorAll(".tl");
+  let transcriptHTML="";
+  if(transcriptLines.length===0){
+    transcriptHTML="<div class='pr-transcript' style='color:#888;font-style:italic'>No transcript was recorded.</div>";
+  } else {
+    const text=[...transcriptLines].map(l=>l.textContent).join("\n");
+    transcriptHTML=`<div class="pr-transcript">${text}</div>`;
+  }
+
+  // Assemble full report
+  $("pdf-report").innerHTML=`
+    <div class="pr-logo">
+      <div class="pr-logo-icon">🎯</div>
+      <div>
+        <div class="pr-title">Pinnacle Peak Recovery</div>
+        <div class="pr-sub">APEX Call Coach — Post-Call Report</div>
+      </div>
+    </div>
+    <hr class="pr-divider">
+    <div class="pr-meta">
+      <div class="pr-meta-item"><span class="pr-meta-label">Date:</span><span class="pr-meta-val">${dateStr}</span></div>
+      <div class="pr-meta-item"><span class="pr-meta-label">Time:</span><span class="pr-meta-val">${timeStr}</span></div>
+      <div class="pr-meta-item"><span class="pr-meta-label">Caller Situation:</span><span class="pr-meta-val">${situation}</span></div>
+      <div class="pr-meta-item"><span class="pr-meta-label">Prospect Persona:</span><span class="pr-meta-val">${persona}</span></div>
+    </div>
+    <div class="pr-stats">
+      <div class="pr-stat"><div class="pr-stat-val">${duration}</div><div class="pr-stat-lbl">Duration</div></div>
+      <div class="pr-stat"><div class="pr-stat-val">${W}</div><div class="pr-stat-lbl">Words</div></div>
+      <div class="pr-stat"><div class="pr-stat-val">${O}</div><div class="pr-stat-lbl">Objections</div></div>
+      <div class="pr-stat"><div class="pr-stat-val">${H}</div><div class="pr-stat-lbl">Handled</div></div>
+      <div class="pr-stat"><div class="pr-stat-val">${winRate}</div><div class="pr-stat-lbl">Win Rate</div></div>
+    </div>
+    <div class="pr-section-title">🚨 Objections &amp; Rebuttals</div>
+    ${objHTML}
+    <div class="pr-section-title">💡 AI Coaching Insights</div>
+    ${coachHTML}
+    <div class="pr-section-title">🎙️ Full Transcript</div>
+    ${transcriptHTML}
+    <div class="pr-footer">
+      <span>Pinnacle Peak Recovery — McCormick Ranch, Scottsdale AZ</span>
+      <span>Generated by APEX Call Coach • ${dateStr} ${timeStr}</span>
+    </div>
+  `;
+
+  window.print();
 }
 </script>
 </body>
