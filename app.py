@@ -14,6 +14,15 @@ st.markdown("""
         padding-left: 0rem;
         padding-right: 0rem;
     }
+    header[data-testid="stHeader"] {
+        display: none;
+    }
+    #root > div:first-child {
+        margin-top: 0;
+    }
+    .stApp {
+        margin-top: 0;
+    }
     iframe {
         display: block;
         width: 100% !important;
