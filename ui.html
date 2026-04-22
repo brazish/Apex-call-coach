@@ -327,7 +327,11 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
 <div id="pdf-report"></div>
 
 <script>
-const DG="__DG__",CL="__CL__",LANG="__LANG__",CI=__CI__;
+const DG="__DG__",CL="__CL__",LANG="__LANG__";
+const CI=(()=>{try{return __CI__;}catch(e){return 20;}})();
+// Safety check — if keys weren't injected by app.py they'll still be placeholders
+const _DG=DG.startsWith("__")||DG===""?"":DG;
+const _CL=CL.startsWith("__")||CL===""?"":CL;
 function getPROD(){return document.getElementById("prod").value||"caller asking about substance abuse treatment";}
 function getPERS(){return document.getElementById("pers").value||"a family member or individual seeking addiction treatment help";}
 let sock,actx,proc,src,ms2,rec=false,t0=null,tmr=null;
@@ -396,7 +400,8 @@ function markObjWon(id){
   }
 }
 async function coach(chunk,full){
-  if(!CL)return;
+  if(!_CL){showerr("Anthropic API key missing — check sidebar or .env file.");return;}
+  ss("🧠 Analyzing...");
   try{
     const prod=getPROD();
     const pers=getPERS();
@@ -503,12 +508,26 @@ Reply ONLY in this exact JSON format:
 
     const r=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
-      headers:{"x-api-key":CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:350,system:sys,messages:[{role:"user",content:"Analyze the latest words and respond now."}]})
+      headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:400,system:sys,messages:[{role:"user",content:"Analyze the latest words and respond now."}]})
     });
+    if(!r.ok){
+      const errText=await r.text();
+      showerr("Claude API error "+r.status+": "+errText.slice(0,120));
+      ss("⚠️ Coaching error — see red bar above.");
+      return;
+    }
     const data=await r.json();
     const raw=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"");
-    const res=JSON.parse(raw);
+    if(!raw){showerr("Claude returned empty response.");return;}
+    let res;
+    try{res=JSON.parse(raw);}
+    catch(pe){
+      // Try to extract JSON from the response if there's extra text
+      const match=raw.match(/\{[\s\S]*\}/);
+      if(match){try{res=JSON.parse(match[0]);}catch(e2){showerr("JSON parse failed: "+raw.slice(0,100));return;}}
+      else{showerr("Unexpected response format: "+raw.slice(0,100));return;}
+    }
 
     if(res.objection_resolved&&res.objection_resolved.length>2){
       const match=objections.find(o=>!o.won&&o.text.toLowerCase().includes(res.objection_resolved.toLowerCase().slice(0,10)));
@@ -526,8 +545,15 @@ Reply ONLY in this exact JSON format:
       }
       upd();
     }
-  }catch(e){console.error("Coach error:",e);}
+    ss("✅ LIVE — Listening...");
+  }catch(e){
+    showerr("Coach error: "+e.message);
+    ss("⚠️ Coaching error — see red bar above.");
+    console.error("Coach error:",e);
+  }
 }
+
+const OBJECTION_KEYWORDS=/\b(can'?t afford|too expensive|too much|not ready|need to think|think about it|call me back|talk to (my |the )?spouse|talk to (my |the )?husband|talk to (my |the )?wife|need to talk|do more research|tried (treatment|before|it before)|doesn'?t want|won'?t go|leave AMA|not sure|doing nothing|just leave|what if it|doesn'?t work|no insurance|don'?t have insurance|only have medicaid|insurance (denied|won'?t cover|doesn'?t cover)|too far|too long|how long|how much|what does it cost|what'?s the cost|what'?s the price|price|cost|expensive|money|afford|payment|covered|coverage|not covered|not going|force him|force her|force them|want to do it|ready to go|not ready to go|tried before|done this before|didn'?t work|never works|pointless|waste of time|what makes you different|why (you|your program|pinnacle)|other programs|somewhere else|closer to home|local|near|distance|drive|far away|phone|cell phone|keep (his|her|their) phone|medication|meds|adderall|suboxone|methadone|job|work|fired|fmla|leave of absence|roommate|private room|food|diet|vegan|gluten|family|visit|see them|when can|how soon|tonight|today|tomorrow|this week)\b/i;
 
 function final(tx){
   const t=ts();
@@ -537,7 +563,11 @@ function final(tx){
   W+=w;WC+=w;pend+=" "+tx;
   upd();
   const now=Date.now();
-  if(WC>=CI&&(now-lc)>8000){
+  const hasObjKeyword=OBJECTION_KEYWORDS.test(tx);
+  // Fire immediately on objection keywords (min 2s gap), or every 8 words (min 4s gap)
+  const threshold=hasObjKeyword?0:8;
+  const cooldown=hasObjKeyword?2000:4000;
+  if(WC>=threshold&&(now-lc)>cooldown){
     coach(pend.trim(),lines.join(" "));
     lc=now;WC=0;pend="";
   }
@@ -545,13 +575,13 @@ function final(tx){
 
 async function go(){
   cerr();
-  if(!DG){showerr("Add your Deepgram API key in the sidebar.");return;}
-  if(!CL){showerr("Add your Anthropic API key in the sidebar.");return;}
+  if(!_DG){showerr("Deepgram API key missing — add it in the sidebar or your .env file.");return;}
+  if(!_CL){showerr("Anthropic API key missing — add it in the sidebar or your .env file.");return;}
   try{
     ms2=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
     ss("🎙️ Connecting to Deepgram...");
     const p=new URLSearchParams({language:LANG,model:"nova-2",smart_format:"true",interim_results:"true",punctuate:"true",endpointing:"300",encoding:"linear16",sample_rate:"16000"});
-    sock=new WebSocket("wss://api.deepgram.com/v1/listen?"+p,["token",DG]);
+    sock=new WebSocket("wss://api.deepgram.com/v1/listen?"+p,["token",_DG]);
     sock.binaryType="arraybuffer";
     sock.onopen=()=>{
       ss("✅ LIVE — Listening...");setLive(true);rec=true;stmr();
