@@ -26,48 +26,7 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
 
 /* ── PRINT / PDF STYLES ── */
 #pdf-report{display:none}
-@media print{
-  body *{visibility:hidden!important}
-  #pdf-report,#pdf-report *{visibility:visible!important}
-  #pdf-report{
-    display:block!important;position:fixed;top:0;left:0;width:100%;
-    background:#fff;color:#111;font-family:Arial,sans-serif;font-size:11pt;
-    padding:32px 40px;
-  }
-  .pr-logo{display:flex;align-items:center;gap:12px;margin-bottom:6px}
-  .pr-logo-icon{width:38px;height:38px;background:linear-gradient(135deg,#00B8CC,#0055CC);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;flex-shrink:0}
-  .pr-title{font-size:18pt;font-weight:800;color:#0a1628}
-  .pr-sub{font-size:8pt;color:#0080CC;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
-  .pr-divider{border:none;border-top:2px solid #0055CC;margin:10px 0 18px}
-  .pr-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin-bottom:18px;font-size:9pt}
-  .pr-meta-item{display:flex;gap:6px}
-  .pr-meta-label{font-weight:700;color:#444;white-space:nowrap}
-  .pr-meta-val{color:#111}
-  .pr-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px}
-  .pr-stat{background:#f4f8ff;border:1px solid #d0ddf0;border-radius:6px;padding:8px;text-align:center}
-  .pr-stat-val{font-size:16pt;font-weight:800;color:#0055CC}
-  .pr-stat-lbl{font-size:7pt;color:#666;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
-  .pr-section-title{font-size:11pt;font-weight:800;color:#0a1628;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #dde6f4;text-transform:uppercase;letter-spacing:1px}
-  .pr-obj-card{border:1px solid #dde6f4;border-left:4px solid #CC2244;border-radius:6px;padding:10px 12px;margin-bottom:8px;page-break-inside:avoid}
-  .pr-obj-card.won{border-left-color:#00995C}
-  .pr-obj-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px}
-  .pr-obj-q{font-weight:700;color:#CC2244;font-size:10pt;flex:1}
-  .pr-obj-q.won{color:#00995C}
-  .pr-badge{font-size:7pt;font-weight:700;letter-spacing:1px;padding:2px 8px;border-radius:100px;border:1px solid;white-space:nowrap;margin-left:8px}
-  .pr-badge.open{background:#fff9e0;color:#996600;border-color:#ccaa00}
-  .pr-badge.handled{background:#e0fff2;color:#00773D;border-color:#00BB5C}
-  .pr-rebuttal-lbl{font-size:7pt;color:#0055CC;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
-  .pr-rebuttal{font-size:9.5pt;color:#222;line-height:1.6;background:#f8faff;border-left:2px solid #0055CC;padding:6px 10px;border-radius:0 4px 4px 0}
-  .pr-ts{font-size:7.5pt;color:#888;margin-top:4px}
-  .pr-transcript{background:#f8f9fb;border:1px solid #dde6f4;border-radius:6px;padding:10px 14px;font-size:9pt;line-height:1.8;white-space:pre-wrap;max-height:none}
-  .pr-coaching-card{border:1px solid #dde6f4;border-radius:6px;padding:8px 12px;margin-bottom:6px;page-break-inside:avoid}
-  .pr-coaching-lbl{font-size:7pt;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:3px;display:inline-block;margin-bottom:4px}
-  .pr-lbl-obj{background:#fde8ec;color:#CC2244}
-  .pr-lbl-coach{background:#e6f4ff;color:#0055CC}
-  .pr-lbl-pos{background:#e0fff2;color:#00773D}
-  .pr-coaching-body{font-size:9.5pt;color:#222;line-height:1.6}
-  .pr-footer{margin-top:24px;padding-top:10px;border-top:1px solid #dde6f4;font-size:7.5pt;color:#888;display:flex;justify-content:space-between}
-}
+
 .ctx{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 .ctx-lbl{font-size:11px;color:#4A6070;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
 .ctx-input{width:100%;background:#090D11;border:1px solid #1E2D3D;border-radius:6px;padding:8px;color:#C8D8E4;font-family:monospace;font-size:12px}
@@ -646,14 +605,14 @@ function exportPDF(){
       const q=card.querySelector(".obj-q")?.textContent||"";
       const rebuttal=card.querySelector(".obj-a")?.textContent||"";
       const ts=card.querySelector(".obj-ts")?.textContent||"";
-      objHTML+=`<div class="pr-obj-card${won?" won":""}">
-        <div class="pr-obj-row">
-          <div class="pr-obj-q${won?" won":""}">${q}</div>
-          <span class="pr-badge ${won?"handled":"open"}">${won?"✅ HANDLED":"⏳ OPEN"}</span>
+      objHTML+=`<div style="border:1px solid #dde6f4;border-left:4px solid ${won?"#00995C":"#CC2244"};border-radius:6px;padding:10px 12px;margin-bottom:8px;page-break-inside:avoid">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">
+          <div style="font-weight:700;color:${won?"#00995C":"#CC2244"};font-size:10pt;flex:1">${q}</div>
+          <span style="font-size:7pt;font-weight:700;letter-spacing:1px;padding:2px 8px;border-radius:100px;border:1px solid;white-space:nowrap;margin-left:8px;${won?"background:#e0fff2;color:#00773D;border-color:#00BB5C":"background:#fff9e0;color:#996600;border-color:#ccaa00"}">${won?"✅ HANDLED":"⏳ OPEN"}</span>
         </div>
-        <div class="pr-rebuttal-lbl">Suggested Response:</div>
-        <div class="pr-rebuttal">${rebuttal}</div>
-        <div class="pr-ts">${ts}</div>
+        <div style="font-size:7pt;color:#0055CC;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Suggested Response:</div>
+        <div style="font-size:9.5pt;color:#222;line-height:1.6;background:#f8faff;border-left:2px solid #0055CC;padding:6px 10px;border-radius:0 4px 4px 0">${rebuttal}</div>
+        <div style="font-size:7.5pt;color:#888;margin-top:4px">${ts}</div>
       </div>`;
     });
   }
@@ -664,7 +623,6 @@ function exportPDF(){
   if(coachCards.length===0){
     coachHTML="<p style='color:#888;font-size:9pt;font-style:italic'>No coaching insights were generated during this call.</p>";
   } else {
-    // Show last 10 coaching items (they're inserted newest-first so reverse)
     const items=[...coachCards].reverse().slice(-10);
     items.forEach(card=>{
       const isObj=card.classList.contains("objection");
@@ -673,63 +631,77 @@ function exportPDF(){
       const lbl=lblEl?lblEl.textContent:"COACHING";
       const tsEl=card.querySelector(".cts");
       const t=tsEl?tsEl.textContent:"";
-      const body=card.querySelector("div[style]")?.textContent||card.textContent.replace(lbl,"").replace(t,"").trim();
-      const lblClass=isObj?"pr-lbl-obj":isPos?"pr-lbl-pos":"pr-lbl-coach";
-      coachHTML+=`<div class="pr-coaching-card">
-        <span class="pr-coaching-lbl ${lblClass}">${lbl}</span>
+      const bodyEl=card.querySelector("div[style]");
+      const body=bodyEl?bodyEl.textContent:card.textContent.replace(lbl,"").replace(t,"").trim();
+      const lblStyle=isObj?"background:#fde8ec;color:#CC2244":isPos?"background:#e0fff2;color:#00773D":"background:#e6f4ff;color:#0055CC";
+      coachHTML+=`<div style="border:1px solid #dde6f4;border-radius:6px;padding:8px 12px;margin-bottom:6px;page-break-inside:avoid">
+        <span style="font-size:7pt;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:3px;display:inline-block;margin-bottom:4px;${lblStyle}">${lbl}</span>
         <span style="font-size:7.5pt;color:#888;float:right">${t}</span>
         <div style="clear:both"></div>
-        <div class="pr-coaching-body">${body}</div>
+        <div style="font-size:9.5pt;color:#222;line-height:1.6">${body}</div>
       </div>`;
     });
   }
 
   // Build transcript
   const transcriptLines=$("tb").querySelectorAll(".tl");
-  let transcriptHTML="";
-  if(transcriptLines.length===0){
-    transcriptHTML="<div class='pr-transcript' style='color:#888;font-style:italic'>No transcript was recorded.</div>";
-  } else {
-    const text=[...transcriptLines].map(l=>l.textContent).join("\n");
-    transcriptHTML=`<div class="pr-transcript">${text}</div>`;
-  }
+  const transcriptText=transcriptLines.length===0
+    ? "<p style='color:#888;font-style:italic;font-size:9pt'>No transcript recorded.</p>"
+    : `<div style="background:#f8f9fb;border:1px solid #dde6f4;border-radius:6px;padding:10px 14px;font-size:9pt;line-height:1.8;white-space:pre-wrap">${[...transcriptLines].map(l=>l.textContent).join("\n")}</div>`;
 
-  // Assemble full report
-  $("pdf-report").innerHTML=`
-    <div class="pr-logo">
-      <div class="pr-logo-icon">🎯</div>
-      <div>
-        <div class="pr-title">Pinnacle Peak Recovery</div>
-        <div class="pr-sub">APEX Call Coach — Post-Call Report</div>
-      </div>
-    </div>
-    <hr class="pr-divider">
-    <div class="pr-meta">
-      <div class="pr-meta-item"><span class="pr-meta-label">Date:</span><span class="pr-meta-val">${dateStr}</span></div>
-      <div class="pr-meta-item"><span class="pr-meta-label">Time:</span><span class="pr-meta-val">${timeStr}</span></div>
-      <div class="pr-meta-item"><span class="pr-meta-label">Caller Situation:</span><span class="pr-meta-val">${situation}</span></div>
-      <div class="pr-meta-item"><span class="pr-meta-label">Prospect Persona:</span><span class="pr-meta-val">${persona}</span></div>
-    </div>
-    <div class="pr-stats">
-      <div class="pr-stat"><div class="pr-stat-val">${duration}</div><div class="pr-stat-lbl">Duration</div></div>
-      <div class="pr-stat"><div class="pr-stat-val">${W}</div><div class="pr-stat-lbl">Words</div></div>
-      <div class="pr-stat"><div class="pr-stat-val">${O}</div><div class="pr-stat-lbl">Objections</div></div>
-      <div class="pr-stat"><div class="pr-stat-val">${H}</div><div class="pr-stat-lbl">Handled</div></div>
-      <div class="pr-stat"><div class="pr-stat-val">${winRate}</div><div class="pr-stat-lbl">Win Rate</div></div>
-    </div>
-    <div class="pr-section-title">🚨 Objections &amp; Rebuttals</div>
-    ${objHTML}
-    <div class="pr-section-title">💡 AI Coaching Insights</div>
-    ${coachHTML}
-    <div class="pr-section-title">🎙️ Full Transcript</div>
-    ${transcriptHTML}
-    <div class="pr-footer">
-      <span>Pinnacle Peak Recovery — McCormick Ranch, Scottsdale AZ</span>
-      <span>Generated by APEX Call Coach • ${dateStr} ${timeStr}</span>
-    </div>
-  `;
+  const reportHTML=`<!DOCTYPE html><html><head><meta charset="utf-8">
+  <title>PPR Call Report — ${dateStr}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;font-size:11pt;color:#111;background:#fff;padding:32px 40px}
+    h1{font-size:18pt;font-weight:800;color:#0a1628;margin:0}
+    .sub{font-size:8pt;color:#0080CC;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+    hr{border:none;border-top:2px solid #0055CC;margin:10px 0 18px}
+    .meta{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin-bottom:18px;font-size:9pt}
+    .meta b{color:#444}
+    .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px}
+    .stat{background:#f4f8ff;border:1px solid #d0ddf0;border-radius:6px;padding:8px;text-align:center}
+    .sv{font-size:16pt;font-weight:800;color:#0055CC}
+    .sl{font-size:7pt;color:#666;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+    .sec{font-size:11pt;font-weight:800;color:#0a1628;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #dde6f4;text-transform:uppercase;letter-spacing:1px}
+    .footer{margin-top:24px;padding-top:10px;border-top:1px solid #dde6f4;font-size:7.5pt;color:#888;display:flex;justify-content:space-between}
+    @media print{body{padding:20px 28px}}
+  </style>
+  </head><body>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+    <div style="width:38px;height:38px;background:linear-gradient(135deg,#00B8CC,#0055CC);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🎯</div>
+    <div><h1>Pinnacle Peak Recovery</h1><div class="sub">APEX Call Coach — Post-Call Report</div></div>
+  </div>
+  <hr>
+  <div class="meta">
+    <div><b>Date:</b> ${dateStr}</div>
+    <div><b>Time:</b> ${timeStr}</div>
+    <div><b>Caller Situation:</b> ${situation}</div>
+    <div><b>Prospect Persona:</b> ${persona}</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="sv">${duration}</div><div class="sl">Duration</div></div>
+    <div class="stat"><div class="sv">${W}</div><div class="sl">Words</div></div>
+    <div class="stat"><div class="sv">${O}</div><div class="sl">Objections</div></div>
+    <div class="stat"><div class="sv">${H}</div><div class="sl">Handled</div></div>
+    <div class="stat"><div class="sv">${winRate}</div><div class="sl">Win Rate</div></div>
+  </div>
+  <div class="sec">🚨 Objections &amp; Rebuttals</div>
+  ${objHTML}
+  <div class="sec">💡 AI Coaching Insights</div>
+  ${coachHTML}
+  <div class="sec">🎙️ Full Transcript</div>
+  ${transcriptText}
+  <div class="footer">
+    <span>Pinnacle Peak Recovery — McCormick Ranch, Scottsdale AZ</span>
+    <span>Generated by APEX Call Coach • ${dateStr} ${timeStr}</span>
+  </div>
+  <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`;
 
-  window.print();
+  const win=window.open("","_blank","width=900,height=700");
+  if(win){win.document.write(reportHTML);win.document.close();}
+  else{showerr("Pop-up blocked — please allow pop-ups for this site to download the report.");}
 }
 </script>
 </body>
