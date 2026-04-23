@@ -457,10 +457,11 @@ If coordinator said something excellent: type "positive".
 
 RULES:
 - ALWAYS return a response
-- Exact scripts only, under 50 words
+- Exact scripts only, under 50 words, NO numbered lists, NO line breaks inside content field
 - Compassionate, confident, expert tone
 - Always move toward admission and the next step (VOB → pre-assessment → bed date)
 - Use PPR program knowledge — never generic answers when a PPR-specific answer is better
+- The "content" field must be a single clean string with no newlines or special characters
 
 Reply ONLY in this exact JSON format:
 {"type":"objection","content":"exact script","objection_text":"short summary","objection_resolved":"","urgency":"high"}`;
@@ -484,7 +485,14 @@ Reply ONLY in this exact JSON format:
     catch(pe){
       // Try to extract JSON from the response if there's extra text
       const match=raw.match(/\{[\s\S]*\}/);
-      if(match){try{res=JSON.parse(match[0]);}catch(e2){showerr("JSON parse failed: "+raw.slice(0,100));return;}}
+      if(match){
+        try{res=JSON.parse(match[0]);}
+        catch(e2){
+          // Last resort — sanitize newlines and retry
+          try{res=JSON.parse(match[0].replace(/\n/g," ").replace(/\r/g,""));}
+          catch(e3){showerr("JSON parse failed: "+raw.slice(0,100));return;}
+        }
+      }
       else{showerr("Unexpected response format: "+raw.slice(0,100));return;}
     }
 
