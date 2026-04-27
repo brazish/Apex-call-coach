@@ -333,6 +333,8 @@ function toggleFocus(){
   }
 }
 function stmr(){
+  xtmr();
+  t0=Date.now();
   tmr=setInterval(()=>{
     const s=Math.floor((Date.now()-t0)/1000);
     $("md").textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
