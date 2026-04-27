@@ -332,7 +332,7 @@ function toggleFocus(){
     ss("✅ LIVE — Listening...");
   }
 }
-  t0=Date.now();
+function stmr(){
   tmr=setInterval(()=>{
     const s=Math.floor((Date.now()-t0)/1000);
     $("md").textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
