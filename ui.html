@@ -354,17 +354,36 @@ function addLine(t,tx){
   b.appendChild(d);b.scrollTop=b.scrollHeight;
 }
 function addCoach(type,content,t){
-  if(focusMode)return; // frozen — don't update UI
+  if(focusMode)return;
   const b=$("cb"),e=b.querySelector(".ce");if(e)e.remove();
   const m={
-    objection:["🚨","to","SAY THIS — OBJECTION"],
-    tip:["💡","tt","TIP"],
-    positive:["✅","tp","GREAT MOVE"],
-    coach:["🎯","tk","SAY THIS"]
+    ask:  ["❓","#00E5FF","rgba(0,229,255,0.10)","ASK THIS"],
+    say:  ["💬","#FFD60A","rgba(255,214,10,0.10)","SAY THIS"],
+    win:  ["🏆","#00FF9D","rgba(0,255,157,0.10)","CLOSING MOVE"],
+    objection:["🚨","#FF3B5C","rgba(255,59,92,0.10)","OBJECTION"],
+    positive: ["✅","#00FF9D","rgba(0,255,157,0.10)","GREAT MOVE"],
   };
-  const[icon,cls,lbl]=m[type]||m.coach;
-  const d=document.createElement("div");d.className="cc "+type;
-  d.innerHTML="<span class='ct "+cls+"'>"+icon+" "+lbl+"</span><span class='cts'>"+t+"</span><div style='clear:both;margin-top:4px'>"+content+"</div>";
+  const[icon,col,bg,lbl]=m[type]||m.say;
+  const d=document.createElement("div");
+  d.style.cssText=`background:${bg};border:1px solid ${col}33;border-left:3px solid ${col};border-radius:9px;padding:12px 14px;margin-bottom:9px`;
+
+  // Split ask+say if both present (separated by ||)
+  const parts=content.split("||").map(s=>s.trim()).filter(Boolean);
+  let inner=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:3px;background:${bg};color:${col};border:1px solid ${col}55">${icon} ${lbl}</span>
+    <span style="font-size:9px;color:#4A6070">${t}</span>
+  </div>`;
+  parts.forEach((p,i)=>{
+    const isQ=p.endsWith("?")||p.startsWith("ASK:")||i===0&&parts.length>1;
+    const text=p.replace(/^(ASK:|SAY:)\s*/,"");
+    const partCol=isQ&&parts.length>1?"#00E5FF":col;
+    const partLbl=isQ&&parts.length>1?"❓ ASK":"💬 SAY";
+    if(parts.length>1){
+      inner+=`<div style="font-size:8px;color:${partCol};letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;margin-top:${i>0?'8px':'0'}">${partLbl}</div>`;
+    }
+    inner+=`<div style="font-size:13px;color:#EFF6FB;line-height:1.6;font-style:${isQ&&parts.length===1?'normal':'normal'}">${text}</div>`;
+  });
+  d.innerHTML=inner;
   b.insertBefore(d,b.firstChild);
 }
 function addObjLog(id,objText,rebuttal,t){
@@ -463,36 +482,52 @@ ${chunk}
 
 === COACHING INSTRUCTIONS ===
 
-CRITICAL: Classify ANY resistance, concern, pushback, or negative statement as type "objection". This includes:
-- Price/cost concerns ("too expensive", "can't afford")
-- Timing resistance ("need to think", "call back later", "not ready")
-- Treatment resistance ("won't go", "doesn't want help")
-- Specific demands or concerns about PPR policies (phone, roommates, food, meds, length of stay)
-- Threats to hang up or end the call
-- Doubt about effectiveness ("tried before", "does it work")
-- Insurance concerns or denials
-- Needing spouse/family approval
-- Wanting to research other options
-- ANY negative, skeptical, or hesitant statement
+=== COACHING PHILOSOPHY ===
+You are a sharp, emotionally intelligent admissions coach. Your job is NOT to give long explanations. Your job is to make the family FEEL the urgency and SPEAK their own pain out loud. Questions land harder than answers. Silence after a good question closes more than any script. Keep everything SHORT, punchy, and emotionally resonant.
 
-For objections: provide a word-for-word rebuttal script that USES PPR-SPECIFIC information where relevant (reference our clinical modalities, our detox approach, our family program, our FMLA support, etc.). Set objection_text to a SHORT summary under 8 words.
+RESPONSE TYPES — pick the one that fits best:
 
-If no objection: check if an open objection was resolved (prospect sounds agreeable/moves forward) — set objection_resolved.
+1. "ask" — A rhetorical or reflective question that makes them speak the pain. Use when they're resistant, deflecting, or need to feel the weight of the situation themselves. The best questions make them sell themselves.
 
-If no objection and none resolved: give a proactive SAY THIS coaching tip to advance toward admission, using PPR-specific language and differentiators where applicable (type "coach").
+2. "say" — A single direct sentence when you actually need to respond or reframe. MAX 1 SENTENCE. No lists. No explanations.
 
-If coordinator said something excellent: type "positive".
+3. "win" — A closing move when they sound ready, agreeable, or emotionally open. Short and decisive.
 
-RULES:
-- ALWAYS return a response
-- Exact scripts only, under 50 words, NO numbered lists, NO line breaks inside content field
-- Compassionate, confident, expert tone
-- Always move toward admission and the next step (VOB → pre-assessment → bed date)
-- Use PPR program knowledge — never generic answers when a PPR-specific answer is better
-- The "content" field must be a single clean string with no newlines or special characters
+4. "positive" — Affirm a great move the coordinator just made.
 
-Reply ONLY in this exact JSON format:
-{"type":"objection","content":"exact script","objection_text":"short summary","objection_resolved":"","urgency":"high"}`;
+RHETORICAL QUESTION BANK — use these or riff on them:
+- "What does your family look like in 6 months if nothing changes?"
+- "How many more chances does he get before this becomes permanent?"
+- "If he had cancer, would you still be waiting to find the right time?"
+- "What would it cost you to be wrong about waiting?"
+- "When you picture her at 40 — what do you see?"
+- "What's the best case scenario if you do nothing today?"
+- "At what point does this become your fault for not acting?"
+- "How long have you been having this same conversation with yourself?"
+- "What are you most afraid of — spending the money, or getting the call?"
+- "If not now, what has to happen first?"
+- "What does recovery look like for your family — not just him?"
+- "When did you stop believing he could get better?"
+- "Is this the life you imagined for them?"
+- "What would you tell yourself a year from now if you don't make this call?"
+- "Who else in your family is suffering because of this?"
+
+FOR OBJECTIONS: AI decides — either lead with a question that exposes the flaw in their thinking, OR a single sharp sentence that reframes it. Use "||" to combine: put the question first, then "||", then a one-sentence reframe if needed. Example: "What's the cost of waiting another month? || Every day of delay makes recovery harder — the brain literally changes."
+
+Set objection_text to a SHORT summary under 6 words.
+If an open objection sounds resolved, set objection_resolved.
+
+RULES — NON NEGOTIABLE:
+- "ask" and "win" types: question only, no rebuttal
+- "say" type: 1 sentence MAX, no exceptions
+- NO numbered lists ever
+- NO multi-sentence explanations
+- NO line breaks inside content field
+- Use PPR knowledge only when it directly helps — don't info-dump
+- If in doubt, ask a question instead of explaining
+
+Reply ONLY in this exact JSON format, no extra text:
+{"type":"ask","content":"your question here","objection_text":"","objection_resolved":""}`;
 
     const r=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
@@ -529,10 +564,11 @@ Reply ONLY in this exact JSON format:
       if(match)markObjWon(match.id);
     }
 
-    if(res.type){
+    if(res.type&&res.content){
       I++;
       addCoach(res.type,res.content,ts());
-      if(res.type==="objection"&&res.objection_text&&res.objection_text.length>1){
+      // Log to objection tracker if it's an objection type OR content suggests objection handling
+      if((res.type==="objection"||res.type==="say"||res.type==="ask")&&res.objection_text&&res.objection_text.length>1){
         O++;
         const id=Date.now();
         objections.push({id,text:res.objection_text,won:false});
