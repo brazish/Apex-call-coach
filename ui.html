@@ -357,33 +357,18 @@ function addCoach(type,content,t){
   if(focusMode)return;
   const b=$("cb"),e=b.querySelector(".ce");if(e)e.remove();
   const m={
-    ask:  ["❓","#00E5FF","rgba(0,229,255,0.10)","ASK THIS"],
-    say:  ["💬","#FFD60A","rgba(255,214,10,0.10)","SAY THIS"],
-    win:  ["🏆","#00FF9D","rgba(0,255,157,0.10)","CLOSING MOVE"],
-    objection:["🚨","#FF3B5C","rgba(255,59,92,0.10)","OBJECTION"],
-    positive: ["✅","#00FF9D","rgba(0,255,157,0.10)","GREAT MOVE"],
+    objection:["🚨","#FF3B5C","OBJECTION"],
+    coach:    ["🎯","#00E5FF","SAY THIS"],
+    positive: ["✅","#00FF9D","GREAT MOVE"],
+    win:      ["🏆","#FFD60A","CLOSING MOVE"],
   };
-  const[icon,col,bg,lbl]=m[type]||m.say;
+  const[icon,col,lbl]=m[type]||m.coach;
   const d=document.createElement("div");
-  d.style.cssText=`background:${bg};border:1px solid ${col}33;border-left:3px solid ${col};border-radius:9px;padding:12px 14px;margin-bottom:9px`;
-
-  // Split ask+say if both present (separated by ||)
-  const parts=content.split("||").map(s=>s.trim()).filter(Boolean);
-  let inner=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-    <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:3px;background:${bg};color:${col};border:1px solid ${col}55">${icon} ${lbl}</span>
+  d.style.cssText=`background:#131A22;border:1px solid ${col}33;border-left:3px solid ${col};border-radius:9px;padding:12px 14px;margin-bottom:9px;font-size:13px;line-height:1.6;color:#EFF6FB`;
+  d.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:3px;background:${col}22;color:${col};border:1px solid ${col}44">${icon} ${lbl}</span>
     <span style="font-size:9px;color:#4A6070">${t}</span>
-  </div>`;
-  parts.forEach((p,i)=>{
-    const isQ=p.endsWith("?")||p.startsWith("ASK:")||i===0&&parts.length>1;
-    const text=p.replace(/^(ASK:|SAY:)\s*/,"");
-    const partCol=isQ&&parts.length>1?"#00E5FF":col;
-    const partLbl=isQ&&parts.length>1?"❓ ASK":"💬 SAY";
-    if(parts.length>1){
-      inner+=`<div style="font-size:8px;color:${partCol};letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;margin-top:${i>0?'8px':'0'}">${partLbl}</div>`;
-    }
-    inner+=`<div style="font-size:13px;color:#EFF6FB;line-height:1.6;font-style:${isQ&&parts.length===1?'normal':'normal'}">${text}</div>`;
-  });
-  d.innerHTML=inner;
+  </div>${content}`;
   b.insertBefore(d,b.firstChild);
 }
 function addObjLog(id,objText,rebuttal,t){
@@ -482,52 +467,43 @@ ${chunk}
 
 === COACHING INSTRUCTIONS ===
 
-=== COACHING PHILOSOPHY ===
-You are a sharp, emotionally intelligent admissions coach. Your job is NOT to give long explanations. Your job is to make the family FEEL the urgency and SPEAK their own pain out loud. Questions land harder than answers. Silence after a good question closes more than any script. Keep everything SHORT, punchy, and emotionally resonant.
+=== COACHING INSTRUCTIONS ===
 
-RESPONSE TYPES — pick the one that fits best:
+CRITICAL: Classify ANY resistance, concern, pushback, or negative statement as type "objection". This includes cost, timing, readiness, insurance, spouse approval, prior treatment, phone/room/food concerns, or any skeptical statement.
 
-1. "ask" — A rhetorical or reflective question that makes them speak the pain. Use when they're resistant, deflecting, or need to feel the weight of the situation themselves. The best questions make them sell themselves.
+RESPONSE TYPES:
 
-2. "say" — A single direct sentence when you actually need to respond or reframe. MAX 1 SENTENCE. No lists. No explanations.
+"objection" — When you detect an objection: lead with ONE sharp rhetorical question that makes them feel the weight of their own resistance, then ONE sentence that reframes or pivots toward action. Total: 2 sentences max. Set objection_text to a summary under 6 words.
 
-3. "win" — A closing move when they sound ready, agreeable, or emotionally open. Short and decisive.
+"coach" — Proactive guidance when no objection is detected. Challenger sale style: reframe their thinking or advance toward the next step. 2 sentences max. No lists.
 
-4. "positive" — Affirm a great move the coordinator just made.
+"positive" — When the coordinator says something excellent. 1 affirming sentence.
 
-RHETORICAL QUESTION BANK — use these or riff on them:
+"win" — When the prospect sounds ready or agreeable. A single decisive closing move.
+
+OBJECTION QUESTION BANK — use these or riff on them contextually:
 - "What does your family look like in 6 months if nothing changes?"
-- "How many more chances does he get before this becomes permanent?"
-- "If he had cancer, would you still be waiting to find the right time?"
-- "What would it cost you to be wrong about waiting?"
+- "If he had cancer, would you still be waiting for the right time?"
+- "What's the cost of being wrong about waiting?"
 - "When you picture her at 40 — what do you see?"
-- "What's the best case scenario if you do nothing today?"
-- "At what point does this become your fault for not acting?"
-- "How long have you been having this same conversation with yourself?"
+- "How many more chances does he get before this becomes permanent?"
+- "What has to happen before this becomes urgent enough?"
+- "Who else in your family is suffering because of this right now?"
 - "What are you most afraid of — spending the money, or getting the call?"
-- "If not now, what has to happen first?"
-- "What does recovery look like for your family — not just him?"
-- "When did you stop believing he could get better?"
 - "Is this the life you imagined for them?"
-- "What would you tell yourself a year from now if you don't make this call?"
-- "Who else in your family is suffering because of this?"
-
-FOR OBJECTIONS: AI decides — either lead with a question that exposes the flaw in their thinking, OR a single sharp sentence that reframes it. Use "||" to combine: put the question first, then "||", then a one-sentence reframe if needed. Example: "What's the cost of waiting another month? || Every day of delay makes recovery harder — the brain literally changes."
-
-Set objection_text to a SHORT summary under 6 words.
-If an open objection sounds resolved, set objection_resolved.
+- "At what point does doing nothing become the wrong choice?"
 
 RULES — NON NEGOTIABLE:
-- "ask" and "win" types: question only, no rebuttal
-- "say" type: 1 sentence MAX, no exceptions
-- NO numbered lists ever
-- NO multi-sentence explanations
-- NO line breaks inside content field
-- Use PPR knowledge only when it directly helps — don't info-dump
-- If in doubt, ask a question instead of explaining
+- 2 sentences MAX on all responses — no exceptions
+- NO numbered lists, NO bullet points, NO line breaks in content field
+- "objection" type: question first, reframe second
+- "coach" type: challenger reframe or clear next step
+- Use PPR-specific knowledge when directly relevant (modalities, detox, FMLA, etc.)
+- Always be moving toward: VOB → pre-assessment → bed date
+- The content field must be one clean string, no special formatting
 
 Reply ONLY in this exact JSON format, no extra text:
-{"type":"ask","content":"your question here","objection_text":"","objection_resolved":""}`;
+{"type":"coach","content":"your coaching here","objection_text":"","objection_resolved":""}`;
 
     const r=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
@@ -567,8 +543,7 @@ Reply ONLY in this exact JSON format, no extra text:
     if(res.type&&res.content){
       I++;
       addCoach(res.type,res.content,ts());
-      // Log to objection tracker if it's an objection type OR content suggests objection handling
-      if((res.type==="objection"||res.type==="say"||res.type==="ask")&&res.objection_text&&res.objection_text.length>1){
+      if(res.type==="objection"&&res.objection_text&&res.objection_text.length>1){
         O++;
         const id=Date.now();
         objections.push({id,text:res.objection_text,won:false});
