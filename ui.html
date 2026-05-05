@@ -519,20 +519,24 @@ Reply ONLY in this exact JSON format, no extra text:
     const data=await r.json();
     const raw=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"");
     if(!raw){showerr("Claude returned empty response.");return;}
+    // Sanitize before parsing — replace smart quotes, curly apostrophes, and line breaks
+    const clean=raw
+      .replace(/[\u2018\u2019]/g,"'")   // curly single quotes → straight
+      .replace(/[\u201C\u201D]/g,'"')   // curly double quotes → straight
+      .replace(/\r?\n/g," ")            // line breaks → space
+      .replace(/\t/g," ");              // tabs → space
     let res;
-    try{res=JSON.parse(raw);}
+    try{res=JSON.parse(clean);}
     catch(pe){
-      // Try to extract JSON from the response if there's extra text
-      const match=raw.match(/\{[\s\S]*\}/);
+      const match=clean.match(/\{[\s\S]*\}/);
       if(match){
         try{res=JSON.parse(match[0]);}
         catch(e2){
-          // Last resort — sanitize newlines and retry
           try{res=JSON.parse(match[0].replace(/\n/g," ").replace(/\r/g,""));}
-          catch(e3){showerr("JSON parse failed: "+raw.slice(0,100));return;}
+          catch(e3){showerr("JSON parse failed: "+clean.slice(0,100));return;}
         }
       }
-      else{showerr("Unexpected response format: "+raw.slice(0,100));return;}
+      else{showerr("Unexpected response format: "+clean.slice(0,100));return;}
     }
 
     if(res.objection_resolved&&res.objection_resolved.length>2){
