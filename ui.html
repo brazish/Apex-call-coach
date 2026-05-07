@@ -854,6 +854,7 @@ function stop(){
 function clr(){
   stop();W=0;O=0;H=0;I=0;WC=0;lines=[];pend="";lc=0;objections=[];callStage=0;setStage(0);
   setCallerType("family_substance");
+  document.getElementById("score-modal").style.display="none";
   $("md").textContent="00:00";$("ib").textContent="";
   $("tb").innerHTML="<div class='te'>Transcript will appear here when you start listening...</div>";
   $("cb").innerHTML="<div class='ce'>🎤<br><br>Real-time coaching will appear here.<br><br><span style='color:#00E5FF'>Start listening to begin.</span></div>";
