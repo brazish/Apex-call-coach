@@ -23,12 +23,44 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
 .btn:disabled{opacity:0.35;cursor:not-allowed}
 .bpdf{background:#131A22;color:#00FF9D;border:1px solid rgba(0,255,157,0.4);font-size:12px}
 .bpdf:hover{background:rgba(0,255,157,0.08)}
+.bscore{background:#131A22;color:#00E5FF;border:1px solid rgba(0,229,255,0.4);font-size:12px}
+.bscore:hover{background:rgba(0,229,255,0.08)}
 .bfocus{background:#131A22;color:#FFD60A;border:1px solid rgba(255,214,10,0.4);font-size:12px}
 .bfocus:hover{background:rgba(255,214,10,0.08)}
 .bfocus.active{background:rgba(255,214,10,0.15);color:#FFD60A;border-color:#FFD60A;box-shadow:0 0 10px rgba(255,214,10,0.3)}
 
 .focus-frozen{position:relative;border:2px solid rgba(255,214,10,0.5)!important;border-radius:9px}
 /* Content fully readable — new items just won't appear until resumed */
+
+/* ── CALL STAGE TRACKER ── */
+.stage-bar{display:flex;align-items:stretch;margin-bottom:10px;background:#090D11;border:1px solid #1E2D3D;border-radius:9px;overflow:hidden}
+.stage{flex:1;padding:9px 4px;text-align:center;font-size:8.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4A6070;transition:all 0.3s}
+.stage.active{color:#000;background:linear-gradient(135deg,#00E5FF,#0080FF)}
+.stage.done{color:#00E5FF;background:rgba(0,229,255,0.07)}
+.stage-sep{width:1px;background:#1E2D3D;flex-shrink:0}
+
+/* ── REP SCORE MODAL ── */
+.score-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center}
+.score-modal.show{display:flex}
+.score-box{background:#0D1520;border:1px solid #1E2D3D;border-radius:16px;padding:32px;width:580px;max-width:96vw;max-height:90vh;overflow-y:auto}
+.score-title{font-size:18px;font-weight:800;color:#EFF6FB;margin-bottom:3px}
+.score-sub{font-size:9px;color:#4A6070;letter-spacing:2px;text-transform:uppercase;margin-bottom:22px}
+.score-grade{text-align:center;margin-bottom:22px;padding:20px;background:#090D11;border-radius:12px;border:1px solid #1E2D3D}
+.score-letter{font-size:80px;font-weight:900;line-height:1}
+.score-pct{font-size:13px;color:#4A6070;margin-top:6px}
+.score-cats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.score-cat{background:#131A22;border-radius:8px;padding:12px 14px}
+.score-cat-name{font-size:8px;color:#4A6070;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.score-cat-val{font-size:22px;font-weight:800}
+.score-bar-bg{height:4px;background:#1E2D3D;border-radius:2px;margin-top:8px}
+.score-bar-fill{height:100%;border-radius:2px}
+.score-breakdown{background:#090D11;border-radius:8px;padding:14px;margin-bottom:16px}
+.score-breakdown-title{font-size:8px;color:#00E5FF;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+.score-item{font-size:12px;color:#C8D8E4;line-height:1.75;padding:5px 0;border-bottom:1px solid #1E2D3D}
+.score-item:last-child{border-bottom:none}
+.score-item strong{color:#EFF6FB}
+.score-close{width:100%;padding:12px;background:linear-gradient(135deg,#00B8CC,#0080FF);border:none;border-radius:8px;color:#000;font-weight:800;font-size:13px;cursor:pointer;font-family:monospace;margin-top:6px}
+
 #pdf-report{display:none}
 
 .ctx{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
@@ -117,7 +149,53 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
   <div class="mc"><div class="mv" id="mi" style="color:#00E5FF">0</div><div class="ml">Insights</div></div>
   <div class="mc"><div class="mv" id="mwr" style="color:#FFD60A">—</div><div class="ml">Win Rate</div></div>
 </div>
+<div class="stage-bar" id="stage-bar">
+  <div class="stage active" id="stage-0">🎙 Opener</div><div class="stage-sep"></div>
+  <div class="stage" id="stage-1">🔍 Discovery</div><div class="stage-sep"></div>
+  <div class="stage" id="stage-2">💡 Pitch</div><div class="stage-sep"></div>
+  <div class="stage" id="stage-3">🚨 Objection</div><div class="stage-sep"></div>
+  <div class="stage" id="stage-4">✅ Close</div>
+</div>
 <div class="status-bar" id="mstat"><span class="pl idle"><span class="dot dy"></span>IDLE</span></div>
+
+<!-- Score Modal -->
+<div class="score-modal" id="score-modal">
+  <div class="score-box">
+    <div class="score-title">📊 Call Performance Score</div>
+    <div class="score-sub">Pinnacle Peak Recovery — APEX Analysis</div>
+    <div class="score-grade">
+      <div class="score-letter" id="sc-letter">—</div>
+      <div class="score-pct" id="sc-pct">Complete a call to see your score</div>
+    </div>
+    <div class="score-cats">
+      <div class="score-cat">
+        <div class="score-cat-name">Objection Handling</div>
+        <div class="score-cat-val" id="sc-obj" style="color:#FF3B5C">—</div>
+        <div class="score-bar-bg"><div class="score-bar-fill" id="sc-obj-bar" style="width:0%;background:#FF3B5C"></div></div>
+      </div>
+      <div class="score-cat">
+        <div class="score-cat-name">Call Control</div>
+        <div class="score-cat-val" id="sc-ctrl" style="color:#00E5FF">—</div>
+        <div class="score-bar-bg"><div class="score-bar-fill" id="sc-ctrl-bar" style="width:0%;background:#00E5FF"></div></div>
+      </div>
+      <div class="score-cat">
+        <div class="score-cat-name">Urgency Created</div>
+        <div class="score-cat-val" id="sc-urg" style="color:#FFD60A">—</div>
+        <div class="score-bar-bg"><div class="score-bar-fill" id="sc-urg-bar" style="width:0%;background:#FFD60A"></div></div>
+      </div>
+      <div class="score-cat">
+        <div class="score-cat-name">Next Step Set</div>
+        <div class="score-cat-val" id="sc-next" style="color:#00FF9D">—</div>
+        <div class="score-bar-bg"><div class="score-bar-fill" id="sc-next-bar" style="width:0%;background:#00FF9D"></div></div>
+      </div>
+    </div>
+    <div class="score-breakdown">
+      <div class="score-breakdown-title">💡 Coaching Feedback</div>
+      <div id="sc-feedback">Complete a call to get personalized feedback.</div>
+    </div>
+    <button class="score-close" onclick="document.getElementById('score-modal').classList.remove('show')">Close</button>
+  </div>
+</div>
 <div class="ctx">
   <div><div class="ctx-lbl">Caller Situation</div><input id="prod" class="ctx-input" type="text" placeholder="e.g. Parent calling about son with opioid addiction, self-pay"></div>
   <div><div class="ctx-lbl">Prospect Persona</div><input id="pers" class="ctx-input" type="text" placeholder="e.g. Desperate mother, 45yr old, son 24, 2 prior failed attempts"></div>
@@ -126,7 +204,8 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
   <button class="btn bs" id="bst" onclick="go()">▶ Start Listening</button>
   <button class="btn bx" id="bsp" onclick="stop()" disabled>◼ Stop</button>
   <button class="btn bc" onclick="clr()">🗑 Clear</button>
-  <button class="btn bpdf" onclick="exportPDF()">⬇ Download Call Report</button>
+  <button class="btn bpdf" onclick="exportPDF()">⬇ Download Report</button>
+  <button class="btn bscore" id="bscore" onclick="scoreCall()">📊 Score Call</button>
   <button class="btn bfocus" id="bfocus" onclick="toggleFocus()">🔒 Focus Mode</button>
 </div>
 <div class="sb" id="sb">👆 Fill in the caller situation above then click Start Listening.</div>
@@ -299,7 +378,36 @@ const _CL=CL.startsWith("__")||CL===""?"":CL;
 function getPROD(){return document.getElementById("prod").value||"caller asking about substance abuse treatment";}
 function getPERS(){return document.getElementById("pers").value||"a family member or individual seeking addiction treatment help";}
 let sock,actx,proc,src,ms2,rec=false,t0=null,tmr=null;
-let W=0,O=0,H=0,I=0,WC=0,lines=[],pend="",lc=0,objections=[],focusMode=false;
+let W=0,O=0,H=0,I=0,WC=0,lines=[],pend="",lc=0,objections=[],focusMode=false,callStage=0;
+
+const STAGES=["opener","discovery","pitch","objection","close"];
+const STAGE_KEYWORDS=[
+  /\b(hello|hi there|calling|how are you|my name is|pinnacle|who am i speaking|thanks for calling)\b/i,
+  /\b(tell me|how long|what's going on|what happened|when did|how often|how serious|walk me through|describe|situation|using|drinking|history)\b/i,
+  /\b(what we do|our program|let me tell you|we offer|we have|we specialize|our clinical|our facility|trauma|emdr|detox|levels of care)\b/i,
+  /\b(too expensive|can't afford|need to think|not ready|doesn't want|won't go|insurance|tried before|call back|talk to my|not sure)\b/i,
+  /\b(move forward|get started|next step|pre.?assessment|schedule|when can|bed available|admission|reserve|let's do this|ready to)\b/i
+];
+
+function detectStage(text){
+  // Progress stage based on keywords — never go backward
+  for(let i=Math.max(callStage,0);i<STAGE_KEYWORDS.length;i++){
+    if(STAGE_KEYWORDS[i].test(text)){
+      if(i>callStage){setStage(i);}
+      break;
+    }
+  }
+}
+function setStage(n){
+  callStage=n;
+  for(let i=0;i<5;i++){
+    const el=document.getElementById("stage-"+i);
+    if(!el)continue;
+    el.classList.remove("active","done");
+    if(i<n)el.classList.add("done");
+    else if(i===n)el.classList.add("active");
+  }
+}
 const $=x=>document.getElementById(x);
 const ts=()=>new Date().toLocaleTimeString("en-US",{hour12:false});
 function ss(m,c="#00E5FF"){$("sb").style.color=c;$("sb").textContent=m;}
@@ -469,38 +577,50 @@ ${chunk}
 
 === COACHING INSTRUCTIONS ===
 
-CRITICAL: Classify ANY resistance, concern, pushback, or negative statement as type "objection". This includes cost, timing, readiness, insurance, spouse approval, prior treatment, phone/room/food concerns, or any skeptical statement.
+CURRENT CALL STAGE: ${STAGES[callStage]||"opener"}
 
 RESPONSE TYPES:
+"objection" — Resistance detected. Use TIERED response based on severity:
+  TIER 1 (soft hesitation, first time): 1 sharp rhetorical question only. Make them feel the weight themselves.
+  TIER 2 (clear objection, direct pushback): 1 question + 1 reframe sentence. Max 2 sentences.
+  TIER 3 (repeat objection, hard no, threatening to end): Pattern interrupt — say something unexpected that reframes their entire frame. 1-2 sentences, challenger style.
+  Always set objection_text (under 6 words). Detect tier from context and transcript history.
 
-"objection" — When you detect an objection: lead with ONE sharp rhetorical question that makes them feel the weight of their own resistance, then ONE sentence that reframes or pivots toward action. Total: 2 sentences max. Set objection_text to a summary under 6 words.
+"coach" — No objection detected. Stage-aware guidance:
+  opener: Help build rapport or transition to discovery. 1 sentence.
+  discovery: Ask a question that uncovers deeper pain or urgency. 1 sentence.
+  pitch: Reinforce a PPR differentiator or bridge to next step. 1 sentence.
+  objection: Help navigate back toward momentum. 1-2 sentences.
+  close: Push toward the definitive next step (VOB / pre-assessment / bed date). 1 sentence.
 
-"coach" — Proactive guidance when no objection is detected. Challenger sale style: reframe their thinking or advance toward the next step. 2 sentences max. No lists.
+"positive" — Rep said something excellent. 1 affirming sentence.
+"win" — Prospect sounds ready or agreeable. 1 decisive closing sentence only.
 
-"positive" — When the coordinator says something excellent. 1 affirming sentence.
-
-"win" — When the prospect sounds ready or agreeable. A single decisive closing move.
-
-OBJECTION QUESTION BANK — use these or riff on them contextually:
+TIERED OBJECTION QUESTION BANK:
+TIER 1 — Reflective questions (make them feel it):
 - "What does your family look like in 6 months if nothing changes?"
 - "If he had cancer, would you still be waiting for the right time?"
-- "What's the cost of being wrong about waiting?"
-- "When you picture her at 40 — what do you see?"
-- "How many more chances does he get before this becomes permanent?"
-- "What has to happen before this becomes urgent enough?"
-- "Who else in your family is suffering because of this right now?"
 - "What are you most afraid of — spending the money, or getting the call?"
-- "Is this the life you imagined for them?"
+- "When you picture them at 40 — what do you see?"
+- "Who else in your family is suffering because of this right now?"
 - "At what point does doing nothing become the wrong choice?"
 
-RULES — NON NEGOTIABLE:
-- 2 sentences MAX on all responses — no exceptions
-- NO numbered lists, NO bullet points, NO line breaks in content field
-- "objection" type: question first, reframe second
-- "coach" type: challenger reframe or clear next step
-- Use PPR-specific knowledge when directly relevant (modalities, detox, FMLA, etc.)
-- Always be moving toward: VOB → pre-assessment → bed date
-- The content field must be one clean string, no special formatting
+TIER 2 — Reframe + bridge (question + pivot):
+- "What's the cost of being wrong about waiting? Every day of delay changes the brain — that's not a metaphor, it's neuroscience."
+- "How many more chances does he get before this becomes permanent? We've helped people in exactly this situation — the ones who made it called when it felt too soon."
+- "What has to happen before this becomes urgent enough? Our program is specifically built for people who come in resistant — readiness comes after the door, not before."
+
+TIER 3 — Pattern interrupt (unexpected reframe):
+- "I hear you — and I want to be honest, most families who say that call back after something worse happened. You're calling now because part of you knows this is the moment."
+- "You've already done the hardest part — you made this call. Everything from here is just logistics, and we handle logistics every day."
+- "The fact that you're still on this call tells me everything I need to know about how much you love them. Let's not let that love go to waste."
+
+LENGTH RULES — NON NEGOTIABLE:
+- "coach", "positive", "win": 1 sentence ALWAYS
+- "objection" Tier 1: 1 sentence (question only)
+- "objection" Tier 2-3: 2 sentences MAX
+- NO numbered lists, NO bullets, NO line breaks in content field
+- Content must be one clean string, no special formatting, straight apostrophes only
 
 Reply ONLY in this exact JSON format, no extra text:
 {"type":"coach","content":"your coaching here","objection_text":"","objection_resolved":""}`;
@@ -581,6 +701,7 @@ function final(tx){
   const w=tx.trim().split(/\s+/).length;
   W+=w;WC+=w;pend+=" "+tx;
   upd();
+  detectStage(tx);
   const now=Date.now();
   const hasObjKeyword=OBJECTION_KEYWORDS.test(tx);
   // Fire immediately on objection keywords (min 2s gap), or every 8 words (min 4s gap)
@@ -638,12 +759,79 @@ function stop(){
 }
 
 function clr(){
-  stop();W=0;O=0;H=0;I=0;WC=0;lines=[];pend="";lc=0;objections=[];
+  stop();W=0;O=0;H=0;I=0;WC=0;lines=[];pend="";lc=0;objections=[];callStage=0;setStage(0);
   $("md").textContent="00:00";$("ib").textContent="";
   $("tb").innerHTML="<div class='te'>Transcript will appear here when you start listening...</div>";
   $("cb").innerHTML="<div class='ce'>🎤<br><br>Real-time coaching will appear here.<br><br><span style='color:#00E5FF'>Start listening to begin.</span></div>";
   $("obj-log").innerHTML="<div class='te' style='font-size:12px;padding:8px 0'>No objections detected yet. Every objection will be logged here with a rebuttal and tracked as Won or Open.</div>";
   cerr();upd();ss("👆 Fill in the caller situation above then click Start Listening.");
+}
+
+async function scoreCall(){
+  if(!_CL){showerr("Anthropic API key missing.");return;}
+  if(lines.length<3){showerr("Not enough transcript to score — complete a call first.");return;}
+  document.getElementById("score-modal").classList.add("show");
+  document.getElementById("sc-letter").textContent="...";
+  document.getElementById("sc-pct").textContent="Analyzing your call...";
+  document.getElementById("sc-feedback").textContent="Running AI analysis...";
+  const duration=$("md").textContent;
+  const winRate=O>0?Math.round((H/O)*100):0;
+  const transcript=lines.slice(-60).join(" ");
+  const scoreSys=`You are an elite sales coach analyzing a recorded admissions call for Pinnacle Peak Recovery, a substance abuse treatment center. Score the rep's performance across 4 categories, each 0-100. Be honest and specific — don't inflate scores.
+
+CATEGORIES:
+1. objection_handling: How well did they handle resistance? Did they reframe, use questions, stay calm? (weight: 30%)
+2. call_control: Did they lead the call? Avoid rambling? Ask good discovery questions? Control pacing? (weight: 25%)
+3. urgency_created: Did they create genuine urgency around the family's situation without being pushy? (weight: 25%)
+4. next_step_set: Did they clearly advance toward VOB, pre-assessment, or a scheduled admission? (weight: 20%)
+
+CALL STATS:
+- Duration: ${duration}
+- Objections detected: ${O}
+- Objections handled: ${H}
+- Win rate: ${winRate}%
+- Call stage reached: ${STAGES[callStage]||"opener"}
+
+TRANSCRIPT (last portion):
+${transcript}
+
+Reply ONLY in this exact JSON — no extra text, no line breaks:
+{"objection_handling":75,"call_control":80,"urgency_created":70,"next_step_set":85,"feedback":["Specific strength or area to improve","Another specific observation","Another coaching point","One more actionable note"]}`;
+
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:500,system:scoreSys,messages:[{role:"user",content:"Score this call now."}]})
+    });
+    const data=await r.json();
+    const raw=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"")
+      .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/\r?\n/g," ");
+    const res=JSON.parse(raw.match(/\{[\s\S]*\}/)[0]);
+    const overall=Math.round(res.objection_handling*0.3+res.call_control*0.25+res.urgency_created*0.25+res.next_step_set*0.2);
+    const grade=overall>=90?"A+":overall>=85?"A":overall>=80?"B+":overall>=75?"B":overall>=70?"C+":overall>=65?"C":overall>=60?"D":"F";
+    const gradeCol=overall>=80?"#00FF9D":overall>=65?"#FFD60A":"#FF3B5C";
+    document.getElementById("sc-letter").style.color=gradeCol;
+    document.getElementById("sc-letter").textContent=grade;
+    document.getElementById("sc-pct").textContent=`Overall Score: ${overall}/100`;
+    const cats=[
+      ["sc-obj","sc-obj-bar",res.objection_handling,"#FF3B5C"],
+      ["sc-ctrl","sc-ctrl-bar",res.call_control,"#00E5FF"],
+      ["sc-urg","sc-urg-bar",res.urgency_created,"#FFD60A"],
+      ["sc-next","sc-next-bar",res.next_step_set,"#00FF9D"],
+    ];
+    cats.forEach(([vid,bid,val,col])=>{
+      document.getElementById(vid).textContent=val+"/100";
+      document.getElementById(vid).style.color=col;
+      setTimeout(()=>{document.getElementById(bid).style.width=val+"%";},100);
+    });
+    const fb=res.feedback||[];
+    document.getElementById("sc-feedback").innerHTML=fb.map(f=>`<div class="score-item">• ${f}</div>`).join("");
+  }catch(e){
+    document.getElementById("sc-letter").textContent="!";
+    document.getElementById("sc-pct").textContent="Scoring failed";
+    document.getElementById("sc-feedback").textContent="Error: "+e.message;
+  }
 }
 
 function exportPDF(){
