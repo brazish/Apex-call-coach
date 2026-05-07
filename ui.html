@@ -40,9 +40,9 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
 .stage-sep{width:1px;background:#1E2D3D;flex-shrink:0}
 
 /* ── REP SCORE MODAL ── */
-.score-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center}
-.score-modal.show{display:flex}
-.score-box{background:#0D1520;border:1px solid #1E2D3D;border-radius:16px;padding:32px;width:580px;max-width:96vw;max-height:90vh;overflow-y:auto}
+.score-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto}
+.score-modal.show{display:block;position:relative;background:transparent;padding:0;margin-top:16px}
+.score-box{background:#0D1520;border:1px solid #1E2D3D;border-radius:16px;padding:24px;width:100%;max-height:none}
 .score-title{font-size:18px;font-weight:800;color:#EFF6FB;margin-bottom:3px}
 .score-sub{font-size:9px;color:#4A6070;letter-spacing:2px;text-transform:uppercase;margin-bottom:22px}
 .score-grade{text-align:center;margin-bottom:22px;padding:20px;background:#090D11;border-radius:12px;border:1px solid #1E2D3D}
@@ -162,12 +162,45 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
   <div class="stage" id="stage-4">✅ Close</div>
 </div>
 <div class="status-bar" id="mstat"><span class="pl idle"><span class="dot dy"></span>IDLE</span></div>
+<div class="caller-select-row">
+  <div class="ctx-lbl" style="margin-bottom:6px">Who's Calling?</div>
+  <div class="caller-chips" id="caller-chips">
+    <div class="chip active" onclick="setCallerType('family_substance')" data-key="family_substance">👨‍👩‍👧 Family — Substance</div>
+    <div class="chip" onclick="setCallerType('family_mental')" data-key="family_mental">🧠 Family — Mental Health</div>
+    <div class="chip" onclick="setCallerType('self_substance')" data-key="self_substance">🙋 Self — Substance</div>
+    <div class="chip" onclick="setCallerType('self_mental')" data-key="self_mental">🙋 Self — Mental Health</div>
+    <div class="chip" onclick="setCallerType('dual')" data-key="dual">⚡ Dual Diagnosis</div>
+    <div class="chip" onclick="setCallerType('crisis')" data-key="crisis">🚨 Crisis / Urgent</div>
+    <div class="chip" onclick="setCallerType('insurance')" data-key="insurance">📋 Insurance / VOB</div>
+    <div class="chip" onclick="setCallerType('custom')" data-key="custom">✏️ Custom</div>
+  </div>
+</div>
+<div class="ctx" id="ctx-fields" style="display:none">
+  <div><div class="ctx-lbl">Caller Situation</div><input id="prod" class="ctx-input" type="text" placeholder="Auto-filled based on caller type"></div>
+  <div><div class="ctx-lbl">Prospect Persona</div><input id="pers" class="ctx-input" type="text" placeholder="Add details to sharpen coaching..."></div>
+</div>
+<div class="btns">
+  <button class="btn bs" id="bst" onclick="go()">▶ Start Listening</button>
+  <button class="btn bx" id="bsp" onclick="stop()" disabled>◼ Stop</button>
+  <button class="btn bc" onclick="clr()">🗑 Clear</button>
+  <button class="btn bpdf" onclick="exportPDF()">⬇ Download Report</button>
+  <button class="btn bscore" id="bscore" onclick="scoreCall()">📊 Score Call</button>
+  <button class="btn bfocus" id="bfocus" onclick="toggleFocus()">🔒 Focus Mode</button>
+</div>
+<div class="sb" id="sb">👆 Select who's calling above, then hit Start Listening.</div>
+<div class="ib" id="ib"></div>
+<div class="eb" id="eb"></div>
 
-<!-- Score Modal -->
-<div class="score-modal" id="score-modal">
+<!-- Score Panel — inline, slides in below buttons -->
+<div id="score-modal" style="display:none;margin-bottom:12px">
   <div class="score-box">
-    <div class="score-title">📊 Call Performance Score</div>
-    <div class="score-sub">Pinnacle Peak Recovery — APEX Analysis</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+      <div>
+        <div class="score-title">📊 Call Performance Score</div>
+        <div class="score-sub">Pinnacle Peak Recovery — APEX Analysis</div>
+      </div>
+      <button onclick="document.getElementById('score-modal').style.display='none'" style="background:none;border:1px solid #1E2D3D;color:#4A6070;border-radius:6px;padding:4px 10px;cursor:pointer;font-family:monospace;font-size:11px">✕ Close</button>
+    </div>
     <div class="score-grade">
       <div class="score-letter" id="sc-letter">—</div>
       <div class="score-pct" id="sc-pct">Complete a call to see your score</div>
@@ -198,37 +231,8 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
       <div class="score-breakdown-title">💡 Coaching Feedback</div>
       <div id="sc-feedback">Complete a call to get personalized feedback.</div>
     </div>
-    <button class="score-close" onclick="document.getElementById('score-modal').classList.remove('show')">Close</button>
   </div>
 </div>
-<div class="caller-select-row">
-  <div class="ctx-lbl" style="margin-bottom:6px">Who's Calling?</div>
-  <div class="caller-chips" id="caller-chips">
-    <div class="chip active" onclick="setCallerType('family_substance')" data-key="family_substance">👨‍👩‍👧 Family — Substance</div>
-    <div class="chip" onclick="setCallerType('family_mental')" data-key="family_mental">🧠 Family — Mental Health</div>
-    <div class="chip" onclick="setCallerType('self_substance')" data-key="self_substance">🙋 Self — Substance</div>
-    <div class="chip" onclick="setCallerType('self_mental')" data-key="self_mental">🙋 Self — Mental Health</div>
-    <div class="chip" onclick="setCallerType('dual')" data-key="dual">⚡ Dual Diagnosis</div>
-    <div class="chip" onclick="setCallerType('crisis')" data-key="crisis">🚨 Crisis / Urgent</div>
-    <div class="chip" onclick="setCallerType('insurance')" data-key="insurance">📋 Insurance / VOB</div>
-    <div class="chip" onclick="setCallerType('custom')" data-key="custom">✏️ Custom</div>
-  </div>
-</div>
-<div class="ctx" id="ctx-fields" style="display:none">
-  <div><div class="ctx-lbl">Caller Situation</div><input id="prod" class="ctx-input" type="text" placeholder="Auto-filled based on caller type"></div>
-  <div><div class="ctx-lbl">Prospect Persona</div><input id="pers" class="ctx-input" type="text" placeholder="Add details to sharpen coaching..."></div>
-</div>
-<div class="btns">
-  <button class="btn bs" id="bst" onclick="go()">▶ Start Listening</button>
-  <button class="btn bx" id="bsp" onclick="stop()" disabled>◼ Stop</button>
-  <button class="btn bc" onclick="clr()">🗑 Clear</button>
-  <button class="btn bpdf" onclick="exportPDF()">⬇ Download Report</button>
-  <button class="btn bscore" id="bscore" onclick="scoreCall()">📊 Score Call</button>
-  <button class="btn bfocus" id="bfocus" onclick="toggleFocus()">🔒 Focus Mode</button>
-</div>
-<div class="sb" id="sb">👆 Select who's calling above, then hit Start Listening.</div>
-<div class="ib" id="ib"></div>
-<div class="eb" id="eb"></div>
 <div class="cols">
   <div>
     <div class="st">🎙️ Live Transcript</div>
@@ -860,7 +864,8 @@ function clr(){
 async function scoreCall(){
   if(!_CL){showerr("Anthropic API key missing.");return;}
   if(lines.length<3){showerr("Not enough transcript to score — complete a call first.");return;}
-  document.getElementById("score-modal").classList.add("show");
+  document.getElementById("score-modal").style.display="block";
+  document.getElementById("score-modal").scrollIntoView({behavior:"smooth",block:"start"});
   document.getElementById("sc-letter").textContent="...";
   document.getElementById("sc-pct").textContent="Analyzing your call...";
   document.getElementById("sc-feedback").textContent="Running AI analysis...";
