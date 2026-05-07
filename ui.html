@@ -63,7 +63,12 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
 
 #pdf-report{display:none}
 
-.ctx{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.caller-select-row{margin-bottom:10px}
+.caller-chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{padding:6px 13px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #1E2D3D;background:#131A22;color:#4A6070;font-family:monospace;transition:all 0.15s;white-space:nowrap}
+.chip:hover{color:#C8D8E4;border-color:#2E4055}
+.chip.active{background:rgba(0,229,255,0.12);color:#00E5FF;border-color:rgba(0,229,255,0.45)}
+.chip.crisis-active{background:rgba(255,59,92,0.12);color:#FF3B5C;border-color:rgba(255,59,92,0.45)}
 .ctx-lbl{font-size:11px;color:#4A6070;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
 .ctx-input{width:100%;background:#090D11;border:1px solid #1E2D3D;border-radius:6px;padding:8px;color:#C8D8E4;font-family:monospace;font-size:12px}
 .sb{font-size:12px;color:#00E5FF;padding:5px 0;min-height:22px}
@@ -196,9 +201,22 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
     <button class="score-close" onclick="document.getElementById('score-modal').classList.remove('show')">Close</button>
   </div>
 </div>
-<div class="ctx">
-  <div><div class="ctx-lbl">Caller Situation</div><input id="prod" class="ctx-input" type="text" placeholder="e.g. Parent calling about son with opioid addiction, self-pay"></div>
-  <div><div class="ctx-lbl">Prospect Persona</div><input id="pers" class="ctx-input" type="text" placeholder="e.g. Desperate mother, 45yr old, son 24, 2 prior failed attempts"></div>
+<div class="caller-select-row">
+  <div class="ctx-lbl" style="margin-bottom:6px">Who's Calling?</div>
+  <div class="caller-chips" id="caller-chips">
+    <div class="chip active" onclick="setCallerType('family_substance')" data-key="family_substance">👨‍👩‍👧 Family — Substance</div>
+    <div class="chip" onclick="setCallerType('family_mental')" data-key="family_mental">🧠 Family — Mental Health</div>
+    <div class="chip" onclick="setCallerType('self_substance')" data-key="self_substance">🙋 Self — Substance</div>
+    <div class="chip" onclick="setCallerType('self_mental')" data-key="self_mental">🙋 Self — Mental Health</div>
+    <div class="chip" onclick="setCallerType('dual')" data-key="dual">⚡ Dual Diagnosis</div>
+    <div class="chip" onclick="setCallerType('crisis')" data-key="crisis">🚨 Crisis / Urgent</div>
+    <div class="chip" onclick="setCallerType('insurance')" data-key="insurance">📋 Insurance / VOB</div>
+    <div class="chip" onclick="setCallerType('custom')" data-key="custom">✏️ Custom</div>
+  </div>
+</div>
+<div class="ctx" id="ctx-fields" style="display:none">
+  <div><div class="ctx-lbl">Caller Situation</div><input id="prod" class="ctx-input" type="text" placeholder="Auto-filled based on caller type"></div>
+  <div><div class="ctx-lbl">Prospect Persona</div><input id="pers" class="ctx-input" type="text" placeholder="Add details to sharpen coaching..."></div>
 </div>
 <div class="btns">
   <button class="btn bs" id="bst" onclick="go()">▶ Start Listening</button>
@@ -208,7 +226,7 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
   <button class="btn bscore" id="bscore" onclick="scoreCall()">📊 Score Call</button>
   <button class="btn bfocus" id="bfocus" onclick="toggleFocus()">🔒 Focus Mode</button>
 </div>
-<div class="sb" id="sb">👆 Fill in the caller situation above then click Start Listening.</div>
+<div class="sb" id="sb">👆 Select who's calling above, then hit Start Listening.</div>
 <div class="ib" id="ib"></div>
 <div class="eb" id="eb"></div>
 <div class="cols">
@@ -375,8 +393,79 @@ const CI=(()=>{try{return __CI__;}catch(e){return 20;}})();
 // Safety check — if keys weren't injected by app.py they'll still be placeholders
 const _DG=DG.startsWith("__")||DG===""?"":DG;
 const _CL=CL.startsWith("__")||CL===""?"":CL;
-function getPROD(){return document.getElementById("prod").value||"caller asking about substance abuse treatment";}
-function getPERS(){return document.getElementById("pers").value||"a family member or individual seeking addiction treatment help";}
+const CALLER_PROFILES={
+  family_substance:{
+    situation:"Family member calling about loved one struggling with substance abuse (alcohol/drugs) — seeking residential treatment",
+    persona:"Concerned family member — likely exhausted, fearful, and researching options. May face resistance from loved one. High emotional urgency.",
+    label:"family_substance"
+  },
+  family_mental:{
+    situation:"Family member calling about loved one struggling with mental health — depression, anxiety, bipolar, or co-occurring disorder",
+    persona:"Worried family member dealing with mental health crisis in a loved one. May be unsure if treatment is needed or what level of care is appropriate.",
+    label:"family_mental"
+  },
+  self_substance:{
+    situation:"Individual calling for themselves regarding substance abuse — seeking detox or residential treatment",
+    persona:"Person acknowledging their own addiction and looking for help. May be ambivalent, scared, or have tried treatment before. Needs encouragement and clear next steps.",
+    label:"self_substance"
+  },
+  self_mental:{
+    situation:"Individual calling for themselves regarding mental health struggles — depression, anxiety, trauma, or co-occurring disorder",
+    persona:"Person seeking mental health support for themselves. May feel shame or uncertainty. Needs compassionate guidance toward the right level of care.",
+    label:"self_mental"
+  },
+  dual:{
+    situation:"Caller inquiring about dual diagnosis treatment — substance abuse combined with mental health disorder",
+    persona:"Family or individual dealing with complex co-occurring disorder. Likely frustrated with programs that only treated one issue. Needs to understand PPR's integrated approach.",
+    label:"dual"
+  },
+  crisis:{
+    situation:"URGENT — Crisis call. Active substance use emergency, safety concern, or immediate intervention needed",
+    persona:"Highly distressed caller. Possibly in acute crisis. Needs immediate reassurance, fast admissions path, and direct action. Do not delay — move toward admission now.",
+    label:"crisis"
+  },
+  insurance:{
+    situation:"Caller focused on insurance coverage and verification of benefits before making treatment decision",
+    persona:"Practical, financially-driven caller. Needs clear coverage information before committing. Goal: complete VOB and transition into clinical conversation.",
+    label:"insurance"
+  },
+  custom:{
+    situation:"",
+    persona:"",
+    label:"custom"
+  }
+};
+let activeCallerType="family_substance";
+function setCallerType(key){
+  activeCallerType=key;
+  document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active","crisis-active"));
+  const chip=document.querySelector(`[data-key="${key}"]`);
+  if(chip){chip.classList.add(key==="crisis"?"crisis-active":"active");}
+  const profile=CALLER_PROFILES[key];
+  const prodEl=document.getElementById("prod");
+  const persEl=document.getElementById("pers");
+  if(key==="custom"){
+    document.getElementById("ctx-fields").style.display="grid";
+    prodEl.value="";persEl.value="";
+    prodEl.placeholder="Describe the caller situation...";
+    persEl.placeholder="Describe the prospect persona...";
+    prodEl.focus();
+  } else {
+    document.getElementById("ctx-fields").style.display="grid";
+    prodEl.value=profile.situation;
+    persEl.value=profile.persona;
+  }
+}
+function getPROD(){
+  const v=document.getElementById("prod")?.value;
+  if(v&&v.trim())return v;
+  return CALLER_PROFILES[activeCallerType]?.situation||"Family member calling about a loved one struggling with substance abuse seeking treatment at Pinnacle Peak Recovery";
+}
+function getPERS(){
+  const v=document.getElementById("pers")?.value;
+  if(v&&v.trim())return v;
+  return CALLER_PROFILES[activeCallerType]?.persona||"Concerned family member or individual seeking addiction treatment help — emotionally invested, may have hesitations around cost, readiness, or prior failed treatment";
+}
 let sock,actx,proc,src,ms2,rec=false,t0=null,tmr=null;
 let W=0,O=0,H=0,I=0,WC=0,lines=[],pend="",lc=0,objections=[],focusMode=false,callStage=0;
 
@@ -760,6 +849,7 @@ function stop(){
 
 function clr(){
   stop();W=0;O=0;H=0;I=0;WC=0;lines=[];pend="";lc=0;objections=[];callStage=0;setStage(0);
+  setCallerType("family_substance");
   $("md").textContent="00:00";$("ib").textContent="";
   $("tb").innerHTML="<div class='te'>Transcript will appear here when you start listening...</div>";
   $("cb").innerHTML="<div class='ce'>🎤<br><br>Real-time coaching will appear here.<br><br><span style='color:#00E5FF'>Start listening to begin.</span></div>";
@@ -952,6 +1042,8 @@ function exportPDF(){
   if(win){win.document.write(reportHTML);win.document.close();}
   else{showerr("Pop-up blocked — please allow pop-ups for this site to download the report.");}
 }
+// Auto-init default caller type
+setCallerType("family_substance");
 </script>
 </body>
 </html>
