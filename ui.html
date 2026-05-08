@@ -898,12 +898,24 @@ Reply ONLY in this exact JSON — no extra text, no line breaks:
     const r=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
       headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:500,system:scoreSys,messages:[{role:"user",content:"Score this call now."}]})
+      body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:600,system:scoreSys,messages:[{role:"user",content:"Score this call now."}]})
     });
+    if(!r.ok){const t=await r.text();throw new Error("API error "+r.status+": "+t.slice(0,100));}
     const data=await r.json();
-    const raw=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"")
-      .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/\r?\n/g," ");
-    const res=JSON.parse(raw.match(/\{[\s\S]*\}/)[0]);
+    const raw=(data.content?.[0]?.text||"").trim()
+      .replace(/^```[a-z]*\n?|\n?```$/g,"")
+      .replace(/[\u2018\u2019]/g,"'")
+      .replace(/[\u201C\u201D]/g,'"')
+      .replace(/\r?\n/g," ");
+    if(!raw){throw new Error("Empty response from Claude");}
+    let res;
+    try{res=JSON.parse(raw);}
+    catch(e){
+      const match=raw.match(/\{[\s\S]*\}/);
+      if(!match)throw new Error("No JSON found in response: "+raw.slice(0,120));
+      try{res=JSON.parse(match[0]);}
+      catch(e2){throw new Error("JSON parse failed: "+match[0].slice(0,120));}
+    }
     const overall=Math.round(res.objection_handling*0.3+res.call_control*0.25+res.urgency_created*0.25+res.next_step_set*0.2);
     const grade=overall>=90?"A+":overall>=85?"A":overall>=80?"B+":overall>=75?"B":overall>=70?"C+":overall>=65?"C":overall>=60?"D":"F";
     const gradeCol=overall>=80?"#00FF9D":overall>=65?"#FFD60A":"#FF3B5C";
