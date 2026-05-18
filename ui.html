@@ -754,11 +754,11 @@ Reply ONLY in this exact JSON format, no extra text:
       if(match){
         try{res=JSON.parse(match[0]);}
         catch(e2){
-          try{res=JSON.parse(match[0].replace(/\n/g," ").replace(/\r/g,""));}
-          catch(e3){showerr("JSON parse failed: "+clean.slice(0,100));return;}
+          try{res=JSON.parse(match[0].replace(/,\s*\}$/,"}").replace(/\n/g," ").replace(/\r/g,""));}
+          catch(e3){console.warn("Coach JSON parse failed — skipping:",clean.slice(0,80));ss("✅ LIVE — Listening...");return;}
         }
       }
-      else{showerr("Unexpected response format: "+clean.slice(0,100));return;}
+      else{console.warn("No JSON in coach response — skipping");ss("✅ LIVE — Listening...");return;}
     }
 
     if(res.objection_resolved&&res.objection_resolved.length>2){
