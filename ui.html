@@ -25,6 +25,8 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
 .bpdf:hover{background:rgba(0,255,157,0.08)}
 .bscore{background:#131A22;color:#00E5FF;border:1px solid rgba(0,229,255,0.4);font-size:12px}
 .bscore:hover{background:rgba(0,229,255,0.08)}
+.breplay{background:#131A22;color:#FFD60A;border:1px solid rgba(255,214,10,0.4);font-size:12px}
+.breplay:hover{background:rgba(255,214,10,0.08)}
 .bfocus{background:#131A22;color:#FFD60A;border:1px solid rgba(255,214,10,0.4);font-size:12px}
 .bfocus:hover{background:rgba(255,214,10,0.08)}
 .bfocus.active{background:rgba(255,214,10,0.15);color:#FFD60A;border-color:#FFD60A;box-shadow:0 0 10px rgba(255,214,10,0.3)}
@@ -69,6 +71,46 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
 .chip:hover{color:#C8D8E4;border-color:#2E4055}
 .chip.active{background:rgba(0,229,255,0.12);color:#00E5FF;border-color:rgba(0,229,255,0.45)}
 .chip.crisis-active{background:rgba(255,59,92,0.12);color:#FF3B5C;border-color:rgba(255,59,92,0.45)}
+
+/* ── PRE-CALL INTEL BRIEF ── */
+.intel-panel{background:#0A1208;border:1px solid rgba(0,255,157,0.2);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.intel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.intel-title{font-size:10px;font-weight:700;color:#00FF9D;letter-spacing:2px;text-transform:uppercase}
+.intel-loading{font-size:11px;color:#4A6070;font-style:italic}
+.intel-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.intel-card{background:#131A22;border-radius:7px;padding:10px 12px;border-left:3px solid}
+.intel-card-lbl{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.intel-card-body{font-size:11px;color:#C8D8E4;line-height:1.6}
+
+/* ── TALK/LISTEN RATIO ── */
+.ratio-bar-wrap{background:#090D11;border:1px solid #1E2D3D;border-radius:8px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.ratio-lbl{font-size:9px;color:#4A6070;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+.ratio-track{flex:1;height:8px;background:#1E2D3D;border-radius:4px;overflow:hidden;position:relative}
+.ratio-fill{height:100%;border-radius:4px;transition:width 0.6s ease;background:linear-gradient(90deg,#00FF9D,#00E5FF)}
+.ratio-fill.warn{background:linear-gradient(90deg,#FFD60A,#FF8C00)}
+.ratio-fill.danger{background:linear-gradient(90deg,#FF3B5C,#CC0033)}
+.ratio-pct{font-size:11px;font-weight:700;color:#EFF6FB;white-space:nowrap;min-width:90px;text-align:right}
+
+/* ── HOT MOMENT FLASH ── */
+.hot-flash{display:none;background:linear-gradient(135deg,rgba(0,255,157,0.15),rgba(0,229,255,0.10));border:2px solid #00FF9D;border-radius:10px;padding:14px 16px;margin-bottom:10px;animation:hotpulse 1s ease-in-out 3}
+@keyframes hotpulse{0%,100%{box-shadow:0 0 0 0 rgba(0,255,157,0.4)}50%{box-shadow:0 0 0 8px rgba(0,255,157,0)}}
+.hot-flash.show{display:block}
+.hot-title{font-size:10px;font-weight:700;color:#00FF9D;letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}
+.hot-content{font-size:13px;color:#EFF6FB;line-height:1.6;font-weight:600}
+
+/* ── REPLAY MODE ── */
+.replay-panel{display:none;background:#090D11;border:1px solid rgba(255,214,10,0.2);border-radius:10px;padding:16px;margin-top:12px}
+.replay-panel.show{display:block}
+.replay-title{font-size:10px;font-weight:700;color:#FFD60A;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.replay-item{background:#131A22;border-radius:8px;padding:12px 14px;margin-bottom:8px;border-left:3px solid #FFD60A}
+.replay-item.missed{border-left-color:#FF3B5C}
+.replay-item.strong{border-left-color:#00FF9D}
+.replay-moment{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.replay-moment.missed{color:#FF3B5C}
+.replay-moment.strong{color:#00FF9D}
+.replay-moment.neutral{color:#FFD60A}
+.replay-text{font-size:12px;color:#C8D8E4;line-height:1.6}
+.replay-alt{font-size:11px;color:#00E5FF;margin-top:5px;font-style:italic;border-top:1px solid #1E2D3D;padding-top:5px}
 .ctx-lbl{font-size:11px;color:#4A6070;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
 .ctx-input{width:100%;background:#090D11;border:1px solid #1E2D3D;border-radius:6px;padding:8px;color:#C8D8E4;font-family:monospace;font-size:12px}
 .sb{font-size:12px;color:#00E5FF;padding:5px 0;min-height:22px}
@@ -116,21 +158,23 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
 .obj-a{font-size:12px;color:#C8D8E4;line-height:1.7;background:#090D11;border-radius:6px;padding:8px;border-left:2px solid #00E5FF}
 .obj-ts{font-size:9px;color:#4A6070;margin-top:5px}
 
-/* ── SCRIPTS LIBRARY ── */
-.scripts-section{margin-top:20px;border-top:1px solid #1E2D3D;padding-top:16px}
-.scripts-title{font-size:14px;font-weight:700;color:#FFD60A;margin-bottom:10px}
-.script-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-.tab{padding:5px 12px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #1E2D3D;background:#131A22;color:#4A6070;font-family:monospace;transition:all 0.15s}
-.tab:hover{color:#C8D8E4;border-color:#2E4055}
-.tab.active{background:rgba(255,214,10,0.15);color:#FFD60A;border-color:rgba(255,214,10,0.4)}
-/* script-box: no fixed height, scrolls naturally */
-.script-box{border:1px solid #1E2D3D;border-radius:8px;padding:10px;background:#090D11}
-.script-content{display:none}
-.script-content.active{display:block}
-.script-card{background:#131A22;border:1px solid #1E2D3D;border-left:3px solid #FFD60A;border-radius:9px;padding:12px;margin-bottom:10px}
-.script-card:last-child{margin-bottom:0}
-.script-lbl{font-size:9px;color:#FFD60A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
-.script-text{font-size:12px;color:#C8D8E4;line-height:1.8;font-style:italic}
+/* ── SCRIPT INJECTOR ── */
+.injector-section{margin-top:20px;border-top:1px solid #1E2D3D;padding-top:16px}
+.injector-title{font-size:14px;font-weight:700;color:#FFD60A;margin-bottom:10px}
+.injector-empty{font-size:12px;color:#4A6070;font-style:italic;padding:8px 0}
+.injector-card{background:#0D1A0A;border:2px solid #00FF9D;border-radius:10px;padding:16px 18px;margin-bottom:10px;position:relative}
+.injector-card.objection{border-color:#FF3B5C;background:#1A0A0D}
+.injector-card.close{border-color:#FFD60A;background:#1A1500}
+.injector-tag{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:2px 9px;border-radius:100px;display:inline-block;margin-bottom:10px}
+.injector-tag.coach{background:rgba(0,255,157,0.15);color:#00FF9D;border:1px solid rgba(0,255,157,0.4)}
+.injector-tag.objection{background:rgba(255,59,92,0.15);color:#FF3B5C;border:1px solid rgba(255,59,92,0.4)}
+.injector-tag.close{background:rgba(255,214,10,0.15);color:#FFD60A;border:1px solid rgba(255,214,10,0.4)}
+.injector-ts{font-size:9px;color:#4A6070;float:right}
+.injector-context{font-size:9px;color:#4A6070;margin-bottom:8px;font-style:italic}
+.injector-script{font-size:15px;color:#EFF6FB;line-height:1.7;font-weight:500;letter-spacing:0.2px}
+.injector-copy{position:absolute;top:12px;right:12px;background:#131A22;border:1px solid #1E2D3D;color:#4A6070;border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer;font-family:monospace;transition:all 0.15s}
+.injector-copy:hover{color:#00FF9D;border-color:rgba(0,255,157,0.4)}
+.injector-copy.copied{color:#00FF9D;border-color:rgba(0,255,157,0.6)}
 
 /* ── PPR PROGRAM QUICK-REF ── */
 .ppr-section{margin-top:20px;border-top:1px solid #1E2D3D;padding-top:16px}
@@ -175,6 +219,42 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
     <div class="chip" onclick="setCallerType('custom')" data-key="custom">✏️ Custom</div>
   </div>
 </div>
+
+<!-- Pre-Call Intel Brief -->
+<div class="intel-panel" id="intel-panel">
+  <div class="intel-header">
+    <span class="intel-title">⚡ Pre-Call Battle Card</span>
+    <span class="intel-loading" id="intel-loading">Select a caller type to generate intel...</span>
+  </div>
+  <div class="intel-cards" id="intel-cards" style="display:none">
+    <div class="intel-card" style="border-color:#FF3B5C">
+      <div class="intel-card-lbl" style="color:#FF3B5C">🚨 Likely Objections</div>
+      <div class="intel-card-body" id="intel-obj">—</div>
+    </div>
+    <div class="intel-card" style="border-color:#FFD60A">
+      <div class="intel-card-lbl" style="color:#FFD60A">💛 Emotional Driver</div>
+      <div class="intel-card-body" id="intel-emo">—</div>
+    </div>
+    <div class="intel-card" style="border-color:#00FF9D">
+      <div class="intel-card-lbl" style="color:#00FF9D">🎯 Recommended Close</div>
+      <div class="intel-card-body" id="intel-close">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- Talk/Listen Ratio -->
+<div class="ratio-bar-wrap">
+  <span class="ratio-lbl">🎙 You're Talking</span>
+  <div class="ratio-track"><div class="ratio-fill" id="ratio-fill" style="width:0%"></div></div>
+  <span class="ratio-pct" id="ratio-pct">— / —</span>
+</div>
+
+<!-- Hot Moment Flash -->
+<div class="hot-flash" id="hot-flash">
+  <div class="hot-title">🔥 BUYING SIGNAL DETECTED — CLOSE NOW</div>
+  <div class="hot-content" id="hot-content">—</div>
+</div>
+
 <div class="ctx" id="ctx-fields" style="display:none">
   <div><div class="ctx-lbl">Caller Situation</div><input id="prod" class="ctx-input" type="text" placeholder="Auto-filled based on caller type"></div>
   <div><div class="ctx-lbl">Prospect Persona</div><input id="pers" class="ctx-input" type="text" placeholder="Add details to sharpen coaching..."></div>
@@ -185,13 +265,21 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
   <button class="btn bc" onclick="clr()">🗑 Clear</button>
   <button class="btn bpdf" onclick="exportPDF()">⬇ Download Report</button>
   <button class="btn bscore" id="bscore" onclick="scoreCall()">📊 Score Call</button>
+  <button class="btn breplay" id="breplay" onclick="replayCall()">🔁 Replay Analysis</button>
   <button class="btn bfocus" id="bfocus" onclick="toggleFocus()">🔒 Focus Mode</button>
 </div>
 <div class="sb" id="sb">👆 Select who's calling above, then hit Start Listening.</div>
 <div class="ib" id="ib"></div>
 <div class="eb" id="eb"></div>
 
-<!-- Score Panel — inline, slides in below buttons -->
+<!-- Replay Analysis Panel -->
+<div class="replay-panel" id="replay-panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="replay-title">🔁 Call Replay Analysis</div>
+    <button onclick="document.getElementById('replay-panel').classList.remove('show')" style="background:none;border:1px solid #1E2D3D;color:#4A6070;border-radius:6px;padding:4px 10px;cursor:pointer;font-family:monospace;font-size:11px">✕ Close</button>
+  </div>
+  <div id="replay-content"><div style="color:#4A6070;font-size:12px;font-style:italic">Analyzing your call...</div></div>
+</div>
 <div id="score-modal" style="display:none;margin-bottom:12px">
   <div class="score-box">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
@@ -288,102 +376,10 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
     <div class="st">💡 Live Coaching Feed</div>
     <div class="box" id="cb"><div class="ce">🎤<br><br>Real-time coaching will appear here.<br><br><span style="color:#00E5FF">Start listening to begin.</span></div></div>
 
-    <!-- CLOSER SCRIPTS — full expandable, scrolls with page -->
-    <div class="scripts-section">
-      <div class="scripts-title">📋 Closer Scripts Library</div>
-      <div class="script-tabs">
-        <div class="tab active" onclick="showTab('open',this)">Opening</div>
-        <div class="tab" onclick="showTab('cost',this)">Cost</div>
-        <div class="tab" onclick="showTab('think',this)">Think About It</div>
-        <div class="tab" onclick="showTab('ins',this)">Insurance</div>
-        <div class="tab" onclick="showTab('ready',this)">Not Ready</div>
-        <div class="tab" onclick="showTab('close',this)">Closing</div>
-        <div class="tab" onclick="showTab('ppr',this)">PPR-Specific</div>
-      </div>
-      <div class="script-box">
-
-        <!-- ═══════════════════ OPENING ═══════════════════ -->
-        <div id="tab-open" class="script-content active">
-          <div class="script-card"><div class="script-lbl">🎯 Warm Opener — Acknowledge Courage</div><div class="script-text">"I want you to know — reaching out today took real courage, and I'm genuinely glad you did. Can you tell me a little about what's been going on? I want to make sure we find the absolute best path forward for your loved one."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 PPR Introduction — Lead with Clinical Strength</div><div class="script-text">"Let me tell you a little bit about our program. Pinnacle Peak Recovery is known for having one of the strongest clinical programs in Arizona. We primarily focus on trauma and the underlying conditions that drive addiction — because when you treat the root cause, the substance use becomes much easier to address. We're a world-class facility in McCormick Ranch, Scottsdale, offering full continuum care: detox, inpatient, and outpatient."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 What Makes PPR Different — The Clinical Edge</div><div class="script-text">"What separates us from other programs is our depth of clinical care. Our master's level therapists are trained in modalities most centers don't even offer — EMDR, Somatic Experiencing, ART, CPT, and DBT. We pair that with small group sizes so every person gets truly individualized attention. We go deeper, and that's why our outcomes are stronger."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Establish Trust Early</div><div class="script-text">"My job isn't to sell you on anything. My job is to help you figure out if we're the right fit. I'm going to ask you a few questions, and I just need you to be completely honest with me — can you do that?"</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Uncover the Pain</div><div class="script-text">"How long has this been going on? Because in my experience, families usually wait two or three years longer than they should — and every day of delay costs them more than any treatment program ever would."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Urgency Framing</div><div class="script-text">"I want to be upfront with you — the longer someone waits to get into treatment, the harder recovery becomes. The brain actually changes with prolonged use. Every single day matters. So let's figure out together how to make this happen as quickly as possible."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Rate the Urgency</div><div class="script-text">"On a scale of 1 to 10, how urgent is this situation right now? Because the families I work with who get the best outcomes are the ones who treat this like the emergency it truly is. Where are you on that scale?"</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Gather Insurance — Transition</div><div class="script-text">"Our admissions process is quick and easy. I'd start by gathering your insurance information and doing a verification of benefits so I can tell you exactly what we're working with. Are you or your loved one covered under any type of insurance?"</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 VOB Callback Wrap-Up</div><div class="script-text">"Okay great — I'm going to look into this right now and I'll be calling you back at [number] in about 30 to 45 minutes with everything I find. After that, the next step is a quick 15 to 20 minute pre-assessment over the phone so we can get a full picture of what's going on and how we can help."</div></div>
-        </div>
-
-        <!-- ═══════════════════ COST ═══════════════════ -->
-        <div id="tab-cost" class="script-content">
-          <div class="script-card"><div class="script-lbl">🚨 "It's too expensive"</div><div class="script-text">"I completely understand — and I want to ask you something. What has this addiction already cost your family? Between the ER visits, the bail, the lost jobs, the broken trust — most families tell me they've already spent more than the cost of treatment. This isn't an expense. It's an investment in getting your family back."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "I can't afford it right now"</div><div class="script-text">"What does 'right now' mean to you — because addiction doesn't wait for the right financial moment. If cost wasn't a factor, would you want your loved one to get help today? Good. Then let's focus on making it work — we have payment plans, and our team works with families every single day to find a path forward."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "That's more than I expected"</div><div class="script-text">"I hear you — and I want to be transparent. You could find cheaper options, but what you get here is a clinical team trained in EMDR, Somatic Experiencing, and ART — modalities most centers don't even offer. Small group sizes. Master's level therapists. A trauma-focused approach that actually treats the root cause. What's your loved one's life worth to you?"</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "Can you lower the price?"</div><div class="script-text">"What I can do is help you maximize every dollar. Let's look at your insurance first — you may be more covered than you think. Then we can explore payment options. Most families are surprised at how manageable it becomes once we break it down together."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 Cost of Inaction</div><div class="script-text">"Here's another way to look at it — the average family spends $35,000 a year managing an active addiction. One ER visit can cost $10,000 alone. Our program pays for itself when you factor in what stops. And more importantly — you get your loved one back. Can we look at the numbers together?"</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "I need to figure out finances first"</div><div class="script-text">"I respect that completely — and that's exactly why I want to get you a verification of benefits right now. Many families are shocked by what their insurance actually covers. Let me do the homework for you so you're making this decision with real numbers, not assumptions. Can I get your insurance information?"</div></div>
-        </div>
-
-        <!-- ═══════════════════ THINK ABOUT IT ═══════════════════ -->
-        <div id="tab-think" class="script-content">
-          <div class="script-card"><div class="script-lbl">🚨 "I need to think about it"</div><div class="script-text">"I completely respect that — and I have to be honest with you, because I care. Families who say they need to think about it almost always call back two or three months later, after something much worse happened. What specifically do you need to think through? Let's work through it together right now, while I have you."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "I need to talk to my spouse first"</div><div class="script-text">"Absolutely — this is a family decision and it should be made together. Can we get them on the phone right now? I'd love to answer their questions directly. It only takes 10 minutes and it'll make your conversation much easier tonight. Are they available?"</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "Let me do more research"</div><div class="script-text">"What are you hoping to find that would make you feel more confident? I'd rather answer those questions right now than have you spend hours on Google getting overwhelmed with places that aren't right for your loved one. What's the one thing that would make this a clear yes for you?"</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "Call me back next week"</div><div class="script-text">"I'll absolutely follow up — and I want to ask you honestly: what changes next week? Because the situation your loved one is in today will most likely be worse next week, not better. What would need to happen for you to feel ready to move forward today?"</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 The Real Cost of Waiting</div><div class="script-text">"I understand needing time — and I want to share something I've seen too many times. Every week of delay increases the risk of a crisis: an overdose, an arrest, a hospitalization. I don't say that to scare you. I say it because I want your loved one to have every possible chance. Pinnacle Peak is ready to help right now."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "I'm just not sure this is the right place"</div><div class="script-text">"That's a fair thing to feel — and here's what I'd tell you. We have one of the strongest clinical programs in Arizona. Master's level therapists. Trauma-focused care. Small groups. Modalities like EMDR and Somatic Experiencing that most programs don't even have. What would make you feel confident this is the right fit? Let me answer that directly."</div></div>
-        </div>
-
-        <!-- ═══════════════════ INSURANCE ═══════════════════ -->
-        <div id="tab-ins" class="script-content">
-          <div class="script-card"><div class="script-lbl">🎯 "Will insurance cover this?" — Standard</div><div class="script-text">"Great question — and the answer depends on your specific plan. What I can do is have our team run a free verification of benefits while we're on the phone. It takes about 10 minutes and you'll know exactly what you're working with before you make any decisions. Can I get your insurance information?"</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "Insurance denied it"</div><div class="script-text">"That happens — and we fight it. We have a team that handles insurance appeals every single day and we win most of them. Insurance companies are legally required to cover substance abuse treatment under the Mental Health Parity Act — if they denied you, they may be in violation. Don't let an insurance company make this life-or-death decision for your family. Let us handle that battle."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "I only have Medicaid"</div><div class="script-text">"We can work with Medicaid when we have availability. Let me do a quick verification right now to see where we stand — can I get your insurance ID so we can check immediately?"</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "I don't have insurance"</div><div class="script-text">"You're not alone — a lot of families are in that exact situation. We have self-pay rates and payment plans. Let's look at what works for your budget and find the best path forward together. Can I get a little more information about your situation?"</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "I'm not sure my insurance will cover it"</div><div class="script-text">"That's exactly why we do the verification before anything else — so there are no surprises. I'll gather your information right now and call you back in 30 to 45 minutes with the full picture. You won't have to guess. Let me take that off your plate."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 VOB Callback Script</div><div class="script-text">"Okay, I've got what I need. I'm going to reach out to your insurance right now and I'll call you back at [number] in about 30 to 45 minutes with exactly what's covered. Once we have those numbers, the next step is a quick 15 to 20 minute pre-assessment over the phone — and then we'll schedule a time to get your loved one in."</div></div>
-        </div>
-
-        <!-- ═══════════════════ NOT READY ═══════════════════ -->
-        <div id="tab-ready" class="script-content">
-          <div class="script-card"><div class="script-lbl">🚨 "He's not ready"</div><div class="script-text">"Most people who come through our doors weren't ready either — and they got better anyway. Readiness comes after admission, not before. Our clinical team at Pinnacle Peak is specifically trained to meet people exactly where they are, even when they're resistant. The question isn't whether he's ready. It's whether you're ready to give him his best chance."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "She needs to want it herself"</div><div class="script-text">"I hear that so often — and here's what the research actually tells us: waiting for someone to hit rock bottom costs lives. Intervention works. Structure works. Love works. The fact that you're on this call right now IS her wanting help — she just can't see it yet through the disease. Let's get her in."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "We tried treatment before and it didn't work"</div><div class="script-text">"That tells me your loved one has already shown they can engage with treatment. Most people need multiple attempts before recovery truly sticks — that's not failure, that's the nature of this disease. What was missing last time? Because we build individualized plans specifically designed to address what didn't work before. What we do here goes deeper."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "I don't want to force them"</div><div class="script-text">"You're not forcing them — you're giving them a choice they can't make clearly right now because of the disease. That's what families do. Our clinical team specializes in working with people who come in resistant and turning that around within the first few days. They've seen it hundreds of times."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "They'll just leave AMA"</div><div class="script-text">"That's a legitimate concern — and here's what I've seen happen at Pinnacle Peak. Most people who come in resistant leave changed. Our therapists are trained in engagement and motivation — getting people to want to stay is part of what we do. The first 72 hours are the hardest. After that, most people choose to stay. Let's get them through that door."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "What if it doesn't work?"</div><div class="script-text">"That's exactly the right question — and here's the honest answer. Recovery is a journey, not a single event. What I can tell you is that doing nothing has a 100% failure rate. Getting help at a program that treats trauma and root causes — with master's level therapists and real clinical depth — gives your loved one a real fighting chance. And we'll be with your family every step of the way."</div></div>
-          <div class="script-card"><div class="script-lbl">🚨 "I don't think they'll go willingly"</div><div class="script-text">"That's more common than you'd think — and it's something we help families navigate every day. Our team can walk you through how to have that conversation, and what the first 24 hours here look like to help ease that fear. What matters most right now is having a plan ready when the moment comes. Let's build that together."</div></div>
-        </div>
-
-        <!-- ═══════════════════ CLOSING ═══════════════════ -->
-        <div id="tab-close" class="script-content">
-          <div class="script-card"><div class="script-lbl">🎯 Assumptive Close</div><div class="script-text">"Based on everything you've shared with me, it sounds like Pinnacle Peak is exactly what your loved one needs right now. Let's start the admissions process — the next step is a quick 15 to 20 minute pre-assessment over the phone. I can have someone reach out to you within the hour. Does that work?"</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Urgency Close — Limited Beds</div><div class="script-text">"I want to be transparent with you — our bed availability changes daily and we fill up fast, especially this time of year. I'd hate for you to call back next week and not have a spot available for your loved one. Can we reserve a place today while you finalize the details?"</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Emotional Close</div><div class="script-text">"You called today because part of you knows this is the moment. You've been carrying this long enough — and so has your loved one. Let us carry it with you. What would it mean to your family to have them back — really back — showing up, present, themselves again?"</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 The Permission Close</div><div class="script-text">"Can I ask you something? If I could show you a way to get your loved one into one of the strongest clinical programs in Arizona this week — with insurance handled and a bed available — would you be willing to move forward today? Because I think I can make that happen."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Buying Signal Response</div><div class="script-text">"It sounds like you're ready to take this step — and I think that's the right call. Let me get our admissions team on the line right now. They'll walk you through everything in about 15 minutes, and we can have a bed ready as early as tomorrow."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Final Objection Crusher</div><div class="script-text">"Let me ask you one last question. If your loved one doesn't get help today — what happens next week? Next month? You already know the answer. The only question is whether today is the day you change that story. I believe it is. Pinnacle Peak is ready. Let's do this together."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 The Vision Close</div><div class="script-text">"Picture your loved one six months from now — sober, present, reconnected with your family, back to who they really are. That's what we create every single day at Pinnacle Peak Recovery. That future is possible. It starts with one decision — and you've already taken the hardest step by making this call. Let's take the next one together."</div></div>
-          <div class="script-card"><div class="script-lbl">🎯 Pre-Assessment Close</div><div class="script-text">"Here's where we are — the next step is just a 15 to 20 minute pre-assessment call so we can get a full picture of what's going on and put together a plan specific to your loved one. Once that's done, we'll schedule the admission. I can set that up right now. Are you available today or would tomorrow morning work better?"</div></div>
-        </div>
-
-        <!-- ═══════════════════ PPR-SPECIFIC ═══════════════════ -->
-        <div id="tab-ppr" class="script-content">
-          <div class="script-card"><div class="script-lbl">🏥 "What makes you different from other programs?"</div><div class="script-text">"We go deeper than other programs — and the reason we can is our clinical team. Our master's level therapists are trained in modalities most treatment centers don't even offer: Somatic Experiencing, EMDR, ART, CPT, and DBT. We pair that with small group sizes and holistic programming so every person gets truly individualized care. We're not treating the surface. We're treating the root cause."</div></div>
-          <div class="script-card"><div class="script-lbl">🏥 "How long will they be in treatment?"</div><div class="script-text">"The length of stay is genuinely different for everyone — it depends on medical progress, clinical progress, and what insurance authorizes. When your loved one arrives, they'll be fully assessed and an individualized treatment plan will be created specifically for them. We don't put anyone on a cookie-cutter timeline."</div></div>
-          <div class="script-card"><div class="script-lbl">🏥 "How long does detox take?"</div><div class="script-text">"Detox looks different for everyone. Our provider will see your loved one within 12 hours of arrival and create an individualized detox plan. The length depends on the substance, how much and how long they've been using, and how they're presenting. We offer medically assisted detox with comfort medications to make it as safe and manageable as possible."</div></div>
-          <div class="script-card"><div class="script-lbl">🏥 "Do you offer non-narcotic detox?"</div><div class="script-text">"We do offer non-narcotic detox for certain substances. For opiate users, we use non-narcotic alternatives alongside vitamins and supplements to support the process. For alcohol and benzodiazepines, we're not able to offer that approach because the severity of withdrawals requires medical management — but our team will make sure it's handled safely and comfortably."</div></div>
-          <div class="script-card"><div class="script-lbl">🏥 "Can they keep their phone?"</div><div class="script-text">"We have an extremely flexible phone policy. During detox, there's no personal phone — but your loved one will have a full team of case managers who can make calls and handle outside stressors on their behalf. Once they move to residential, they have house phone access. After 7 to 10 days with clinical approval, they can use all electronics after clinical hours. It's designed to keep them focused while staying connected."</div></div>
-          <div class="script-card"><div class="script-lbl">🏥 "What about their job — can they get fired?"</div><div class="script-text">"That's something we help navigate every single day. Your loved one will have a full team of case managers to handle outside stressors and manage their leave of absence. FMLA provides up to 12 weeks of job-protected unpaid leave for treatment. If they don't qualify for FMLA, the ADA still provides protections — substance use disorders can be classified as a disability. They won't have to face any of that alone."</div></div>
-          <div class="script-card"><div class="script-lbl">🏥 "Can they continue their medications?"</div><div class="script-text">"Our provider does a full assessment on arrival. For medications like Adderall or benzos, we'll find a non-narcotic alternative — our doctors are highly experienced with this and most patients do very well with the transition. For testosterone, we'll run a full blood panel and the provider will evaluate for continuation. Just don't bring any existing prescriptions."</div></div>
-          <div class="script-card"><div class="script-lbl">🏥 "Will they have a roommate?"</div><div class="script-text">"Rooms are typically shared — they're spacious with large beds and plenty of room to feel comfortable. Having a roommate is actually a meaningful part of the recovery process — connecting with someone who understands what you're going through can be incredibly powerful. That said, if privacy is a priority, we do have private rooms available at an additional cost."</div></div>
-          <div class="script-card"><div class="script-lbl">🏥 "What's the food like?"</div><div class="script-text">"All meals are prepared and catered by our private chef using quality ingredients — it's honestly one of the highlights of our program. We can accommodate most dietary needs: allergies, intolerances, vegan, gluten-free, and more. Just let us know before admission so we can have everything set up when your loved one arrives."</div></div>
-          <div class="script-card"><div class="script-lbl">🏥 "How involved can our family be?"</div><div class="script-text">"Family involvement can be a powerful part of recovery — and we take it seriously. We offer dedicated family therapy sessions, regular update calls from your loved one's therapist or case manager, and family workshops for residential clients. Everything is based on your loved one's consent, so it's collaborative — never forced. How involved would you like to be?"</div></div>
-          <div class="script-card"><div class="script-lbl">🏥 Trauma / Root Cause Close</div><div class="script-text">"Here's what makes Pinnacle Peak different at the core: we don't just treat the addiction — we treat the underlying trauma and conditions driving it. When you address the root cause, the substance use becomes much easier to treat and recovery actually sticks. That's the reason our clinical outcomes are stronger. That's why families choose us."</div></div>
-        </div>
-
-      </div>
+    <!-- SCRIPT INJECTOR -->
+    <div class="injector-section">
+      <div class="injector-title">⚡ Live Script Injector</div>
+      <div id="injector-feed"><div class="injector-empty">Scripts will auto-surface here based on what's happening on the call. No hunting required.</div></div>
     </div>
   </div>
 </div>
@@ -454,10 +450,13 @@ function setCallerType(key){
     prodEl.placeholder="Describe the caller situation...";
     persEl.placeholder="Describe the prospect persona...";
     prodEl.focus();
+    document.getElementById("intel-loading").textContent="Enter custom details above";
+    document.getElementById("intel-cards").style.display="none";
   } else {
     document.getElementById("ctx-fields").style.display="grid";
     prodEl.value=profile.situation;
     persEl.value=profile.persona;
+    generateIntel(key);
   }
 }
 function getPROD(){
@@ -542,12 +541,6 @@ function stmr(){
   },500);
 }
 function xtmr(){clearInterval(tmr);}
-function showTab(name,el){
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  document.querySelectorAll(".script-content").forEach(c=>c.classList.remove("active"));
-  document.getElementById("tab-"+name).classList.add("active");
-  el.classList.add("active");
-}
 function addLine(t,tx){
   const b=$("tb"),e=b.querySelector(".te");if(e)e.remove();
   const d=document.createElement("div");d.className="tl";
@@ -571,6 +564,39 @@ function addCoach(type,content,t){
     <span style="font-size:9px;color:#4A6070">${t}</span>
   </div>${content}`;
   b.insertBefore(d,b.firstChild);
+}
+function addInjector(type,script,context,t){
+  if(focusMode||!script||!script.trim())return;
+  const feed=document.getElementById("injector-feed");
+  if(!feed)return;
+  const empty=feed.querySelector(".injector-empty");if(empty)empty.remove();
+  const tagType=type==="objection"?"objection":type==="win"?"close":"coach";
+  const tagLabel=type==="objection"?"🚨 OBJECTION RESPONSE":type==="win"?"🏆 CLOSE NOW":"💬 SAY THIS";
+  const id="inj-"+Date.now();
+  const d=document.createElement("div");
+  d.className=`injector-card ${tagType}`;
+  d.id=id;
+  d.innerHTML=`
+    <button class="injector-copy" onclick="copyScript('${id}',this)">📋 Copy</button>
+    <span class="injector-tag ${tagType}">${tagLabel}</span>
+    <span class="injector-ts">${t}</span>
+    ${context?`<div class="injector-context">${context}</div>`:""}
+    <div class="injector-script">"${script}"</div>
+  `;
+  feed.insertBefore(d,feed.firstChild);
+  // Keep only last 5 scripts
+  const cards=feed.querySelectorAll(".injector-card");
+  if(cards.length>5)cards[cards.length-1].remove();
+}
+
+function copyScript(id,btn){
+  const card=document.getElementById(id);
+  if(!card)return;
+  const text=card.querySelector(".injector-script")?.textContent||"";
+  navigator.clipboard.writeText(text.replace(/^"|"$/g,"")).then(()=>{
+    btn.textContent="✅ Copied!";btn.classList.add("copied");
+    setTimeout(()=>{btn.textContent="📋 Copy";btn.classList.remove("copied");},2000);
+  });
 }
 function addObjLog(id,objText,rebuttal,t){
   if(focusMode)return; // frozen — don't update UI
@@ -715,8 +741,15 @@ LENGTH RULES — NON NEGOTIABLE:
 - NO numbered lists, NO bullets, NO line breaks in content field
 - Content must be one clean string, no special formatting, straight apostrophes only
 
+SCRIPT INJECTION — "script" field:
+- For "objection" type: ALWAYS include the exact word-for-word script to say, 1-2 sentences max, in first person as if speaking it out loud. Start with a natural opener like "I hear you..." or "I understand..."
+- For "win" type: ALWAYS include the exact closing line to use right now
+- For "coach" type: include a script only when there's a clear specific thing to say (e.g. asking a discovery question, making a PPR pitch). Leave empty string "" if it's general guidance.
+- For "positive": always empty string ""
+- Scripts must be natural spoken language — not formal, not stiff. How a great rep actually talks.
+
 Reply ONLY in this exact JSON format, no extra text:
-{"type":"coach","content":"your coaching here","objection_text":"","objection_resolved":""}`;
+{"type":"coach","content":"your coaching here","script":"exact word-for-word script to say or empty string","objection_text":"","objection_resolved":""}`;
 
     let r, attempts=0;
     while(attempts<3){
@@ -769,6 +802,9 @@ Reply ONLY in this exact JSON format, no extra text:
     if(res.type&&res.content){
       I++;
       addCoach(res.type,res.content,ts());
+      if(res.script&&res.script.trim()){
+        addInjector(res.type,res.script,res.objection_text||"",ts());
+      }
       if(res.type==="objection"&&res.objection_text&&res.objection_text.length>1){
         O++;
         const id=Date.now();
@@ -794,7 +830,9 @@ function final(tx){
   const w=tx.trim().split(/\s+/).length;
   W+=w;WC+=w;pend+=" "+tx;
   upd();
+  updateRatio(w);
   detectStage(tx);
+  checkHotMoment(tx);
   const now=Date.now();
   const hasObjKeyword=OBJECTION_KEYWORDS.test(tx);
   // Fire immediately on objection keywords (min 2s gap), or every 8 words (min 4s gap)
@@ -853,8 +891,15 @@ function stop(){
 
 function clr(){
   stop();W=0;O=0;H=0;I=0;WC=0;lines=[];pend="";lc=0;objections=[];callStage=0;setStage(0);
-  setCallerType("family_substance");
+  talkWords=0;totalWords=0;hotCooldown=false;
+  const fill=document.getElementById("ratio-fill");const pct=document.getElementById("ratio-pct");
+  if(fill)fill.style.width="0%";if(pct)pct.textContent="— / —";
+  document.getElementById("hot-flash")?.classList.remove("show");
   document.getElementById("score-modal").style.display="none";
+  document.getElementById("replay-panel")?.classList.remove("show");
+  const injFeed=document.getElementById("injector-feed");
+  if(injFeed)injFeed.innerHTML='<div class="injector-empty">Scripts will auto-surface here based on what\'s happening on the call. No hunting required.</div>';
+  setCallerType("family_substance");
   $("md").textContent="00:00";$("ib").textContent="";
   $("tb").innerHTML="<div class='te'>Transcript will appear here when you start listening...</div>";
   $("cb").innerHTML="<div class='ce'>🎤<br><br>Real-time coaching will appear here.<br><br><span style='color:#00E5FF'>Start listening to begin.</span></div>";
@@ -1060,7 +1105,140 @@ function exportPDF(){
   if(win){win.document.write(reportHTML);win.document.close();}
   else{showerr("Pop-up blocked — please allow pop-ups for this site to download the report.");}
 }
-// Auto-init default caller type
+// ── TALK/LISTEN RATIO ──
+let talkWords=0,totalWords=0;
+function updateRatio(w){
+  talkWords+=w;totalWords+=w; // all transcribed words are "you" talking
+  // Estimate listen ratio: assume prospect speaks ~40% of time not captured
+  const adjustedTotal=totalWords/0.6;
+  const talkPct=Math.round((talkWords/adjustedTotal)*100);
+  const fill=document.getElementById("ratio-fill");
+  const pct=document.getElementById("ratio-pct");
+  if(!fill||!pct)return;
+  fill.style.width=Math.min(talkPct,100)+"%";
+  fill.className="ratio-fill"+(talkPct>65?" danger":talkPct>50?" warn":"");
+  const status=talkPct>65?"⚠️ TALKING TOO MUCH":talkPct>50?"⚡ Watch your ratio":"✅ Good balance";
+  pct.textContent=`You: ${talkPct}% — ${status}`;
+}
+
+// ── HOT MOMENT DETECTION ──
+const HOT_SIGNALS=/\b(how soon|when can (he|she|they) start|what does (insurance|my insurance) cover|is there (availability|a bed)|how (do I|do we) get started|what('?s| is) the (next step|process|cost|price)|I('?m| am) ready|we('?re| are) ready|let('?s| us) do (it|this)|what do (I|we) need|sign (me|him|her|them) up|get (him|her|them) in|I want to (move forward|proceed)|can we (schedule|set|book)|when (is|are) you available)\b/i;
+const HOT_CLOSES={
+  default:"Let's lock in a pre-assessment right now — I have availability today. What's the best number to reach you in the next 30 minutes?",
+  insurance:"Perfect — let me get your insurance info right now and I'll call you back in 30 minutes with exactly what's covered.",
+  family_substance:"Let's get the intake process started right now — I can have someone reach out within the hour. What's the best contact number?",
+  self_substance:"I'm glad you're ready — let's take the next step together right now. Can I get you scheduled for a quick 15-minute pre-assessment call today?",
+  crisis:"We need to move on this right now. Let me get your information and we can have a bed ready as early as tonight.",
+};
+let hotCooldown=false;
+function checkHotMoment(tx){
+  if(hotCooldown||!HOT_SIGNALS.test(tx))return;
+  const close=HOT_CLOSES[activeCallerType]||HOT_CLOSES.default;
+  const flash=document.getElementById("hot-flash");
+  const content=document.getElementById("hot-content");
+  if(!flash||!content)return;
+  content.textContent=close;
+  flash.classList.add("show");
+  hotCooldown=true;
+  setTimeout(()=>{flash.classList.remove("show");hotCooldown=false;},12000);
+}
+
+// ── PRE-CALL INTEL BRIEF ──
+let intelCache={};
+async function generateIntel(key){
+  if(!_CL)return;
+  if(intelCache[key]){applyIntel(intelCache[key]);return;}
+  document.getElementById("intel-loading").textContent="Generating battle card...";
+  document.getElementById("intel-cards").style.display="none";
+  const profile=CALLER_PROFILES[key];
+  if(!profile||key==="custom")return;
+  const sys=`You are an elite admissions coach for Pinnacle Peak Recovery (PPR), a premier substance abuse and mental health treatment center in McCormick Ranch, Scottsdale AZ.
+
+Generate a pre-call battle card for this caller type: ${profile.situation}
+Persona: ${profile.persona}
+
+Reply ONLY in this exact JSON, no extra text, straight quotes only:
+{"objections":"2-3 most likely objections this caller will raise, comma separated, very short","emotional_driver":"The core emotional fear or desire driving this call in one short sentence","recommended_close":"The single best closing move or next step for this caller type in one sentence"}`;
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:300,system:sys,messages:[{role:"user",content:"Generate the battle card now."}]})
+    });
+    if(!r.ok){document.getElementById("intel-loading").textContent="Intel unavailable";return;}
+    const data=await r.json();
+    const raw=(data.content?.[0]?.text||"").trim()
+      .replace(/^```[a-z]*\n?|\n?```$/g,"")
+      .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/\r?\n/g," ");
+    const match=raw.match(/\{[\s\S]*\}/);
+    if(!match){document.getElementById("intel-loading").textContent="Intel unavailable";return;}
+    const res=JSON.parse(match[0]);
+    intelCache[key]=res;
+    applyIntel(res);
+  }catch(e){document.getElementById("intel-loading").textContent="Intel unavailable";}
+}
+function applyIntel(res){
+  document.getElementById("intel-obj").textContent=res.objections||"—";
+  document.getElementById("intel-emo").textContent=res.emotional_driver||"—";
+  document.getElementById("intel-close").textContent=res.recommended_close||"—";
+  document.getElementById("intel-cards").style.display="grid";
+  document.getElementById("intel-loading").textContent="Ready";
+}
+
+// ── CALL REPLAY ANALYSIS ──
+async function replayCall(){
+  if(!_CL){showerr("Anthropic API key missing.");return;}
+  if(lines.length<5){showerr("Not enough transcript to analyze — complete a call first.");return;}
+  const panel=document.getElementById("replay-panel");
+  const content=document.getElementById("replay-content");
+  panel.classList.add("show");
+  panel.scrollIntoView({behavior:"smooth",block:"start"});
+  content.innerHTML="<div style='color:#4A6070;font-size:12px;font-style:italic;padding:8px 0'>🔁 Re-running your call through APEX analysis...</div>";
+  const transcript=lines.join(" ");
+  const sys=`You are an elite admissions sales coach analyzing a call transcript from Pinnacle Peak Recovery. Your job is to find every missed opportunity, flag what was done well, and provide the exact alternative script for each missed moment.
+
+CALLER TYPE: ${CALLER_PROFILES[activeCallerType]?.situation||"substance abuse admissions call"}
+CALL STAGE REACHED: ${STAGES[callStage]||"opener"}
+OBJECTIONS FACED: ${O}, HANDLED: ${H}
+
+FULL TRANSCRIPT:
+${transcript.slice(-4000)}
+
+Identify 4-6 specific moments. For each: classify as "strong", "missed", or "neutral". Be specific about what was said and what should have been said instead.
+
+Reply ONLY in this exact JSON, no extra text:
+{"moments":[{"type":"missed","quote":"exact or paraphrased thing said","issue":"what went wrong in one sentence","alternative":"exact word-for-word script to use instead"},{"type":"strong","quote":"exact or paraphrased thing said","issue":"why this worked"},{"type":"missed","quote":"...","issue":"...","alternative":"..."}]}`;
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:1000,system:sys,messages:[{role:"user",content:"Analyze this call now."}]})
+    });
+    if(!r.ok){const t=await r.text();throw new Error("API error "+r.status+": "+t.slice(0,80));}
+    const data=await r.json();
+    const raw=(data.content?.[0]?.text||"").trim()
+      .replace(/^```[a-z]*\n?|\n?```$/g,"")
+      .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"');
+    const match=raw.match(/\{[\s\S]*\}/);
+    if(!match)throw new Error("No JSON in response");
+    const res=JSON.parse(match[0]);
+    const moments=res.moments||[];
+    if(moments.length===0){content.innerHTML="<div style='color:#4A6070;font-size:12px'>No moments identified.</div>";return;}
+    content.innerHTML=moments.map(m=>{
+      const col=m.type==="strong"?"#00FF9D":m.type==="missed"?"#FF3B5C":"#FFD60A";
+      const lbl=m.type==="strong"?"✅ STRONG MOVE":m.type==="missed"?"❌ MISSED OPPORTUNITY":"💡 COULD BE STRONGER";
+      return `<div class="replay-item ${m.type}">
+        <div class="replay-moment ${m.type}">${lbl}</div>
+        <div class="replay-text"><strong style="color:#EFF6FB">"${m.quote}"</strong><br>${m.issue}</div>
+        ${m.alternative?`<div class="replay-alt">Instead say: "${m.alternative}"</div>`:""}
+      </div>`;
+    }).join("");
+  }catch(e){
+    content.innerHTML=`<div style='color:#FF3B5C;font-size:12px'>Replay failed: ${e.message}</div>`;
+  }
+}
+
+// Auto-init default caller type and intel
 setCallerType("family_substance");
 </script>
 </body>
