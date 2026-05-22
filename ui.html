@@ -956,10 +956,22 @@ Reply ONLY in this exact JSON — no extra text, no line breaks:
     let res;
     try{res=JSON.parse(raw);}
     catch(e){
-      const match=raw.match(/\{[\s\S]*\}/);
-      if(!match)throw new Error("No JSON found in response: "+raw.slice(0,120));
-      try{res=JSON.parse(match[0]);}
-      catch(e2){throw new Error("JSON parse failed: "+match[0].slice(0,120));}
+      // Fallback: extract fields individually via regex — handles malformed JSON
+      try{
+        const oh=raw.match(/"objection_handling"\s*:\s*(\d+)/)?.[1];
+        const cc=raw.match(/"call_control"\s*:\s*(\d+)/)?.[1];
+        const uc=raw.match(/"urgency_created"\s*:\s*(\d+)/)?.[1];
+        const ns=raw.match(/"next_step_set"\s*:\s*(\d+)/)?.[1];
+        if(!oh||!cc||!uc||!ns)throw new Error("Missing score fields");
+        const fbMatch=raw.match(/"feedback"\s*:\s*\[([\s\S]*?)\]/);
+        let fb=[];
+        if(fbMatch){
+          fb=fbMatch[1].match(/"([^"]+)"/g)?.map(s=>s.replace(/^"|"$/g,""))||[];
+        }
+        res={objection_handling:+oh,call_control:+cc,urgency_created:+uc,next_step_set:+ns,feedback:fb};
+      }catch(e2){
+        throw new Error("Could not parse score: "+raw.slice(0,150));
+      }
     }
     const overall=Math.round(res.objection_handling*0.3+res.call_control*0.25+res.urgency_created*0.25+res.next_step_set*0.2);
     const grade=overall>=90?"A+":overall>=85?"A":overall>=80?"B+":overall>=75?"B":overall>=70?"C+":overall>=65?"C":overall>=60?"D":"F";
