@@ -1,368 +1,461 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
+/* ── TOKENS ── */
+:root{
+  --void:#060912;
+  --surface-1:#0B1120;
+  --surface-2:#111827;
+  --surface-3:#1a2236;
+  --border:#1E2D45;
+  --border-bright:#2A3F5F;
+  --text-primary:#E8F4FF;
+  --text-secondary:#8BA4C0;
+  --text-muted:#3D5470;
+  --cyan:#00D9FF;
+  --cyan-dim:rgba(0,217,255,0.12);
+  --cyan-glow:rgba(0,217,255,0.25);
+  --green:#00F5A0;
+  --green-dim:rgba(0,245,160,0.10);
+  --amber:#FFB800;
+  --amber-dim:rgba(255,184,0,0.10);
+  --red:#FF3D6B;
+  --red-dim:rgba(255,61,107,0.10);
+  --font-mono:'SF Mono','Fira Code','Cascadia Code',monospace;
+  --radius:10px;
+  --radius-sm:6px;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;overflow-x:hidden}
-body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-size:14px}
-.hdr{display:flex;align-items:center;gap:14px;padding-bottom:16px;border-bottom:1px solid #1E2D3D;margin-bottom:18px}
-.logo{width:46px;height:46px;background:linear-gradient(135deg,#00E5FF,#0080FF);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:22px}
-.t1{font-size:20px;font-weight:800;color:#EFF6FB}
-.t2{font-size:10px;color:#00E5FF;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
-.metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:10px}
-.mc{background:#131A22;border:1px solid #1E2D3D;border-radius:9px;padding:12px;text-align:center}
-.mv{font-size:20px;font-weight:800;color:#EFF6FB}
-.ml{font-size:9px;color:#4A6070;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
-.status-bar{background:#131A22;border:1px solid #1E2D3D;border-radius:9px;padding:10px;text-align:center;margin-bottom:10px}
-.btns{display:flex;gap:10px;margin-bottom:10px}
-.btn{flex:1;padding:11px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
-.bs{background:linear-gradient(135deg,#00B8CC,#0080FF);color:#000}
-.bx{background:#131A22;color:#FF3B5C;border:1px solid rgba(255,59,92,0.4)}
-.bc{background:#131A22;color:#4A6070;border:1px solid #1E2D3D}
-.btn:disabled{opacity:0.35;cursor:not-allowed}
-.bpdf{background:#131A22;color:#00FF9D;border:1px solid rgba(0,255,157,0.4);font-size:12px}
-.bpdf:hover{background:rgba(0,255,157,0.08)}
-.bscore{background:#131A22;color:#00E5FF;border:1px solid rgba(0,229,255,0.4);font-size:12px}
-.bscore:hover{background:rgba(0,229,255,0.08)}
-.breplay{background:#131A22;color:#FFD60A;border:1px solid rgba(255,214,10,0.4);font-size:12px}
-.breplay:hover{background:rgba(255,214,10,0.08)}
-.bfocus{background:#131A22;color:#FFD60A;border:1px solid rgba(255,214,10,0.4);font-size:12px}
-.bfocus:hover{background:rgba(255,214,10,0.08)}
-.bfocus.active{background:rgba(255,214,10,0.15);color:#FFD60A;border-color:#FFD60A;box-shadow:0 0 10px rgba(255,214,10,0.3)}
+html,body{background:var(--void);color:var(--text-primary);font-family:var(--font-mono);font-size:13px;overflow-x:hidden;width:100%}
 
-.focus-frozen{position:relative;border:2px solid rgba(255,214,10,0.5)!important;border-radius:9px}
-/* Content fully readable — new items just won't appear until resumed */
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:2px}
 
-/* ── CALL STAGE TRACKER ── */
-.stage-bar{display:flex;align-items:stretch;margin-bottom:10px;background:#090D11;border:1px solid #1E2D3D;border-radius:9px;overflow:hidden}
-.stage{flex:1;padding:9px 4px;text-align:center;font-size:8.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4A6070;transition:all 0.3s}
-.stage.active{color:#000;background:linear-gradient(135deg,#00E5FF,#0080FF)}
-.stage.done{color:#00E5FF;background:rgba(0,229,255,0.07)}
-.stage-sep{width:1px;background:#1E2D3D;flex-shrink:0}
+/* ── LAYOUT ── */
+.app{display:grid;grid-template-rows:auto auto 1fr;min-height:100vh;padding:16px;gap:12px;max-width:1600px;margin:0 auto}
 
-/* ── REP SCORE MODAL ── */
-.score-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto}
-.score-modal.show{display:block;position:relative;background:transparent;padding:0;margin-top:16px}
-.score-box{background:#0D1520;border:1px solid #1E2D3D;border-radius:16px;padding:24px;width:100%;max-height:none}
-.score-title{font-size:18px;font-weight:800;color:#EFF6FB;margin-bottom:3px}
-.score-sub{font-size:9px;color:#4A6070;letter-spacing:2px;text-transform:uppercase;margin-bottom:22px}
-.score-grade{text-align:center;margin-bottom:22px;padding:20px;background:#090D11;border-radius:12px;border:1px solid #1E2D3D}
-.score-letter{font-size:80px;font-weight:900;line-height:1}
-.score-pct{font-size:13px;color:#4A6070;margin-top:6px}
-.score-cats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
-.score-cat{background:#131A22;border-radius:8px;padding:12px 14px}
-.score-cat-name{font-size:8px;color:#4A6070;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
-.score-cat-val{font-size:22px;font-weight:800}
-.score-bar-bg{height:4px;background:#1E2D3D;border-radius:2px;margin-top:8px}
-.score-bar-fill{height:100%;border-radius:2px}
-.score-breakdown{background:#090D11;border-radius:8px;padding:14px;margin-bottom:16px}
-.score-breakdown-title{font-size:8px;color:#00E5FF;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
-.score-item{font-size:12px;color:#C8D8E4;line-height:1.75;padding:5px 0;border-bottom:1px solid #1E2D3D}
-.score-item:last-child{border-bottom:none}
-.score-item strong{color:#EFF6FB}
-.score-close{width:100%;padding:12px;background:linear-gradient(135deg,#00B8CC,#0080FF);border:none;border-radius:8px;color:#000;font-weight:800;font-size:13px;cursor:pointer;font-family:monospace;margin-top:6px}
+/* ── TOPBAR ── */
+.topbar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:14px 20px;background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);position:relative;overflow:hidden}
+.topbar::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.5}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{width:38px;height:38px;background:linear-gradient(135deg,#0044FF,#00AAFF);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 0 20px rgba(0,170,255,0.3)}
+.brand-name{font-size:15px;font-weight:700;color:var(--text-primary);letter-spacing:0.5px}
+.brand-sub{font-size:9px;color:var(--cyan);letter-spacing:2.5px;text-transform:uppercase;margin-top:2px}
+.metrics-strip{display:flex;gap:0;justify-content:center}
+.metric{padding:6px 18px;border-right:1px solid var(--border);text-align:center;min-width:90px}
+.metric:last-child{border-right:none}
+.metric-val{font-size:18px;font-weight:800;color:var(--text-primary);line-height:1}
+.metric-lbl{font-size:8px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px}
+.live-indicator{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:100px;position:relative}
+.signal-ring{width:10px;height:10px;border-radius:50%;background:var(--text-muted);position:relative;flex-shrink:0}
+.signal-ring.live{background:var(--green)}
+.signal-ring.live::before,.signal-ring.live::after{content:'';position:absolute;border-radius:50%;border:1px solid var(--green);top:50%;left:50%;transform:translate(-50%,-50%);animation:ripple 1.8s ease-out infinite}
+.signal-ring.live::after{animation-delay:0.6s}
+@keyframes ripple{0%{width:10px;height:10px;opacity:1}100%{width:28px;height:28px;opacity:0}}
+.live-text{font-size:10px;font-weight:600;color:var(--text-secondary);letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
 
-#pdf-report{display:none}
+/* ── STAGE BAR ── */
+.stagebar{display:flex;background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.stage{flex:1;padding:9px 4px;text-align:center;font-size:8px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-muted);transition:all 0.4s;cursor:default;position:relative}
+.stage.done{color:var(--cyan);background:var(--cyan-dim)}
+.stage.done::after{content:'✓ ';font-size:7px}
+.stage.active{color:#000;background:linear-gradient(135deg,var(--cyan),#0088FF);box-shadow:0 0 20px var(--cyan-glow)}
+.stage-sep{width:1px;background:var(--border);flex-shrink:0}
 
-.caller-select-row{margin-bottom:10px}
-.caller-chips{display:flex;flex-wrap:wrap;gap:7px}
-.chip{padding:6px 13px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #1E2D3D;background:#131A22;color:#4A6070;font-family:monospace;transition:all 0.15s;white-space:nowrap}
-.chip:hover{color:#C8D8E4;border-color:#2E4055}
-.chip.active{background:rgba(0,229,255,0.12);color:#00E5FF;border-color:rgba(0,229,255,0.45)}
-.chip.crisis-active{background:rgba(255,59,92,0.12);color:#FF3B5C;border-color:rgba(255,59,92,0.45)}
+/* ── CONTROL ROW ── */
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.ctx-input{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text-primary);font-family:var(--font-mono);font-size:12px;transition:border-color 0.2s;outline:none}
+.ctx-input:focus{border-color:var(--cyan)}
+.ctx-lbl{font-size:8px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
 
-/* ── PRE-CALL INTEL BRIEF ── */
-.intel-panel{background:#0A1208;border:1px solid rgba(0,255,157,0.2);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+/* ── CALLER CHIPS ── */
+.chips-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip{padding:5px 12px;border-radius:100px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface-2);color:var(--text-muted);font-family:var(--font-mono);transition:all 0.15s;white-space:nowrap}
+.chip:hover{color:var(--text-primary);border-color:var(--border-bright)}
+.chip.active{background:var(--cyan-dim);color:var(--cyan);border-color:rgba(0,217,255,0.4)}
+.chip.crisis-active{background:var(--red-dim);color:var(--red);border-color:rgba(255,61,107,0.4)}
+
+/* ── ACTION BUTTONS ── */
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:10px 16px;border:none;border-radius:var(--radius-sm);font-weight:700;font-size:11px;cursor:pointer;font-family:var(--font-mono);letter-spacing:0.5px;transition:all 0.15s;white-space:nowrap}
+.btn-start{background:linear-gradient(135deg,#0055FF,#00AAFF);color:#fff;flex:2;min-width:160px;box-shadow:0 0 20px rgba(0,120,255,0.3)}
+.btn-start:hover{box-shadow:0 0 30px rgba(0,120,255,0.5)}
+.btn-start:disabled{opacity:0.3;cursor:not-allowed;box-shadow:none}
+.btn-stop{background:var(--surface-2);color:var(--red);border:1px solid rgba(255,61,107,0.3);flex:1}
+.btn-stop:disabled{opacity:0.3;cursor:not-allowed}
+.btn-ghost{background:var(--surface-2);color:var(--text-secondary);border:1px solid var(--border);flex:1}
+.btn-ghost:hover{border-color:var(--border-bright);color:var(--text-primary)}
+.btn-green{background:var(--surface-2);color:var(--green);border:1px solid rgba(0,245,160,0.3)}
+.btn-amber{background:var(--surface-2);color:var(--amber);border:1px solid rgba(255,184,0,0.3)}
+.btn-cyan{background:var(--surface-2);color:var(--cyan);border:1px solid rgba(0,217,255,0.3)}
+.btn-focus{background:var(--surface-2);color:var(--amber);border:1px solid rgba(255,184,0,0.3)}
+.btn-focus.active{background:var(--amber-dim);border-color:var(--amber);box-shadow:0 0 12px var(--amber-dim)}
+
+/* ── STATUS / ERROR ── */
+.status-row{display:flex;align-items:center;gap:8px;min-height:20px}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);flex-shrink:0}
+.status-text{font-size:11px;color:var(--cyan)}
+.interim{font-size:11px;color:var(--text-muted);font-style:italic}
+.error-bar{background:rgba(255,61,107,0.08);border:1px solid rgba(255,61,107,0.25);border-radius:var(--radius-sm);padding:8px 12px;color:var(--red);font-size:11px;display:none;margin-top:6px}
+
+/* ── HOT FLASH ── */
+.hot-flash{display:none;background:linear-gradient(135deg,rgba(0,245,160,0.08),rgba(0,217,255,0.06));border:1px solid rgba(0,245,160,0.4);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;position:relative;overflow:hidden}
+.hot-flash::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),var(--cyan));animation:scanline 2s linear infinite}
+@keyframes scanline{0%{transform:scaleX(0);transform-origin:left}50%{transform:scaleX(1);transform-origin:left}51%{transform:scaleX(1);transform-origin:right}100%{transform:scaleX(0);transform-origin:right}}
+.hot-flash.show{display:block;animation:flashin 0.3s ease}
+@keyframes flashin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.hot-tag{font-size:8px;font-weight:700;letter-spacing:2px;color:var(--green);text-transform:uppercase;margin-bottom:6px}
+.hot-script{font-size:13px;color:var(--text-primary);line-height:1.65;font-weight:500}
+
+/* ── INTEL PANEL ── */
+.intel-panel{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px}
 .intel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.intel-title{font-size:10px;font-weight:700;color:#00FF9D;letter-spacing:2px;text-transform:uppercase}
-.intel-loading{font-size:11px;color:#4A6070;font-style:italic}
-.intel-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.intel-card{background:#131A22;border-radius:7px;padding:10px 12px;border-left:3px solid}
-.intel-card-lbl{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
-.intel-card-body{font-size:11px;color:#C8D8E4;line-height:1.6}
+.intel-title{font-size:9px;font-weight:700;color:var(--green);letter-spacing:2px;text-transform:uppercase}
+.intel-status{font-size:10px;color:var(--text-muted);font-style:italic}
+.intel-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.intel-card{background:var(--surface-2);border-radius:var(--radius-sm);padding:10px 12px;border-top:2px solid}
+.intel-lbl{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.intel-body{font-size:11px;color:var(--text-secondary);line-height:1.6}
 
-/* ── TALK/LISTEN RATIO ── */
-.ratio-bar-wrap{background:#090D11;border:1px solid #1E2D3D;border-radius:8px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
-.ratio-lbl{font-size:9px;color:#4A6070;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
-.ratio-track{flex:1;height:8px;background:#1E2D3D;border-radius:4px;overflow:hidden;position:relative}
-.ratio-fill{height:100%;border-radius:4px;transition:width 0.6s ease;background:linear-gradient(90deg,#00FF9D,#00E5FF)}
-.ratio-fill.warn{background:linear-gradient(90deg,#FFD60A,#FF8C00)}
-.ratio-fill.danger{background:linear-gradient(90deg,#FF3B5C,#CC0033)}
-.ratio-pct{font-size:11px;font-weight:700;color:#EFF6FB;white-space:nowrap;min-width:90px;text-align:right}
+/* ── RATIO BAR ── */
+.ratio-wrap{display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px}
+.ratio-lbl{font-size:8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+.ratio-track{flex:1;height:6px;background:var(--surface-3);border-radius:3px;overflow:hidden}
+.ratio-fill{height:100%;border-radius:3px;transition:width 0.6s ease;background:linear-gradient(90deg,var(--green),var(--cyan))}
+.ratio-fill.warn{background:linear-gradient(90deg,var(--amber),#FF8C00)}
+.ratio-fill.danger{background:linear-gradient(90deg,var(--red),#CC0033)}
+.ratio-val{font-size:10px;font-weight:700;color:var(--text-primary);white-space:nowrap;min-width:140px;text-align:right}
 
-/* ── HOT MOMENT FLASH ── */
-.hot-flash{display:none;background:linear-gradient(135deg,rgba(0,255,157,0.15),rgba(0,229,255,0.10));border:2px solid #00FF9D;border-radius:10px;padding:14px 16px;margin-bottom:10px;animation:hotpulse 1s ease-in-out 3}
-@keyframes hotpulse{0%,100%{box-shadow:0 0 0 0 rgba(0,255,157,0.4)}50%{box-shadow:0 0 0 8px rgba(0,255,157,0)}}
-.hot-flash.show{display:block}
-.hot-title{font-size:10px;font-weight:700;color:#00FF9D;letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}
-.hot-content{font-size:13px;color:#EFF6FB;line-height:1.6;font-weight:600}
+/* ── MAIN GRID ── */
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
 
-/* ── REPLAY MODE ── */
-.replay-panel{display:none;background:#090D11;border:1px solid rgba(255,214,10,0.2);border-radius:10px;padding:16px;margin-top:12px}
-.replay-panel.show{display:block}
-.replay-title{font-size:10px;font-weight:700;color:#FFD60A;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
-.replay-item{background:#131A22;border-radius:8px;padding:12px 14px;margin-bottom:8px;border-left:3px solid #FFD60A}
-.replay-item.missed{border-left-color:#FF3B5C}
-.replay-item.strong{border-left-color:#00FF9D}
-.replay-moment{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
-.replay-moment.missed{color:#FF3B5C}
-.replay-moment.strong{color:#00FF9D}
-.replay-moment.neutral{color:#FFD60A}
-.replay-text{font-size:12px;color:#C8D8E4;line-height:1.6}
-.replay-alt{font-size:11px;color:#00E5FF;margin-top:5px;font-style:italic;border-top:1px solid #1E2D3D;padding-top:5px}
-.ctx-lbl{font-size:11px;color:#4A6070;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
-.ctx-input{width:100%;background:#090D11;border:1px solid #1E2D3D;border-radius:6px;padding:8px;color:#C8D8E4;font-family:monospace;font-size:12px}
-.sb{font-size:12px;color:#00E5FF;padding:5px 0;min-height:22px}
-.ib{font-size:12px;color:#4A6070;font-style:italic;min-height:18px;padding:3px 0}
-.eb{background:rgba(255,59,92,0.1);border:1px solid rgba(255,59,92,0.3);border-radius:7px;padding:9px 13px;color:#FF3B5C;font-size:12px;margin:6px 0;display:none}
-.cols{display:grid;grid-template-columns:55fr 45fr;gap:20px;margin-top:18px}
-.st{font-size:15px;font-weight:700;color:#EFF6FB;margin-bottom:10px}
-.box{background:#090D11;border:1px solid #1E2D3D;border-radius:8px;padding:14px;min-height:220px;max-height:300px;overflow-y:auto;font-size:12px;line-height:1.9}
-.tl{margin:3px 0}
-.ts{color:#00E5FF;font-weight:500}
-.te{color:#4A6070;font-style:italic}
-.cc{border-radius:9px;padding:12px;margin-bottom:9px;border-left:3px solid #00E5FF;background:#131A22;font-size:13px;line-height:1.6}
-.cc.objection{border-left-color:#FF3B5C}
-.cc.tip{border-left-color:#FFD60A}
-.cc.positive{border-left-color:#00FF9D}
-.cc.coach{border-left-color:#00E5FF}
-.ct{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:3px;margin-bottom:5px;display:inline-block}
-.to{background:rgba(255,59,92,0.15);color:#FF3B5C}
-.tt{background:rgba(255,214,10,0.15);color:#FFD60A}
-.tp{background:rgba(0,255,157,0.15);color:#00FF9D}
-.tk{background:rgba(0,229,255,0.10);color:#00E5FF}
-.cts{font-size:9px;color:#4A6070;float:right}
-.ce{text-align:center;padding:28px 0;color:#4A6070;font-size:12px}
-.pl{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:100px;font-size:11px}
-.live{background:rgba(0,255,157,0.12);color:#00FF9D;border:1px solid rgba(0,255,157,0.3)}
-.idle{background:rgba(74,96,112,0.2);color:#4A6070;border:1px solid #1E2D3D}
-.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
-.dg{background:#00FF9D;animation:blink 1.2s infinite}
-.dy{background:#4A6070}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+/* ── PANELS ── */
+.panel{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.panel-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface-2)}
+.panel-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.panel-badge{font-size:8px;padding:2px 7px;border-radius:100px;font-weight:600}
+.panel-body{padding:12px;max-height:280px;overflow-y:auto}
 
-/* ── OBJECTION TRACKER ── */
-.obj-section{margin-top:20px;border-top:1px solid #1E2D3D;padding-top:16px}
-.obj-title{font-size:14px;font-weight:700;color:#FF3B5C;margin-bottom:10px}
-/* No max-height — scrolls naturally with the page */
-.obj-log-box{display:flex;flex-direction:column;gap:0}
-.obj-card{background:#131A22;border:1px solid rgba(255,59,92,0.3);border-left:3px solid #FF3B5C;border-radius:9px;padding:12px;margin-bottom:10px}
-.obj-card.won{border-color:rgba(0,255,157,0.4);border-left-color:#00FF9D}
-.obj-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
-.obj-q{font-size:12px;color:#FF3B5C;font-weight:600;flex:1}
-.obj-badge{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:100px;flex-shrink:0;margin-left:8px}
-.badge-open{background:rgba(255,214,10,0.15);color:#FFD60A;border:1px solid rgba(255,214,10,0.3)}
-.badge-won{background:rgba(0,255,157,0.15);color:#00FF9D;border:1px solid rgba(0,255,157,0.3)}
-.obj-a-lbl{font-size:9px;color:#00E5FF;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
-.obj-a{font-size:12px;color:#C8D8E4;line-height:1.7;background:#090D11;border-radius:6px;padding:8px;border-left:2px solid #00E5FF}
-.obj-ts{font-size:9px;color:#4A6070;margin-top:5px}
+/* ── TRANSCRIPT ── */
+.tx-line{padding:4px 0;border-bottom:1px solid var(--surface-3);font-size:11px;line-height:1.6;display:flex;gap:8px}
+.tx-line:last-child{border-bottom:none}
+.tx-time{color:var(--text-muted);flex-shrink:0;font-size:10px;padding-top:1px}
+.tx-name{color:var(--cyan);font-weight:600;flex-shrink:0}
+.tx-text{color:var(--text-secondary)}
+.tx-empty{color:var(--text-muted);font-style:italic;font-size:11px;padding:16px 0;text-align:center}
+
+/* ── COACHING CARDS ── */
+.coach-card{border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:8px;border-left:3px solid;font-size:12px;line-height:1.65;animation:cardin 0.25s ease}
+@keyframes cardin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.coach-card:last-child{margin-bottom:0}
+.coach-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.coach-tag{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:100px}
+.coach-time{font-size:9px;color:var(--text-muted)}
+.coach-body{color:var(--text-primary)}
+.coach-empty{color:var(--text-muted);font-style:italic;font-size:11px;text-align:center;padding:24px 0}
 
 /* ── SCRIPT INJECTOR ── */
-.injector-section{margin-top:20px;border-top:1px solid #1E2D3D;padding-top:16px}
-.injector-title{font-size:14px;font-weight:700;color:#FFD60A;margin-bottom:10px}
-.injector-empty{font-size:12px;color:#4A6070;font-style:italic;padding:8px 0}
-.injector-card{background:#0D1A0A;border:2px solid #00FF9D;border-radius:10px;padding:16px 18px;margin-bottom:10px;position:relative}
-.injector-card.objection{border-color:#FF3B5C;background:#1A0A0D}
-.injector-card.close{border-color:#FFD60A;background:#1A1500}
-.injector-tag{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:2px 9px;border-radius:100px;display:inline-block;margin-bottom:10px}
-.injector-tag.coach{background:rgba(0,255,157,0.15);color:#00FF9D;border:1px solid rgba(0,255,157,0.4)}
-.injector-tag.objection{background:rgba(255,59,92,0.15);color:#FF3B5C;border:1px solid rgba(255,59,92,0.4)}
-.injector-tag.close{background:rgba(255,214,10,0.15);color:#FFD60A;border:1px solid rgba(255,214,10,0.4)}
-.injector-ts{font-size:9px;color:#4A6070;float:right}
-.injector-context{font-size:9px;color:#4A6070;margin-bottom:8px;font-style:italic}
-.injector-script{font-size:15px;color:#EFF6FB;line-height:1.7;font-weight:500;letter-spacing:0.2px}
-.injector-copy{position:absolute;top:12px;right:12px;background:#131A22;border:1px solid #1E2D3D;color:#4A6070;border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer;font-family:monospace;transition:all 0.15s}
-.injector-copy:hover{color:#00FF9D;border-color:rgba(0,255,157,0.4)}
-.injector-copy.copied{color:#00FF9D;border-color:rgba(0,255,157,0.6)}
+.injector-card{border-radius:var(--radius-sm);padding:13px 15px;margin-bottom:8px;position:relative;border:1px solid;animation:cardin 0.25s ease}
+.injector-card:last-child{margin-bottom:0}
+.inj-tag{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:100px;display:inline-block;margin-bottom:8px}
+.inj-time{font-size:9px;color:var(--text-muted);float:right;margin-top:1px}
+.inj-context{font-size:9px;color:var(--text-muted);margin-bottom:6px;font-style:italic}
+.inj-script{font-size:14px;color:var(--text-primary);line-height:1.7;font-weight:500;letter-spacing:0.1px}
+.inj-copy{position:absolute;bottom:10px;right:10px;background:var(--surface-3);border:1px solid var(--border);color:var(--text-muted);border-radius:var(--radius-sm);padding:3px 9px;font-size:9px;cursor:pointer;font-family:var(--font-mono);transition:all 0.15s}
+.inj-copy:hover{color:var(--green);border-color:rgba(0,245,160,0.4)}
+.inj-copy.copied{color:var(--green);border-color:rgba(0,245,160,0.6)}
+.inj-empty{color:var(--text-muted);font-style:italic;font-size:11px;text-align:center;padding:20px 0;line-height:1.6}
 
-/* ── PPR PROGRAM QUICK-REF ── */
-.ppr-section{margin-top:20px;border-top:1px solid #1E2D3D;padding-top:16px}
-.ppr-title{font-size:14px;font-weight:700;color:#00FF9D;margin-bottom:10px}
-.ppr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ppr-card{background:#0A1208;border:1px solid rgba(0,255,157,0.15);border-left:3px solid #00FF9D;border-radius:8px;padding:10px}
-.ppr-card-title{font-size:9px;color:#00FF9D;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
-.ppr-card-body{font-size:11px;color:#C8D8E4;line-height:1.7}
+/* ── OBJECTION TRACKER ── */
+.obj-card{border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:8px;border:1px solid rgba(255,61,107,0.2);border-left:3px solid var(--red);background:rgba(255,61,107,0.04)}
+.obj-card.won{border-color:rgba(0,245,160,0.2);border-left-color:var(--green);background:rgba(0,245,160,0.04)}
+.obj-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.obj-q{font-size:11px;font-weight:600;color:var(--red);flex:1}
+.obj-q.won{color:var(--green)}
+.obj-badge{font-size:8px;font-weight:700;letter-spacing:1px;padding:2px 8px;border-radius:100px;border:1px solid;white-space:nowrap;margin-left:8px}
+.badge-open{background:var(--amber-dim);color:var(--amber);border-color:rgba(255,184,0,0.3)}
+.badge-won{background:var(--green-dim);color:var(--green);border-color:rgba(0,245,160,0.3)}
+.obj-rebuttal-lbl{font-size:8px;color:var(--cyan);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:3px}
+.obj-rebuttal{font-size:11px;color:var(--text-secondary);line-height:1.65;background:var(--surface-2);border-left:2px solid var(--cyan);padding:6px 9px;border-radius:0 4px 4px 0}
+.obj-ts{font-size:9px;color:var(--text-muted);margin-top:4px}
+.obj-empty{color:var(--text-muted);font-style:italic;font-size:11px;text-align:center;padding:16px 0}
+
+/* ── PPR QUICK REF ── */
+.ppr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}
+.ppr-card{background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--radius-sm);padding:10px 12px}
+.ppr-card-title{font-size:8px;color:var(--green);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;font-weight:700}
+.ppr-card-body{font-size:10.5px;color:var(--text-secondary);line-height:1.7}
+
+/* ── SCORE PANEL ── */
+#score-modal{display:none;background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px;animation:cardin 0.3s ease}
+.score-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.score-grade-box{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:14px}
+.score-letter{font-size:72px;font-weight:900;line-height:1}
+.score-overall{font-size:11px;color:var(--text-muted);margin-top:4px}
+.score-cats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.score-cat{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px}
+.score-cat-lbl{font-size:8px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.score-cat-val{font-size:20px;font-weight:800;margin-bottom:6px}
+.score-bar-bg{height:3px;background:var(--surface-3);border-radius:2px}
+.score-bar-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.score-feedback{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px}
+.score-feedback-title{font-size:8px;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.score-item{font-size:11px;color:var(--text-secondary);line-height:1.7;padding:4px 0;border-bottom:1px solid var(--border)}
+.score-item:last-child{border:none}
+
+/* ── REPLAY PANEL ── */
+.replay-panel{display:none;background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-top:12px}
+.replay-panel.show{display:block;animation:cardin 0.3s ease}
+.replay-item{background:var(--surface-2);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:8px;border-left:3px solid}
+.replay-item.missed{border-left-color:var(--red)}
+.replay-item.strong{border-left-color:var(--green)}
+.replay-item.neutral{border-left-color:var(--amber)}
+.replay-moment-lbl{font-size:8px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px}
+.replay-moment-lbl.missed{color:var(--red)}
+.replay-moment-lbl.strong{color:var(--green)}
+.replay-moment-lbl.neutral{color:var(--amber)}
+.replay-body{font-size:11px;color:var(--text-secondary);line-height:1.65}
+.replay-alt{font-size:11px;color:var(--cyan);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-style:italic}
+
+/* ── CLOSE BTN ── */
+.close-btn{background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:var(--radius-sm);padding:3px 10px;cursor:pointer;font-family:var(--font-mono);font-size:10px;transition:all 0.15s}
+.close-btn:hover{color:var(--text-primary);border-color:var(--border-bright)}
+
+/* ── FOCUS FROZEN ── */
+.focus-frozen{border:1px solid rgba(255,184,0,0.4)!important;border-radius:var(--radius)!important}
+
+@media print{body *{visibility:hidden!important}#pdf-report,#pdf-report *{visibility:visible!important}#pdf-report{display:block!important;position:fixed;top:0;left:0;width:100%;background:#fff;color:#111;font-family:Arial,sans-serif;padding:28px 36px}}
 </style>
 </head>
 <body>
-<div class="hdr">
-  <div class="logo">🎯</div>
-  <div><div class="t1">APEX Call Coach — Pinnacle Peak Recovery</div><div class="t2">Live AI Admissions Intelligence — McCormick Ranch, Scottsdale AZ</div></div>
-</div>
-<div class="metrics">
-  <div class="mc"><div class="mv" id="md">00:00</div><div class="ml">Duration</div></div>
-  <div class="mc"><div class="mv" id="mw">0</div><div class="ml">Words</div></div>
-  <div class="mc"><div class="mv" id="mo" style="color:#FF3B5C">0</div><div class="ml">Objections</div></div>
-  <div class="mc"><div class="mv" id="mh" style="color:#00FF9D">0</div><div class="ml">Handled</div></div>
-  <div class="mc"><div class="mv" id="mi" style="color:#00E5FF">0</div><div class="ml">Insights</div></div>
-  <div class="mc"><div class="mv" id="mwr" style="color:#FFD60A">—</div><div class="ml">Win Rate</div></div>
-</div>
-<div class="stage-bar" id="stage-bar">
-  <div class="stage active" id="stage-0">🎙 Opener</div><div class="stage-sep"></div>
-  <div class="stage" id="stage-1">🔍 Discovery</div><div class="stage-sep"></div>
-  <div class="stage" id="stage-2">💡 Pitch</div><div class="stage-sep"></div>
-  <div class="stage" id="stage-3">🚨 Objection</div><div class="stage-sep"></div>
-  <div class="stage" id="stage-4">✅ Close</div>
-</div>
-<div class="status-bar" id="mstat"><span class="pl idle"><span class="dot dy"></span>IDLE</span></div>
-<div class="caller-select-row">
-  <div class="ctx-lbl" style="margin-bottom:6px">Who's Calling?</div>
-  <div class="caller-chips" id="caller-chips">
-    <div class="chip active" onclick="setCallerType('family_substance')" data-key="family_substance">👨‍👩‍👧 Family — Substance</div>
-    <div class="chip" onclick="setCallerType('family_mental')" data-key="family_mental">🧠 Family — Mental Health</div>
-    <div class="chip" onclick="setCallerType('self_substance')" data-key="self_substance">🙋 Self — Substance</div>
-    <div class="chip" onclick="setCallerType('self_mental')" data-key="self_mental">🙋 Self — Mental Health</div>
-    <div class="chip" onclick="setCallerType('dual')" data-key="dual">⚡ Dual Diagnosis</div>
-    <div class="chip" onclick="setCallerType('crisis')" data-key="crisis">🚨 Crisis / Urgent</div>
-    <div class="chip" onclick="setCallerType('insurance')" data-key="insurance">📋 Insurance / VOB</div>
-    <div class="chip" onclick="setCallerType('custom')" data-key="custom">✏️ Custom</div>
-  </div>
-</div>
+<div class="app">
 
-<!-- Pre-Call Intel Brief -->
-<div class="intel-panel" id="intel-panel">
-  <div class="intel-header">
-    <span class="intel-title">⚡ Pre-Call Battle Card</span>
-    <span class="intel-loading" id="intel-loading">Select a caller type to generate intel...</span>
-  </div>
-  <div class="intel-cards" id="intel-cards" style="display:none">
-    <div class="intel-card" style="border-color:#FF3B5C">
-      <div class="intel-card-lbl" style="color:#FF3B5C">🚨 Likely Objections</div>
-      <div class="intel-card-body" id="intel-obj">—</div>
-    </div>
-    <div class="intel-card" style="border-color:#FFD60A">
-      <div class="intel-card-lbl" style="color:#FFD60A">💛 Emotional Driver</div>
-      <div class="intel-card-body" id="intel-emo">—</div>
-    </div>
-    <div class="intel-card" style="border-color:#00FF9D">
-      <div class="intel-card-lbl" style="color:#00FF9D">🎯 Recommended Close</div>
-      <div class="intel-card-body" id="intel-close">—</div>
-    </div>
-  </div>
-</div>
-
-<!-- Talk/Listen Ratio -->
-<div class="ratio-bar-wrap">
-  <span class="ratio-lbl">🎙 You're Talking</span>
-  <div class="ratio-track"><div class="ratio-fill" id="ratio-fill" style="width:0%"></div></div>
-  <span class="ratio-pct" id="ratio-pct">— / —</span>
-</div>
-
-<!-- Hot Moment Flash -->
-<div class="hot-flash" id="hot-flash">
-  <div class="hot-title">🔥 BUYING SIGNAL DETECTED — CLOSE NOW</div>
-  <div class="hot-content" id="hot-content">—</div>
-</div>
-
-<div class="ctx" id="ctx-fields" style="display:none">
-  <div><div class="ctx-lbl">Caller Situation</div><input id="prod" class="ctx-input" type="text" placeholder="Auto-filled based on caller type"></div>
-  <div><div class="ctx-lbl">Prospect Persona</div><input id="pers" class="ctx-input" type="text" placeholder="Add details to sharpen coaching..."></div>
-</div>
-<div class="btns">
-  <button class="btn bs" id="bst" onclick="go()">▶ Start Listening</button>
-  <button class="btn bx" id="bsp" onclick="stop()" disabled>◼ Stop</button>
-  <button class="btn bc" onclick="clr()">🗑 Clear</button>
-  <button class="btn bpdf" onclick="exportPDF()">⬇ Download Report</button>
-  <button class="btn bscore" id="bscore" onclick="scoreCall()">📊 Score Call</button>
-  <button class="btn breplay" id="breplay" onclick="replayCall()">🔁 Replay Analysis</button>
-  <button class="btn bfocus" id="bfocus" onclick="toggleFocus()">🔒 Focus Mode</button>
-</div>
-<div class="sb" id="sb">👆 Select who's calling above, then hit Start Listening.</div>
-<div class="ib" id="ib"></div>
-<div class="eb" id="eb"></div>
-
-<!-- Replay Analysis Panel -->
-<div class="replay-panel" id="replay-panel">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-    <div class="replay-title">🔁 Call Replay Analysis</div>
-    <button onclick="document.getElementById('replay-panel').classList.remove('show')" style="background:none;border:1px solid #1E2D3D;color:#4A6070;border-radius:6px;padding:4px 10px;cursor:pointer;font-family:monospace;font-size:11px">✕ Close</button>
-  </div>
-  <div id="replay-content"><div style="color:#4A6070;font-size:12px;font-style:italic">Analyzing your call...</div></div>
-</div>
-<div id="score-modal" style="display:none;margin-bottom:12px">
-  <div class="score-box">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+  <!-- ── TOPBAR ── -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-icon">🎯</div>
       <div>
-        <div class="score-title">📊 Call Performance Score</div>
-        <div class="score-sub">Pinnacle Peak Recovery — APEX Analysis</div>
-      </div>
-      <button onclick="document.getElementById('score-modal').style.display='none'" style="background:none;border:1px solid #1E2D3D;color:#4A6070;border-radius:6px;padding:4px 10px;cursor:pointer;font-family:monospace;font-size:11px">✕ Close</button>
-    </div>
-    <div class="score-grade">
-      <div class="score-letter" id="sc-letter">—</div>
-      <div class="score-pct" id="sc-pct">Complete a call to see your score</div>
-    </div>
-    <div class="score-cats">
-      <div class="score-cat">
-        <div class="score-cat-name">Objection Handling</div>
-        <div class="score-cat-val" id="sc-obj" style="color:#FF3B5C">—</div>
-        <div class="score-bar-bg"><div class="score-bar-fill" id="sc-obj-bar" style="width:0%;background:#FF3B5C"></div></div>
-      </div>
-      <div class="score-cat">
-        <div class="score-cat-name">Call Control</div>
-        <div class="score-cat-val" id="sc-ctrl" style="color:#00E5FF">—</div>
-        <div class="score-bar-bg"><div class="score-bar-fill" id="sc-ctrl-bar" style="width:0%;background:#00E5FF"></div></div>
-      </div>
-      <div class="score-cat">
-        <div class="score-cat-name">Urgency Created</div>
-        <div class="score-cat-val" id="sc-urg" style="color:#FFD60A">—</div>
-        <div class="score-bar-bg"><div class="score-bar-fill" id="sc-urg-bar" style="width:0%;background:#FFD60A"></div></div>
-      </div>
-      <div class="score-cat">
-        <div class="score-cat-name">Next Step Set</div>
-        <div class="score-cat-val" id="sc-next" style="color:#00FF9D">—</div>
-        <div class="score-bar-bg"><div class="score-bar-fill" id="sc-next-bar" style="width:0%;background:#00FF9D"></div></div>
+        <div class="brand-name">APEX Call Coach</div>
+        <div class="brand-sub">Pinnacle Peak Recovery · Scottsdale AZ</div>
       </div>
     </div>
-    <div class="score-breakdown">
-      <div class="score-breakdown-title">💡 Coaching Feedback</div>
-      <div id="sc-feedback">Complete a call to get personalized feedback.</div>
+    <div class="metrics-strip">
+      <div class="metric"><div class="metric-val" id="md">00:00</div><div class="metric-lbl">Duration</div></div>
+      <div class="metric"><div class="metric-val" id="mw">0</div><div class="metric-lbl">Words</div></div>
+      <div class="metric"><div class="metric-val" id="mo" style="color:var(--red)">0</div><div class="metric-lbl">Objections</div></div>
+      <div class="metric"><div class="metric-val" id="mh" style="color:var(--green)">0</div><div class="metric-lbl">Handled</div></div>
+      <div class="metric"><div class="metric-val" id="mi" style="color:var(--cyan)">0</div><div class="metric-lbl">Insights</div></div>
+      <div class="metric"><div class="metric-val" id="mwr" style="color:var(--amber)">—</div><div class="metric-lbl">Win Rate</div></div>
+    </div>
+    <div class="live-indicator" id="live-ind">
+      <div class="signal-ring" id="signal-ring"></div>
+      <span class="live-text" id="live-text">IDLE</span>
     </div>
   </div>
-</div>
-<div class="cols">
-  <div>
-    <div class="st">🎙️ Live Transcript</div>
-    <div class="box" id="tb"><div class="te">Transcript will appear here when you start listening...</div></div>
 
-    <!-- OBJECTION TRACKER — no max-height, scrolls with page -->
-    <div class="obj-section">
-      <div class="obj-title">🚨 Objection Tracker — Live Win Rate</div>
-      <div class="obj-log-box" id="obj-log"><div class="te" style="font-size:12px;padding:8px 0">No objections detected yet. Every objection will be logged here with a rebuttal and tracked as Won or Open.</div></div>
+  <!-- ── STAGE BAR ── -->
+  <div class="stagebar">
+    <div class="stage active" id="stage-0">🎙 Opener</div><div class="stage-sep"></div>
+    <div class="stage" id="stage-1">🔍 Discovery</div><div class="stage-sep"></div>
+    <div class="stage" id="stage-2">💡 Pitch</div><div class="stage-sep"></div>
+    <div class="stage" id="stage-3">🚨 Objection</div><div class="stage-sep"></div>
+    <div class="stage" id="stage-4">✅ Close</div>
+  </div>
+
+  <!-- ── CONTROL AREA ── -->
+  <div>
+    <!-- Caller type -->
+    <div style="margin-bottom:8px">
+      <div class="ctx-lbl" style="margin-bottom:6px">Who's Calling?</div>
+      <div class="chips-row" id="caller-chips">
+        <div class="chip active" onclick="setCallerType('family_substance')" data-key="family_substance">👨‍👩‍👧 Family · Substance</div>
+        <div class="chip" onclick="setCallerType('family_mental')" data-key="family_mental">🧠 Family · Mental Health</div>
+        <div class="chip" onclick="setCallerType('self_substance')" data-key="self_substance">🙋 Self · Substance</div>
+        <div class="chip" onclick="setCallerType('self_mental')" data-key="self_mental">🙋 Self · Mental Health</div>
+        <div class="chip" onclick="setCallerType('dual')" data-key="dual">⚡ Dual Diagnosis</div>
+        <div class="chip" onclick="setCallerType('crisis')" data-key="crisis">🚨 Crisis</div>
+        <div class="chip" onclick="setCallerType('insurance')" data-key="insurance">📋 Insurance / VOB</div>
+        <div class="chip" onclick="setCallerType('custom')" data-key="custom">✏️ Custom</div>
+      </div>
     </div>
 
-    <!-- PPR PROGRAM QUICK-REF -->
-    <div class="ppr-section">
-      <div class="ppr-title">🏥 Pinnacle Peak Recovery — Quick Reference</div>
+    <!-- Context inputs (shown for custom) -->
+    <div class="controls" id="ctx-fields" style="display:none;margin-bottom:8px">
+      <div><div class="ctx-lbl">Caller Situation</div><input id="prod" class="ctx-input" type="text" placeholder="Describe the situation..."></div>
+      <div><div class="ctx-lbl">Prospect Persona</div><input id="pers" class="ctx-input" type="text" placeholder="Describe the prospect..."></div>
+    </div>
+
+    <!-- Intel brief -->
+    <div class="intel-panel" id="intel-panel">
+      <div class="intel-header">
+        <span class="intel-title">⚡ Pre-Call Battle Card</span>
+        <span class="intel-status" id="intel-loading">Select a caller type to generate intel...</span>
+      </div>
+      <div class="intel-grid" id="intel-cards" style="display:none">
+        <div class="intel-card" style="border-top-color:var(--red)">
+          <div class="intel-lbl" style="color:var(--red)">🚨 Likely Objections</div>
+          <div class="intel-body" id="intel-obj">—</div>
+        </div>
+        <div class="intel-card" style="border-top-color:var(--amber)">
+          <div class="intel-lbl" style="color:var(--amber)">💛 Emotional Driver</div>
+          <div class="intel-body" id="intel-emo">—</div>
+        </div>
+        <div class="intel-card" style="border-top-color:var(--green)">
+          <div class="intel-lbl" style="color:var(--green)">🎯 Recommended Close</div>
+          <div class="intel-body" id="intel-close">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ratio bar -->
+    <div class="ratio-wrap">
+      <span class="ratio-lbl">🎙 You're Talking</span>
+      <div class="ratio-track"><div class="ratio-fill" id="ratio-fill" style="width:0%"></div></div>
+      <span class="ratio-val" id="ratio-pct">— · Waiting for call</span>
+    </div>
+
+    <!-- Hot moment -->
+    <div class="hot-flash" id="hot-flash">
+      <div class="hot-tag">🔥 Buying Signal — Close Now</div>
+      <div class="hot-script" id="hot-content">—</div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions" style="margin-bottom:8px">
+      <button class="btn btn-start" id="bst" onclick="go()">▶ Start Listening</button>
+      <button class="btn btn-stop" id="bsp" onclick="stop()" disabled>◼ Stop</button>
+      <button class="btn btn-ghost" onclick="clr()">🗑 Clear</button>
+      <button class="btn btn-green" onclick="exportPDF()">⬇ Report</button>
+      <button class="btn btn-cyan" onclick="scoreCall()">📊 Score</button>
+      <button class="btn btn-amber" onclick="replayCall()">🔁 Replay</button>
+      <button class="btn btn-focus" id="bfocus" onclick="toggleFocus()">🔒 Focus</button>
+    </div>
+
+    <!-- Status + error -->
+    <div class="status-row">
+      <div class="status-dot" id="sdot" style="background:var(--text-muted)"></div>
+      <span class="sb" id="sb" style="font-size:11px;color:var(--text-muted)">Select who's calling then hit Start Listening.</span>
+      <span class="interim" id="ib" style="margin-left:8px"></span>
+    </div>
+    <div class="error-bar" id="eb"></div>
+
+    <!-- Score panel -->
+    <div id="score-modal">
+      <div class="score-header">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--text-primary)">📊 Call Performance</div>
+          <div style="font-size:9px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px">APEX Analysis · Pinnacle Peak Recovery</div>
+        </div>
+        <button class="close-btn" onclick="document.getElementById('score-modal').style.display='none'">✕ Close</button>
+      </div>
+      <div class="score-grade-box">
+        <div class="score-letter" id="sc-letter">—</div>
+        <div class="score-overall" id="sc-pct">Complete a call to see your score</div>
+      </div>
+      <div class="score-cats">
+        <div class="score-cat"><div class="score-cat-lbl">Objection Handling</div><div class="score-cat-val" id="sc-obj" style="color:var(--red)">—</div><div class="score-bar-bg"><div class="score-bar-fill" id="sc-obj-bar" style="width:0%;background:var(--red)"></div></div></div>
+        <div class="score-cat"><div class="score-cat-lbl">Call Control</div><div class="score-cat-val" id="sc-ctrl" style="color:var(--cyan)">—</div><div class="score-bar-bg"><div class="score-bar-fill" id="sc-ctrl-bar" style="width:0%;background:var(--cyan)"></div></div></div>
+        <div class="score-cat"><div class="score-cat-lbl">Urgency Created</div><div class="score-cat-val" id="sc-urg" style="color:var(--amber)">—</div><div class="score-bar-bg"><div class="score-bar-fill" id="sc-urg-bar" style="width:0%;background:var(--amber)"></div></div></div>
+        <div class="score-cat"><div class="score-cat-lbl">Next Step Set</div><div class="score-cat-val" id="sc-next" style="color:var(--green)">—</div><div class="score-bar-bg"><div class="score-bar-fill" id="sc-next-bar" style="width:0%;background:var(--green)"></div></div></div>
+      </div>
+      <div class="score-feedback"><div class="score-feedback-title">💡 Coaching Feedback</div><div id="sc-feedback">Complete a call to get feedback.</div></div>
+    </div>
+
+    <!-- Replay panel -->
+    <div class="replay-panel" id="replay-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:10px;font-weight:700;color:var(--amber);letter-spacing:2px;text-transform:uppercase">🔁 Call Replay Analysis</div>
+        <button class="close-btn" onclick="document.getElementById('replay-panel').classList.remove('show')">✕ Close</button>
+      </div>
+      <div id="replay-content"><div style="color:var(--text-muted);font-size:11px;font-style:italic">Analyzing your call...</div></div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="main-grid" style="margin-top:12px">
+
+      <!-- LEFT: Transcript + Objection Tracker -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="panel" id="tx-panel">
+          <div class="panel-header">
+            <div class="panel-title" style="color:var(--cyan)">🎙 Live Transcript</div>
+            <div id="tx-badge" class="panel-badge" style="background:var(--surface-3);color:var(--text-muted)">IDLE</div>
+          </div>
+          <div class="panel-body" id="tb"><div class="tx-empty">Transcript will appear here when you start listening...</div></div>
+        </div>
+        <div class="panel" id="obj-panel">
+          <div class="panel-header">
+            <div class="panel-title" style="color:var(--red)">🚨 Objection Tracker</div>
+            <div class="panel-badge" style="background:var(--red-dim);color:var(--red)" id="obj-badge">WIN RATE: —</div>
+          </div>
+          <div style="padding:12px" id="obj-log"><div class="obj-empty">No objections detected yet.</div></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Coaching + Script Injector -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="panel" id="coach-panel">
+          <div class="panel-header">
+            <div class="panel-title" style="color:var(--amber)">💡 Live Coaching</div>
+            <div class="panel-badge" style="background:var(--amber-dim);color:var(--amber)">AI POWERED</div>
+          </div>
+          <div class="panel-body" id="cb"><div class="coach-empty">Start listening to receive live coaching...</div></div>
+        </div>
+        <div class="panel" id="inj-panel">
+          <div class="panel-header">
+            <div class="panel-title" style="color:var(--green)">⚡ Script Injector</div>
+            <div class="panel-badge" style="background:var(--green-dim);color:var(--green)">CONTEXTUAL</div>
+          </div>
+          <div style="padding:12px" id="injector-feed"><div class="inj-empty">Scripts auto-surface here based on what's happening on the call. No hunting required.</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PPR Quick Reference -->
+    <div class="panel" style="margin-top:12px">
+      <div class="panel-header">
+        <div class="panel-title" style="color:var(--green)">🏥 PPR Quick Reference</div>
+        <div class="panel-badge" style="background:var(--green-dim);color:var(--green)">PINNACLE PEAK RECOVERY</div>
+      </div>
       <div class="ppr-grid">
         <div class="ppr-card">
           <div class="ppr-card-title">📍 Location & Levels of Care</div>
-          <div class="ppr-card-body">McCormick Ranch, Scottsdale AZ<br>Full continuum: Detox → Inpatient → PHP → IOP → EIOP (Evening Intensive Outpatient) → VOP (Virtual Outpatient)<br>Small group sizes — individualized care</div>
+          <div class="ppr-card-body">McCormick Ranch, Scottsdale AZ<br>Detox → Residential → PHP → IOP → EIOP → VOP<br>Small group sizes — individualized care</div>
         </div>
         <div class="ppr-card">
           <div class="ppr-card-title">🧠 Clinical Differentiators</div>
-          <div class="ppr-card-body">Trauma-focused / root-cause model<br>Master's level therapists<br>EMDR · Somatic Experiencing · ART · CPT · DBT · Holistic Groups</div>
+          <div class="ppr-card-body">Trauma-focused / root-cause model<br>Master's level therapists<br>Somatic Experiencing · ART · CPT · DBT · Holistic Groups</div>
         </div>
         <div class="ppr-card">
           <div class="ppr-card-title">🏨 Detox FAQs</div>
-          <div class="ppr-card-body">Provider seen within 12hrs of arrival<br>Length varies by substance/usage history<br>Medically assisted — individualized detox plan<br>Non-narcotic available for opiates; NOT for alcohol/benzos</div>
+          <div class="ppr-card-body">Provider seen within 12hrs of arrival<br>Individualized detox plan — varies by substance<br>Non-narcotic available for opiates only (not alcohol/benzos)</div>
         </div>
         <div class="ppr-card">
           <div class="ppr-card-title">📱 Phone Policy</div>
-          <div class="ppr-card-body"><strong>Detox:</strong> No personal phone (case mgrs handle calls)<br><strong>Residential:</strong> House phone access<br><strong>After 7–10 days</strong> + clinical approval: full electronics after clinical hours</div>
+          <div class="ppr-card-body"><strong>Detox:</strong> No personal phone<br><strong>Residential:</strong> House phone access<br><strong>7–10 days + approval:</strong> full electronics after clinical hours</div>
         </div>
         <div class="ppr-card">
-          <div class="ppr-card-title">🛏️ Rooms & Amenities</div>
-          <div class="ppr-card-body">World-class facility, spacious shared rooms (large beds)<br>Private rooms available at added cost<br>Private chef — accommodates dietary needs (notify admissions first)</div>
+          <div class="ppr-card-title">💰 Self-Pay Pricing</div>
+          <div class="ppr-card-body">
+            Detox: $7,000 · Residential 30d: $24,500<br>
+            Residential + Detox: $27,000<br>
+            PHP: $15,000 · IOP: $10,000 · EIOP: $12,000<br>
+            VOP: $3,500 · <strong>150-day full: $45,000</strong><br>
+            Housing: $1,500 one-time
+          </div>
         </div>
         <div class="ppr-card">
-          <div class="ppr-card-title">👨‍👩‍👧 Family Involvement</div>
-          <div class="ppr-card-body">Family therapy sessions, update calls from therapist/CM<br>Family workshops for residential clients<br>All involvement requires client consent & ROI — never mandatory</div>
+          <div class="ppr-card-title">🏆 PPR Guarantee</div>
+          <div class="ppr-card-body">Complete our program + slip within <strong>first year</strong> → <strong>30 days residential FREE</strong>. Use this to overcome cost hesitation.</div>
         </div>
         <div class="ppr-card">
           <div class="ppr-card-title">💼 Work / FMLA</div>
-          <div class="ppr-card-body">Case managers handle outside stressors & LOA<br>FMLA: up to 12 wks job-protected unpaid leave<br>ADA protections if FMLA doesn't apply</div>
+          <div class="ppr-card-body">Case managers handle LOA + employer communication<br>FMLA: up to 12 wks job-protected unpaid leave<br>ADA protections if FMLA doesn't apply</div>
         </div>
         <div class="ppr-card">
           <div class="ppr-card-title">⏱️ Admissions Process</div>
@@ -370,259 +463,235 @@ body{background:#080C10;color:#C8D8E4;font-family:monospace;padding:16px;font-si
         </div>
       </div>
     </div>
-  </div>
 
-  <div>
-    <div class="st">💡 Live Coaching Feed</div>
-    <div class="box" id="cb"><div class="ce">🎤<br><br>Real-time coaching will appear here.<br><br><span style="color:#00E5FF">Start listening to begin.</span></div></div>
-
-    <!-- SCRIPT INJECTOR -->
-    <div class="injector-section">
-      <div class="injector-title">⚡ Live Script Injector</div>
-      <div id="injector-feed"><div class="injector-empty">Scripts will auto-surface here based on what's happening on the call. No hunting required.</div></div>
-    </div>
   </div>
 </div>
 
-<!-- Hidden PDF report — revealed only during print -->
-<div id="pdf-report"></div>
+<div id="pdf-report" style="display:none"></div>
 
 <script>
 const DG="__DG__",CL="__CL__",LANG="__LANG__";
 const CI=(()=>{try{return __CI__;}catch(e){return 20;}})();
-// Safety check — if keys weren't injected by app.py they'll still be placeholders
 const _DG=DG.startsWith("__")||DG===""?"":DG;
 const _CL=CL.startsWith("__")||CL===""?"":CL;
+
 const CALLER_PROFILES={
-  family_substance:{
-    situation:"Family member calling about loved one struggling with substance abuse (alcohol/drugs) — seeking residential treatment",
-    persona:"Concerned family member — likely exhausted, fearful, and researching options. May face resistance from loved one. High emotional urgency.",
-    label:"family_substance"
-  },
-  family_mental:{
-    situation:"Family member calling about loved one struggling with mental health — depression, anxiety, bipolar, or co-occurring disorder",
-    persona:"Worried family member dealing with mental health crisis in a loved one. May be unsure if treatment is needed or what level of care is appropriate.",
-    label:"family_mental"
-  },
-  self_substance:{
-    situation:"Individual calling for themselves regarding substance abuse — seeking detox or residential treatment",
-    persona:"Person acknowledging their own addiction and looking for help. May be ambivalent, scared, or have tried treatment before. Needs encouragement and clear next steps.",
-    label:"self_substance"
-  },
-  self_mental:{
-    situation:"Individual calling for themselves regarding mental health struggles — depression, anxiety, trauma, or co-occurring disorder",
-    persona:"Person seeking mental health support for themselves. May feel shame or uncertainty. Needs compassionate guidance toward the right level of care.",
-    label:"self_mental"
-  },
-  dual:{
-    situation:"Caller inquiring about dual diagnosis treatment — substance abuse combined with mental health disorder",
-    persona:"Family or individual dealing with complex co-occurring disorder. Likely frustrated with programs that only treated one issue. Needs to understand PPR's integrated approach.",
-    label:"dual"
-  },
-  crisis:{
-    situation:"URGENT — Crisis call. Active substance use emergency, safety concern, or immediate intervention needed",
-    persona:"Highly distressed caller. Possibly in acute crisis. Needs immediate reassurance, fast admissions path, and direct action. Do not delay — move toward admission now.",
-    label:"crisis"
-  },
-  insurance:{
-    situation:"Caller focused on insurance coverage and verification of benefits before making treatment decision",
-    persona:"Practical, financially-driven caller. Needs clear coverage information before committing. Goal: complete VOB and transition into clinical conversation.",
-    label:"insurance"
-  },
-  custom:{
-    situation:"",
-    persona:"",
-    label:"custom"
-  }
+  family_substance:{situation:"Family member calling about loved one struggling with substance abuse (alcohol/drugs) — seeking residential treatment",persona:"Concerned family member — likely exhausted, fearful, and researching options. May face resistance from loved one. High emotional urgency.",label:"family_substance"},
+  family_mental:{situation:"Family member calling about loved one struggling with mental health — depression, anxiety, bipolar, or co-occurring disorder",persona:"Worried family member dealing with mental health crisis in a loved one. May be unsure if treatment is needed or what level of care is appropriate.",label:"family_mental"},
+  self_substance:{situation:"Individual calling for themselves regarding substance abuse — seeking detox or residential treatment",persona:"Person acknowledging their own addiction and looking for help. May be ambivalent, scared, or have tried treatment before. Needs encouragement and clear next steps.",label:"self_substance"},
+  self_mental:{situation:"Individual calling for themselves regarding mental health struggles — depression, anxiety, trauma, or co-occurring disorder",persona:"Person seeking mental health support for themselves. May feel shame or uncertainty. Needs compassionate guidance toward the right level of care.",label:"self_mental"},
+  dual:{situation:"Caller inquiring about dual diagnosis treatment — substance abuse combined with mental health disorder",persona:"Family or individual dealing with complex co-occurring disorder. Likely frustrated with programs that only treated one issue. Needs to understand PPR integrated approach.",label:"dual"},
+  crisis:{situation:"URGENT — Crisis call. Active substance use emergency, safety concern, or immediate intervention needed",persona:"Highly distressed caller. Possibly in acute crisis. Needs immediate reassurance, fast admissions path, and direct action. Do not delay — move toward admission now.",label:"crisis"},
+  insurance:{situation:"Caller focused on insurance coverage and verification of benefits before making treatment decision",persona:"Practical, financially-driven caller. Needs clear coverage information before committing. Goal: complete VOB and transition into clinical conversation.",label:"insurance"},
+  custom:{situation:"",persona:"",label:"custom"}
 };
 let activeCallerType="family_substance";
 function setCallerType(key){
   activeCallerType=key;
   document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active","crisis-active"));
   const chip=document.querySelector(`[data-key="${key}"]`);
-  if(chip){chip.classList.add(key==="crisis"?"crisis-active":"active");}
+  if(chip)chip.classList.add(key==="crisis"?"crisis-active":"active");
   const profile=CALLER_PROFILES[key];
   const prodEl=document.getElementById("prod");
   const persEl=document.getElementById("pers");
   if(key==="custom"){
     document.getElementById("ctx-fields").style.display="grid";
-    prodEl.value="";persEl.value="";
-    prodEl.placeholder="Describe the caller situation...";
-    persEl.placeholder="Describe the prospect persona...";
-    prodEl.focus();
+    prodEl.value="";persEl.value="";prodEl.focus();
     document.getElementById("intel-loading").textContent="Enter custom details above";
     document.getElementById("intel-cards").style.display="none";
   } else {
     document.getElementById("ctx-fields").style.display="grid";
-    prodEl.value=profile.situation;
-    persEl.value=profile.persona;
+    prodEl.value=profile.situation;persEl.value=profile.persona;
     generateIntel(key);
   }
 }
-function getPROD(){
-  const v=document.getElementById("prod")?.value;
-  if(v&&v.trim())return v;
-  return CALLER_PROFILES[activeCallerType]?.situation||"Family member calling about a loved one struggling with substance abuse seeking treatment at Pinnacle Peak Recovery";
-}
-function getPERS(){
-  const v=document.getElementById("pers")?.value;
-  if(v&&v.trim())return v;
-  return CALLER_PROFILES[activeCallerType]?.persona||"Concerned family member or individual seeking addiction treatment help — emotionally invested, may have hesitations around cost, readiness, or prior failed treatment";
-}
-let sock,actx,proc,src,ms2,rec=false,t0=null,tmr=null;
-let W=0,O=0,H=0,I=0,WC=0,lines=[],pend="",lc=0,objections=[],focusMode=false,callStage=0;
+function getPROD(){const v=document.getElementById("prod")?.value;if(v&&v.trim())return v;return CALLER_PROFILES[activeCallerType]?.situation||"Family member calling about substance abuse treatment";}
+function getPERS(){const v=document.getElementById("pers")?.value;if(v&&v.trim())return v;return CALLER_PROFILES[activeCallerType]?.persona||"Concerned family member or individual seeking addiction treatment help";}
 
 const STAGES=["opener","discovery","pitch","objection","close"];
-const STAGE_KEYWORDS=[
+const STAGE_KW=[
   /\b(hello|hi there|calling|how are you|my name is|pinnacle|who am i speaking|thanks for calling)\b/i,
-  /\b(tell me|how long|what's going on|what happened|when did|how often|how serious|walk me through|describe|situation|using|drinking|history)\b/i,
-  /\b(what we do|our program|let me tell you|we offer|we have|we specialize|our clinical|our facility|trauma|emdr|detox|levels of care)\b/i,
+  /\b(tell me|how long|what's going on|what happened|when did|how often|how serious|walk me through|situation|using|drinking|history)\b/i,
+  /\b(what we do|our program|let me tell you|we offer|we specialize|our clinical|our facility|trauma|detox|levels of care)\b/i,
   /\b(too expensive|can't afford|need to think|not ready|doesn't want|won't go|insurance|tried before|call back|talk to my|not sure)\b/i,
   /\b(move forward|get started|next step|pre.?assessment|schedule|when can|bed available|admission|reserve|let's do this|ready to)\b/i
 ];
-
-function detectStage(text){
-  // Progress stage based on keywords — never go backward
-  for(let i=Math.max(callStage,0);i<STAGE_KEYWORDS.length;i++){
-    if(STAGE_KEYWORDS[i].test(text)){
-      if(i>callStage){setStage(i);}
-      break;
-    }
-  }
-}
+let callStage=0;
+function detectStage(tx){for(let i=Math.max(callStage,0);i<STAGE_KW.length;i++){if(STAGE_KW[i].test(tx)){if(i>callStage)setStage(i);break;}}}
 function setStage(n){
   callStage=n;
-  for(let i=0;i<5;i++){
-    const el=document.getElementById("stage-"+i);
-    if(!el)continue;
-    el.classList.remove("active","done");
-    if(i<n)el.classList.add("done");
-    else if(i===n)el.classList.add("active");
-  }
+  for(let i=0;i<5;i++){const el=document.getElementById("stage-"+i);if(!el)continue;el.classList.remove("active","done");if(i<n)el.classList.add("done");else if(i===n)el.classList.add("active");}
 }
+
+let sock,actx,proc,src,ms2,rec=false,t0=null,tmr=null;
+let W=0,O=0,H=0,I=0,WC=0,lines=[],pend="",lc=0,objections=[],focusMode=false;
+let talkWords=0,totalWords=0,hotCooldown=false;
 const $=x=>document.getElementById(x);
 const ts=()=>new Date().toLocaleTimeString("en-US",{hour12:false});
-function ss(m,c="#00E5FF"){$("sb").style.color=c;$("sb").textContent=m;}
-function showerr(m){$("eb").textContent="❌ "+m;$("eb").style.display="block";}
-function cerr(){$("eb").style.display="none";}
+
+function ss(m,c="var(--cyan)"){const el=$("sb");if(el){el.style.color=c;el.textContent=m;}const dot=$("sdot");if(dot)dot.style.background=c;}
+function showerr(m){const e=$("eb");if(e){e.textContent="❌ "+m;e.style.display="block";}}
+function cerr(){const e=$("eb");if(e)e.style.display="none";}
+
 function setLive(on){
-  $("mstat").innerHTML=on?"<span class='pl live'><span class='dot dg'></span>LIVE — Listening...</span>":"<span class='pl idle'><span class='dot dy'></span>IDLE</span>";
+  const ring=$("signal-ring");const text=$("live-text");
+  const badge=$("tx-badge");
+  if(ring)ring.className="signal-ring"+(on?" live":"");
+  if(text)text.textContent=on?"LIVE":"IDLE";
+  if(badge){badge.textContent=on?"● LIVE":"IDLE";badge.style.background=on?"rgba(0,245,160,0.1)":"var(--surface-3)";badge.style.color=on?"var(--green)":"var(--text-muted)";}
   $("bst").disabled=on;$("bsp").disabled=!on;
 }
+
 function upd(){
   $("mw").textContent=W;$("mo").textContent=O;$("mh").textContent=H;$("mi").textContent=I;
   $("mwr").textContent=O>0?Math.round((H/O)*100)+"%":"—";
+  const ob=$("obj-badge");if(ob)ob.textContent="WIN RATE: "+(O>0?Math.round((H/O)*100)+"%":"—");
 }
+
 function toggleFocus(){
   focusMode=!focusMode;
   const btn=$("bfocus");
-  const coachBox=$("cb");
-  const objLog=$("obj-log");
+  const cb=$("cb");const ol=$("obj-log");const inf=$("injector-feed");
   if(focusMode){
-    btn.textContent="🔓 Resume Coaching";
-    btn.classList.add("active");
-    coachBox.classList.add("focus-frozen");
-    objLog.classList.add("focus-frozen");
-    ss("🔒 Focus Mode ON — transcribing silently. Hit Resume when ready.",  "#FFD60A");
+    btn.textContent="🔓 Resume";btn.classList.add("active");
+    [cb,ol,inf].forEach(el=>{if(el)el.classList.add("focus-frozen");});
+    ss("🔒 Focus Mode — reading scripts. Hit Resume when done.","var(--amber)");
   } else {
-    btn.textContent="🔒 Focus Mode";
-    btn.classList.remove("active");
-    coachBox.classList.remove("focus-frozen");
-    objLog.classList.remove("focus-frozen");
+    btn.textContent="🔒 Focus";btn.classList.remove("active");
+    [cb,ol,inf].forEach(el=>{if(el)el.classList.remove("focus-frozen");});
     ss("✅ LIVE — Listening...");
   }
 }
+
 function stmr(){
-  xtmr();
-  t0=Date.now();
+  xtmr();t0=Date.now();
   tmr=setInterval(()=>{
     const s=Math.floor((Date.now()-t0)/1000);
     $("md").textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
   },500);
 }
 function xtmr(){clearInterval(tmr);}
+
+function updateRatio(w){
+  talkWords+=w;totalWords+=w;
+  const pct=Math.round((talkWords/(totalWords/0.6))*100);
+  const fill=$("ratio-fill");const val=$("ratio-pct");
+  if(!fill||!val)return;
+  fill.style.width=Math.min(pct,100)+"%";
+  fill.className="ratio-fill"+(pct>65?" danger":pct>50?" warn":"");
+  val.textContent=`You: ${pct}% · `+(pct>65?"⚠️ Too much talking":pct>50?"⚡ Watch your ratio":"✅ Good balance");
+}
+
+const HOT_SIGNALS=/\b(how soon|when can (he|she|they) start|what does (insurance|my insurance) cover|is there (availability|a bed)|how (do I|do we) get started|what('?s| is) the (next step|process|cost|price)|I('?m| am) ready|we('?re| are) ready|let('?s| us) do (it|this)|what do (I|we) need|sign (me|him|her|them) up|get (him|her|them) in|I want to (move forward|proceed)|can we (schedule|set|book)|when (is|are) you available)\b/i;
+const HOT_CLOSES={default:"Let's lock in a pre-assessment right now — I have availability today. What's the best number to reach you in the next 30 minutes?",insurance:"Perfect — let me get your insurance info right now and I'll call you back in 30 minutes with exactly what's covered.",family_substance:"Let's get the intake process started right now — I can have someone reach out within the hour. What's the best contact number?",self_substance:"I'm glad you're ready — let's take the next step together right now. Can I get you scheduled for a quick 15-minute pre-assessment call today?",crisis:"We need to move on this right now. Let me get your information and we can have a bed ready as early as tonight."};
+function checkHotMoment(tx){
+  if(hotCooldown||!HOT_SIGNALS.test(tx))return;
+  const close=HOT_CLOSES[activeCallerType]||HOT_CLOSES.default;
+  const flash=$("hot-flash");const content=$("hot-content");
+  if(!flash||!content)return;
+  content.textContent=close;flash.classList.add("show");hotCooldown=true;
+  setTimeout(()=>{flash.classList.remove("show");hotCooldown=false;},12000);
+}
+
+let intelCache={};
+async function generateIntel(key){
+  if(!_CL)return;
+  if(intelCache[key]){applyIntel(intelCache[key]);return;}
+  $("intel-loading").textContent="Generating battle card...";
+  $("intel-cards").style.display="none";
+  const profile=CALLER_PROFILES[key];
+  if(!profile||key==="custom")return;
+  const sys=`You are an elite admissions coach for Pinnacle Peak Recovery (PPR) in McCormick Ranch, Scottsdale AZ. Generate a pre-call battle card for: ${profile.situation}. Persona: ${profile.persona}. Reply ONLY in JSON, no extra text, straight quotes: {"objections":"2-3 most likely objections, comma separated, very short","emotional_driver":"core emotional fear or desire in one short sentence","recommended_close":"single best closing move for this caller type in one sentence"}`;
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:300,system:sys,messages:[{role:"user",content:"Generate the battle card now."}]})});
+    if(!r.ok)return;
+    const data=await r.json();
+    const raw=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"").replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/\r?\n/g," ");
+    const match=raw.match(/\{[\s\S]*\}/);if(!match)return;
+    const res=JSON.parse(match[0]);
+    intelCache[key]=res;applyIntel(res);
+  }catch(e){$("intel-loading").textContent="Intel unavailable";}
+}
+function applyIntel(res){
+  $("intel-obj").textContent=res.objections||"—";$("intel-emo").textContent=res.emotional_driver||"—";$("intel-close").textContent=res.recommended_close||"—";
+  $("intel-cards").style.display="grid";$("intel-loading").textContent="Ready";
+}
+
 function addLine(t,tx){
-  const b=$("tb"),e=b.querySelector(".te");if(e)e.remove();
-  const d=document.createElement("div");d.className="tl";
-  d.innerHTML="<span class='ts'>["+t+"] You</span>: "+tx;
+  const b=$("tb"),e=b.querySelector(".tx-empty");if(e)e.remove();
+  const d=document.createElement("div");d.className="tx-line";
+  d.innerHTML=`<span class="tx-time">${t}</span><span class="tx-name">You</span><span class="tx-text">${tx}</span>`;
   b.appendChild(d);b.scrollTop=b.scrollHeight;
 }
+
 function addCoach(type,content,t){
   if(focusMode)return;
-  const b=$("cb"),e=b.querySelector(".ce");if(e)e.remove();
-  const m={
-    objection:["🚨","#FF3B5C","OBJECTION"],
-    coach:    ["🎯","#00E5FF","SAY THIS"],
-    positive: ["✅","#00FF9D","GREAT MOVE"],
-    win:      ["🏆","#FFD60A","CLOSING MOVE"],
+  const b=$("cb"),e=b.querySelector(".coach-empty");if(e)e.remove();
+  const cfg={
+    objection:{col:"var(--red)",bg:"rgba(255,61,107,0.06)",lbl:"🚨 OBJECTION"},
+    coach:{col:"var(--cyan)",bg:"rgba(0,217,255,0.06)",lbl:"🎯 SAY THIS"},
+    positive:{col:"var(--green)",bg:"rgba(0,245,160,0.06)",lbl:"✅ GREAT MOVE"},
+    win:{col:"var(--amber)",bg:"rgba(255,184,0,0.06)",lbl:"🏆 CLOSE NOW"},
   };
-  const[icon,col,lbl]=m[type]||m.coach;
+  const{col,bg,lbl}=cfg[type]||cfg.coach;
   const d=document.createElement("div");
-  d.style.cssText=`background:#131A22;border:1px solid ${col}33;border-left:3px solid ${col};border-radius:9px;padding:12px 14px;margin-bottom:9px;font-size:13px;line-height:1.6;color:#EFF6FB`;
-  d.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-    <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:3px;background:${col}22;color:${col};border:1px solid ${col}44">${icon} ${lbl}</span>
-    <span style="font-size:9px;color:#4A6070">${t}</span>
-  </div>${content}`;
+  d.className="coach-card";
+  d.style.cssText=`border-left-color:${col};background:${bg}`;
+  d.innerHTML=`<div class="coach-meta"><span class="coach-tag" style="background:${bg};color:${col};border:1px solid ${col}44">${lbl}</span><span class="coach-time">${t}</span></div><div class="coach-body">${content}</div>`;
   b.insertBefore(d,b.firstChild);
 }
+
 function addInjector(type,script,context,t){
   if(focusMode||!script||!script.trim())return;
-  const feed=document.getElementById("injector-feed");
-  if(!feed)return;
-  const empty=feed.querySelector(".injector-empty");if(empty)empty.remove();
-  const tagType=type==="objection"?"objection":type==="win"?"close":"coach";
-  const tagLabel=type==="objection"?"🚨 OBJECTION RESPONSE":type==="win"?"🏆 CLOSE NOW":"💬 SAY THIS";
+  const feed=$("injector-feed");if(!feed)return;
+  const empty=feed.querySelector(".inj-empty");if(empty)empty.remove();
+  const cfg={
+    objection:{col:"var(--red)",bg:"rgba(255,61,107,0.06)",lbl:"🚨 OBJECTION RESPONSE"},
+    win:{col:"var(--amber)",bg:"rgba(255,184,0,0.06)",lbl:"🏆 CLOSE NOW"},
+    coach:{col:"var(--green)",bg:"rgba(0,245,160,0.06)",lbl:"💬 SAY THIS"},
+  };
+  const{col,bg,lbl}=cfg[type]||cfg.coach;
   const id="inj-"+Date.now();
   const d=document.createElement("div");
-  d.className=`injector-card ${tagType}`;
-  d.id=id;
-  d.innerHTML=`
-    <button class="injector-copy" onclick="copyScript('${id}',this)">📋 Copy</button>
-    <span class="injector-tag ${tagType}">${tagLabel}</span>
-    <span class="injector-ts">${t}</span>
-    ${context?`<div class="injector-context">${context}</div>`:""}
-    <div class="injector-script">"${script}"</div>
-  `;
+  d.className="injector-card";d.id=id;
+  d.style.cssText=`border-color:${col}33;background:${bg}`;
+  d.innerHTML=`<span class="inj-tag" style="background:${bg};color:${col};border:1px solid ${col}44">${lbl}</span><span class="inj-time">${t}</span>${context?`<div class="inj-context">${context}</div>`:""}<div class="inj-script">"${script}"</div><button class="inj-copy" onclick="copyScript('${id}',this)">📋 Copy</button>`;
   feed.insertBefore(d,feed.firstChild);
-  // Keep only last 5 scripts
-  const cards=feed.querySelectorAll(".injector-card");
-  if(cards.length>5)cards[cards.length-1].remove();
+  const cards=feed.querySelectorAll(".injector-card");if(cards.length>5)cards[cards.length-1].remove();
 }
 
 function copyScript(id,btn){
-  const card=document.getElementById(id);
-  if(!card)return;
-  const text=card.querySelector(".injector-script")?.textContent||"";
-  navigator.clipboard.writeText(text.replace(/^"|"$/g,"")).then(()=>{
-    btn.textContent="✅ Copied!";btn.classList.add("copied");
-    setTimeout(()=>{btn.textContent="📋 Copy";btn.classList.remove("copied");},2000);
-  });
+  const card=document.getElementById(id);if(!card)return;
+  const text=card.querySelector(".inj-script")?.textContent||"";
+  navigator.clipboard.writeText(text.replace(/^"|"$/g,"")).then(()=>{btn.textContent="✅ Copied!";btn.classList.add("copied");setTimeout(()=>{btn.textContent="📋 Copy";btn.classList.remove("copied");},2000);});
 }
+
 function addObjLog(id,objText,rebuttal,t){
-  if(focusMode)return; // frozen — don't update UI
-  const log=$("obj-log");
-  const empty=log.querySelector(".te");if(empty)empty.remove();
+  if(focusMode)return;
+  const log=$("obj-log");const empty=log.querySelector(".obj-empty");if(empty)empty.remove();
   const d=document.createElement("div");d.className="obj-card";d.id="obj-"+id;
-  d.innerHTML="<div class='obj-header'><div class='obj-q'>🚨 "+objText+"</div><span class='obj-badge badge-open' id='badge-"+id+"'>⏳ OPEN</span></div><div class='obj-a-lbl'>Say This:</div><div class='obj-a'>"+rebuttal+"</div><div class='obj-ts'>Heard at "+t+"</div>";
+  d.innerHTML=`<div class="obj-header"><div class="obj-q">🚨 ${objText}</div><span class="obj-badge badge-open" id="badge-${id}">⏳ OPEN</span></div><div class="obj-rebuttal-lbl">Suggested Response:</div><div class="obj-rebuttal">${rebuttal}</div><div class="obj-ts">Heard at ${t}</div>`;
   log.insertBefore(d,log.firstChild);
 }
+
 function markObjWon(id){
-  const card=document.getElementById("obj-"+id);
-  const badge=document.getElementById("badge-"+id);
+  const card=document.getElementById("obj-"+id);const badge=document.getElementById("badge-"+id);
   if(card&&badge&&!card.classList.contains("won")){
     card.classList.add("won");
-    badge.className="obj-badge badge-won";
-    badge.textContent="✅ HANDLED";
+    card.querySelector(".obj-q").classList.add("won");
+    badge.className="obj-badge badge-won";badge.textContent="✅ HANDLED";
     H++;upd();
   }
 }
+
+const OBJECTION_KEYWORDS=/\b(can'?t afford|too expensive|too much|not ready|need to think|think about it|call me back|talk to (my |the )?spouse|talk to (my |the )?husband|talk to (my |the )?wife|need to talk|do more research|tried (treatment|before|it before)|doesn'?t want|won'?t go|leave AMA|not sure|doing nothing|just leave|what if it|doesn'?t work|no insurance|don'?t have insurance|only have medicaid|insurance (denied|won'?t cover|doesn'?t cover)|too far|too long|how long|how much|what does it cost|what'?s the cost|what'?s the price|price|cost|expensive|money|afford|payment|covered|coverage|not covered|not going|force him|force her|force them|want to do it|ready to go|not ready to go|tried before|done this before|didn'?t work|never works|pointless|waste of time|what makes you different|why (you|your program|pinnacle)|other programs|somewhere else|closer to home|local|near|distance|drive|far away|phone|cell phone|keep (his|her|their) phone|medication|meds|adderall|suboxone|methadone|job|work|fired|fmla|leave of absence|roommate|private room|food|diet|vegan|gluten|family|visit|see them|when can|how soon|tonight|today|tomorrow|this week)\b/i;
+
 async function coach(chunk,full){
-  if(!_CL){showerr("Anthropic API key missing — check sidebar or .env file.");return;}
-  if(focusMode)return; // focus mode — skip coaching, keep transcribing
+  if(!_CL){showerr("Anthropic API key missing.");return;}
+  if(focusMode)return;
   ss("🧠 Analyzing...");
   try{
-    const prod=getPROD();
-    const pers=getPERS();
+    const prod=getPROD();const pers=getPERS();
     const openObjs=objections.filter(o=>!o.won).map(o=>o.text).join("; ");
     const sys=`You are APEX, an elite real-time admissions coach for PINNACLE PEAK RECOVERY (PPR) — a premier substance abuse and mental health treatment center in McCormick Ranch, Scottsdale, Arizona.
 
@@ -633,7 +702,7 @@ CLINICAL IDENTITY:
 - Trauma-focused / root-cause model: treat underlying conditions → addiction becomes easier to treat
 - Master's level therapists (not just counselors)
 - Small group sizes — highly individualized care
-- Modalities: EMDR, Somatic Experiencing, ART (Accelerated Resolution Therapy), CPT (Cognitive Processing Therapy), DBT (Dialectical Behavioral Therapy)
+- Modalities: Somatic Experiencing, ART (Accelerated Resolution Therapy), CPT (Cognitive Processing Therapy), DBT (Dialectical Behavioral Therapy)
 - Holistic and psychoeducational group programming
 
 LEVELS OF CARE (full continuum):
@@ -655,7 +724,7 @@ PHONE POLICY:
 
 ROOMS: Spacious shared rooms (large beds). Private rooms available at added cost. Having a roommate is clinically beneficial.
 
-FOOD: Private chef, high-quality ingredients. Accommodates dietary restrictions (allergies, vegan, gluten-free, etc.) — must notify admissions before arrival.
+FOOD: Private chef, high-quality ingredients. Accommodates dietary restrictions — must notify admissions before arrival.
 
 MEDICATIONS:
 - Adderall/benzos/controlled substances: provider will prescribe non-narcotic alternatives
@@ -677,188 +746,131 @@ ADMISSIONS PROCESS:
 2. 15-20 min pre-assessment phone call
 3. Schedule admission date
 
+SELF-PAY PRICING (effective 3/10/2023):
+- Detox only: $7,000 upfront
+- Residential (30 days): $24,500
+- Residential + Detox: $27,000
+- PHP (20 sessions / 30 days): $15,000
+- IOP (20 sessions / 30 days): $10,000 (optional housing available)
+- Evening IOP / EIOP (24 sessions / 60 days): $12,000 (no housing included)
+- Virtual Outpatient / VOP (8 sessions / 60 days): $3,500
+- Full 150-day continuum: $45,000 (+$3,500 if detox needed) — must be paid upfront
+- Housing fee: $1,500 one-time (room, board, transport)
+
+PPR GUARANTEE:
+Clients who successfully complete PPR's proven process and have a slip within their first year of recovery can return for 30 days of residential treatment at NO COST. Use this on cost objections — "We're so confident in our program that if they complete it and relapse in the first year, we bring them back for free."
+
 TREATMENT LENGTH:
 - Individualized — based on medical progress, clinical progress, insurance authorization
-- No one-size-fits-all timeline
 
 === CALL CONTEXT ===
 SITUATION: ${prod}
 PROSPECT: ${pers}
 OPEN UNRESOLVED OBJECTIONS: ${openObjs||"none"}
+CURRENT CALL STAGE: ${STAGES[callStage]||"opener"}
 
 FULL TRANSCRIPT:
 ${full.slice(-3000)}
 
-LATEST WORDS SPOKEN:
+LATEST WORDS:
 ${chunk}
 
 === COACHING INSTRUCTIONS ===
 
-=== COACHING INSTRUCTIONS ===
-
-CURRENT CALL STAGE: ${STAGES[callStage]||"opener"}
-
 RESPONSE TYPES:
-"objection" — Resistance detected. Use TIERED response based on severity:
-  TIER 1 (soft hesitation, first time): 1 sharp rhetorical question only. Make them feel the weight themselves.
+"objection" — Resistance detected. TIERED response:
+  TIER 1 (soft hesitation, first time): 1 sharp rhetorical question only.
   TIER 2 (clear objection, direct pushback): 1 question + 1 reframe sentence. Max 2 sentences.
-  TIER 3 (repeat objection, hard no, threatening to end): Pattern interrupt — say something unexpected that reframes their entire frame. 1-2 sentences, challenger style.
-  Always set objection_text (under 6 words). Detect tier from context and transcript history.
+  TIER 3 (repeat/hard no): Pattern interrupt — something unexpected. 1-2 sentences.
+  Always set objection_text (under 6 words).
 
-"coach" — No objection detected. Stage-aware guidance:
-  opener: Help build rapport or transition to discovery. 1 sentence.
-  discovery: Ask a question that uncovers deeper pain or urgency. 1 sentence.
-  pitch: Reinforce a PPR differentiator or bridge to next step. 1 sentence.
-  objection: Help navigate back toward momentum. 1-2 sentences.
-  close: Push toward the definitive next step (VOB / pre-assessment / bed date). 1 sentence.
-
+"coach" — No objection. Stage-aware: opener=rapport/transition, discovery=uncover pain, pitch=PPR differentiator, close=next step. 1 sentence.
 "positive" — Rep said something excellent. 1 affirming sentence.
-"win" — Prospect sounds ready or agreeable. 1 decisive closing sentence only.
+"win" — Prospect sounds ready. 1 decisive closing sentence.
 
-TIERED OBJECTION QUESTION BANK:
-TIER 1 — Reflective questions (make them feel it):
-- "What does your family look like in 6 months if nothing changes?"
-- "If he had cancer, would you still be waiting for the right time?"
-- "What are you most afraid of — spending the money, or getting the call?"
-- "When you picture them at 40 — what do you see?"
-- "Who else in your family is suffering because of this right now?"
-- "At what point does doing nothing become the wrong choice?"
+TIERED OBJECTION QUESTIONS:
+TIER 1: "What does your family look like in 6 months if nothing changes?" / "If he had cancer, would you still be waiting?" / "What are you most afraid of — spending the money, or getting the call?" / "At what point does doing nothing become the wrong choice?"
+TIER 2: question + "Every day of delay changes the brain — that's neuroscience, not a sales pitch." / "We've helped people come in resistant and leave changed — readiness comes after the door, not before."
+TIER 3: "I hear you — and I want to be honest, most families who say that call back after something worse happened. You're calling now because part of you knows this is the moment." / "The fact that you're still on this call tells me everything — let's not let that love go to waste."
 
-TIER 2 — Reframe + bridge (question + pivot):
-- "What's the cost of being wrong about waiting? Every day of delay changes the brain — that's not a metaphor, it's neuroscience."
-- "How many more chances does he get before this becomes permanent? We've helped people in exactly this situation — the ones who made it called when it felt too soon."
-- "What has to happen before this becomes urgent enough? Our program is specifically built for people who come in resistant — readiness comes after the door, not before."
+PPR GUARANTEE ON COST: When cost comes up, mention: "And remember — if they successfully complete our program and have a slip in their first year, they come back for 30 days at no cost. We stand behind our results."
 
-TIER 3 — Pattern interrupt (unexpected reframe):
-- "I hear you — and I want to be honest, most families who say that call back after something worse happened. You're calling now because part of you knows this is the moment."
-- "You've already done the hardest part — you made this call. Everything from here is just logistics, and we handle logistics every day."
-- "The fact that you're still on this call tells me everything I need to know about how much you love them. Let's not let that love go to waste."
-
-LENGTH RULES — NON NEGOTIABLE:
+LENGTH RULES:
 - "coach", "positive", "win": 1 sentence ALWAYS
-- "objection" Tier 1: 1 sentence (question only)
+- "objection" Tier 1: 1 sentence
 - "objection" Tier 2-3: 2 sentences MAX
-- NO numbered lists, NO bullets, NO line breaks in content field
-- Content must be one clean string, no special formatting, straight apostrophes only
+- NO numbered lists, NO bullets, NO line breaks in content
+- Straight apostrophes only
 
 SCRIPT INJECTION — "script" field:
-- For "objection" type: ALWAYS include the exact word-for-word script to say, 1-2 sentences max, in first person as if speaking it out loud. Start with a natural opener like "I hear you..." or "I understand..."
-- For "win" type: ALWAYS include the exact closing line to use right now
-- For "coach" type: include a script only when there's a clear specific thing to say (e.g. asking a discovery question, making a PPR pitch). Leave empty string "" if it's general guidance.
-- For "positive": always empty string ""
-- Scripts must be natural spoken language — not formal, not stiff. How a great rep actually talks.
+- "objection": ALWAYS include exact word-for-word script, 1-2 sentences, natural spoken language
+- "win": ALWAYS include exact closing line
+- "coach": include script only when there's something specific to say; otherwise ""
+- "positive": always ""
 
-Reply ONLY in this exact JSON format, no extra text:
-{"type":"coach","content":"your coaching here","script":"exact word-for-word script to say or empty string","objection_text":"","objection_resolved":""}`;
+Reply ONLY in this exact JSON, no extra text:
+{"type":"coach","content":"coaching here","script":"exact script or empty string","objection_text":"","objection_resolved":""}`;
 
-    let r, attempts=0;
+    let r,attempts=0;
     while(attempts<3){
-      r=await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST",
-        headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
-        body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:400,system:sys,messages:[{role:"user",content:"Analyze the latest words and respond now."}]})
-      });
-      if(r.status===529){
-        attempts++;
-        if(attempts<3){ss("⏳ API busy — retrying in 3s...");await new Promise(res=>setTimeout(res,3000));}
-        continue;
-      }
+      r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:400,system:sys,messages:[{role:"user",content:"Analyze and respond now."}]})});
+      if(r.status===529){attempts++;if(attempts<3){ss("⏳ API busy — retrying...");await new Promise(res=>setTimeout(res,3000));}continue;}
       break;
     }
-    if(!r.ok){
-      const errText=await r.text();
-      showerr("Claude API error "+r.status+": "+errText.slice(0,120));
-      ss("⚠️ Coaching error — see red bar above.");
-      return;
-    }
+    if(!r.ok){const t=await r.text();showerr("Claude API error "+r.status+": "+t.slice(0,100));ss("⚠️ Error","var(--red)");return;}
     const data=await r.json();
-    const raw=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"");
-    if(!raw){showerr("Claude returned empty response.");return;}
-    // Sanitize before parsing — replace smart quotes, curly apostrophes, and line breaks
-    const clean=raw
-      .replace(/[\u2018\u2019]/g,"'")   // curly single quotes → straight
-      .replace(/[\u201C\u201D]/g,'"')   // curly double quotes → straight
-      .replace(/\r?\n/g," ")            // line breaks → space
-      .replace(/\t/g," ");              // tabs → space
+    const clean=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"").replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/\r?\n/g," ");
+    if(!clean){ss("✅ LIVE — Listening...");return;}
     let res;
     try{res=JSON.parse(clean);}
     catch(pe){
       const match=clean.match(/\{[\s\S]*\}/);
       if(match){
         try{res=JSON.parse(match[0]);}
-        catch(e2){
-          try{res=JSON.parse(match[0].replace(/,\s*\}$/,"}").replace(/\n/g," ").replace(/\r/g,""));}
-          catch(e3){console.warn("Coach JSON parse failed — skipping:",clean.slice(0,80));ss("✅ LIVE — Listening...");return;}
-        }
-      }
-      else{console.warn("No JSON in coach response — skipping");ss("✅ LIVE — Listening...");return;}
+        catch(e2){try{res=JSON.parse(match[0].replace(/,\s*\}$/,"}"));}catch(e3){ss("✅ LIVE — Listening...");return;}}
+      } else {ss("✅ LIVE — Listening...");return;}
     }
-
     if(res.objection_resolved&&res.objection_resolved.length>2){
       const match=objections.find(o=>!o.won&&o.text.toLowerCase().includes(res.objection_resolved.toLowerCase().slice(0,10)));
       if(match)markObjWon(match.id);
     }
-
     if(res.type&&res.content){
-      I++;
-      addCoach(res.type,res.content,ts());
-      if(res.script&&res.script.trim()){
-        addInjector(res.type,res.script,res.objection_text||"",ts());
-      }
+      I++;addCoach(res.type,res.content,ts());
+      if(res.script&&res.script.trim())addInjector(res.type,res.script,res.objection_text||"",ts());
       if(res.type==="objection"&&res.objection_text&&res.objection_text.length>1){
-        O++;
-        const id=Date.now();
+        O++;const id=Date.now();
         objections.push({id,text:res.objection_text,won:false});
         addObjLog(id,res.objection_text,res.content,ts());
       }
       upd();
     }
     ss("✅ LIVE — Listening...");
-  }catch(e){
-    showerr("Coach error: "+e.message);
-    ss("⚠️ Coaching error — see red bar above.");
-    console.error("Coach error:",e);
-  }
+  }catch(e){showerr("Coach error: "+e.message);ss("⚠️ Error","var(--red)");console.error(e);}
 }
 
-const OBJECTION_KEYWORDS=/\b(can'?t afford|too expensive|too much|not ready|need to think|think about it|call me back|talk to (my |the )?spouse|talk to (my |the )?husband|talk to (my |the )?wife|need to talk|do more research|tried (treatment|before|it before)|doesn'?t want|won'?t go|leave AMA|not sure|doing nothing|just leave|what if it|doesn'?t work|no insurance|don'?t have insurance|only have medicaid|insurance (denied|won'?t cover|doesn'?t cover)|too far|too long|how long|how much|what does it cost|what'?s the cost|what'?s the price|price|cost|expensive|money|afford|payment|covered|coverage|not covered|not going|force him|force her|force them|want to do it|ready to go|not ready to go|tried before|done this before|didn'?t work|never works|pointless|waste of time|what makes you different|why (you|your program|pinnacle)|other programs|somewhere else|closer to home|local|near|distance|drive|far away|phone|cell phone|keep (his|her|their) phone|medication|meds|adderall|suboxone|methadone|job|work|fired|fmla|leave of absence|roommate|private room|food|diet|vegan|gluten|family|visit|see them|when can|how soon|tonight|today|tomorrow|this week)\b/i;
-
 function final(tx){
-  const t=ts();
-  addLine(t,tx);
-  lines.push(tx);
-  const w=tx.trim().split(/\s+/).length;
-  W+=w;WC+=w;pend+=" "+tx;
-  upd();
-  updateRatio(w);
-  detectStage(tx);
-  checkHotMoment(tx);
+  const t=ts();addLine(t,tx);lines.push(tx);
+  const w=tx.trim().split(/\s+/).length;W+=w;WC+=w;pend+=" "+tx;upd();
+  updateRatio(w);detectStage(tx);checkHotMoment(tx);
   const now=Date.now();
-  const hasObjKeyword=OBJECTION_KEYWORDS.test(tx);
-  // Fire immediately on objection keywords (min 2s gap), or every 8 words (min 4s gap)
-  const threshold=hasObjKeyword?0:8;
-  const cooldown=hasObjKeyword?2000:4000;
-  if(WC>=threshold&&(now-lc)>cooldown){
-    coach(pend.trim(),lines.join(" "));
-    lc=now;WC=0;pend="";
-  }
+  const hasObj=OBJECTION_KEYWORDS.test(tx);
+  const threshold=hasObj?0:8;const cooldown=hasObj?2000:4000;
+  if(WC>=threshold&&(now-lc)>cooldown){coach(pend.trim(),lines.join(" "));lc=now;WC=0;pend="";}
 }
 
 async function go(){
   cerr();
-  if(!_DG){showerr("Deepgram API key missing — add it in the sidebar or your .env file.");return;}
-  if(!_CL){showerr("Anthropic API key missing — add it in the sidebar or your .env file.");return;}
+  if(!_DG){showerr("Deepgram API key missing — check sidebar.");return;}
+  if(!_CL){showerr("Anthropic API key missing — check sidebar.");return;}
   try{
     ms2=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
-    ss("🎙️ Connecting to Deepgram...");
+    ss("🎙 Connecting to Deepgram...");
     const p=new URLSearchParams({language:LANG,model:"nova-2",smart_format:"true",interim_results:"true",punctuate:"true",endpointing:"300",encoding:"linear16",sample_rate:"16000"});
     sock=new WebSocket("wss://api.deepgram.com/v1/listen?"+p,["token",_DG]);
     sock.binaryType="arraybuffer";
     sock.onopen=()=>{
       ss("✅ LIVE — Listening...");setLive(true);rec=true;stmr();
-      actx=new AudioContext({sampleRate:16000});
-      src=actx.createMediaStreamSource(ms2);
-      proc=actx.createScriptProcessor(4096,1,1);
+      actx=new AudioContext({sampleRate:16000});src=actx.createMediaStreamSource(ms2);proc=actx.createScriptProcessor(4096,1,1);
       src.connect(proc);proc.connect(actx.destination);
       proc.onaudioprocess=e=>{
         if(sock.readyState!==WebSocket.OPEN)return;
@@ -869,388 +881,135 @@ async function go(){
     };
     sock.onmessage=e=>{
       const d=JSON.parse(e.data);if(d.type!=="Results")return;
-      const a=(d.channel?.alternatives||[{}])[0];
-      const tx=(a.transcript||"").trim();if(!tx)return;
-      if(d.is_final){$("ib").textContent="";final(tx);}
-      else{$("ib").textContent="… "+tx;}
+      const a=(d.channel?.alternatives||[{}])[0];const tx=(a.transcript||"").trim();if(!tx)return;
+      if(d.is_final){$("ib").textContent="";final(tx);}else{$("ib").textContent="… "+tx;}
     };
-    sock.onerror=()=>{showerr("Deepgram error — check your API key.");stop();};
+    sock.onerror=()=>{showerr("Deepgram connection error — check your API key.");stop();};
     sock.onclose=()=>{if(rec)ss("⏹ Disconnected.");setLive(false);rec=false;xtmr();};
   }catch(e){showerr("Mic error: "+e.message);}
 }
 
 function stop(){
-  rec=false;xtmr();setLive(false);ss("⏹ Stopped.");$("ib").textContent="";
-  if(focusMode)toggleFocus(); // auto-release focus mode when call ends
-  if(sock)sock.close();
-  if(proc){proc.disconnect();proc=null;}
-  if(src){src.disconnect();src=null;}
-  if(actx){actx.close();actx=null;}
-  if(ms2){ms2.getTracks().forEach(t=>t.stop());ms2=null;}
+  rec=false;xtmr();setLive(false);ss("⏹ Stopped.","var(--text-muted)");$("ib").textContent="";
+  if(focusMode)toggleFocus();
+  if(sock)sock.close();if(proc){proc.disconnect();proc=null;}if(src){src.disconnect();src=null;}if(actx){actx.close();actx=null;}if(ms2){ms2.getTracks().forEach(t=>t.stop());ms2=null;}
 }
 
 function clr(){
   stop();W=0;O=0;H=0;I=0;WC=0;lines=[];pend="";lc=0;objections=[];callStage=0;setStage(0);
   talkWords=0;totalWords=0;hotCooldown=false;
-  const fill=document.getElementById("ratio-fill");const pct=document.getElementById("ratio-pct");
-  if(fill)fill.style.width="0%";if(pct)pct.textContent="— / —";
-  document.getElementById("hot-flash")?.classList.remove("show");
-  document.getElementById("score-modal").style.display="none";
-  document.getElementById("replay-panel")?.classList.remove("show");
-  const injFeed=document.getElementById("injector-feed");
-  if(injFeed)injFeed.innerHTML='<div class="injector-empty">Scripts will auto-surface here based on what\'s happening on the call. No hunting required.</div>';
-  setCallerType("family_substance");
   $("md").textContent="00:00";$("ib").textContent="";
-  $("tb").innerHTML="<div class='te'>Transcript will appear here when you start listening...</div>";
-  $("cb").innerHTML="<div class='ce'>🎤<br><br>Real-time coaching will appear here.<br><br><span style='color:#00E5FF'>Start listening to begin.</span></div>";
-  $("obj-log").innerHTML="<div class='te' style='font-size:12px;padding:8px 0'>No objections detected yet. Every objection will be logged here with a rebuttal and tracked as Won or Open.</div>";
-  cerr();upd();ss("👆 Fill in the caller situation above then click Start Listening.");
+  const rf=$("ratio-fill");const rv=$("ratio-pct");
+  if(rf)rf.style.width="0%";if(rv)rv.textContent="— · Waiting for call";
+  $("hot-flash")?.classList.remove("show");
+  $("score-modal").style.display="none";
+  $("replay-panel")?.classList.remove("show");
+  $("tb").innerHTML='<div class="tx-empty">Transcript will appear here when you start listening...</div>';
+  $("cb").innerHTML='<div class="coach-empty">Start listening to receive live coaching...</div>';
+  $("obj-log").innerHTML='<div class="obj-empty">No objections detected yet.</div>';
+  $("injector-feed").innerHTML='<div class="inj-empty">Scripts auto-surface here based on what\'s happening on the call. No hunting required.</div>';
+  cerr();upd();ss("Select who\'s calling then hit Start Listening.","var(--text-muted)");
+  setCallerType("family_substance");
 }
 
 async function scoreCall(){
   if(!_CL){showerr("Anthropic API key missing.");return;}
-  if(lines.length<3){showerr("Not enough transcript to score — complete a call first.");return;}
-  document.getElementById("score-modal").style.display="block";
-  document.getElementById("score-modal").scrollIntoView({behavior:"smooth",block:"start"});
-  document.getElementById("sc-letter").textContent="...";
-  document.getElementById("sc-pct").textContent="Analyzing your call...";
-  document.getElementById("sc-feedback").textContent="Running AI analysis...";
-  const duration=$("md").textContent;
-  const winRate=O>0?Math.round((H/O)*100):0;
+  if(lines.length<3){showerr("Not enough transcript — complete a call first.");return;}
+  $("score-modal").style.display="block";
+  $("score-modal").scrollIntoView({behavior:"smooth",block:"start"});
+  $("sc-letter").textContent="...";$("sc-pct").textContent="Analyzing your call...";$("sc-feedback").textContent="Running APEX analysis...";
   const transcript=lines.slice(-60).join(" ");
-  const scoreSys=`You are an elite sales coach analyzing a recorded admissions call for Pinnacle Peak Recovery, a substance abuse treatment center. Score the rep's performance across 4 categories, each 0-100. Be honest and specific — don't inflate scores.
-
-CATEGORIES:
-1. objection_handling: How well did they handle resistance? Did they reframe, use questions, stay calm? (weight: 30%)
-2. call_control: Did they lead the call? Avoid rambling? Ask good discovery questions? Control pacing? (weight: 25%)
-3. urgency_created: Did they create genuine urgency around the family's situation without being pushy? (weight: 25%)
-4. next_step_set: Did they clearly advance toward VOB, pre-assessment, or a scheduled admission? (weight: 20%)
-
-CALL STATS:
-- Duration: ${duration}
-- Objections detected: ${O}
-- Objections handled: ${H}
-- Win rate: ${winRate}%
-- Call stage reached: ${STAGES[callStage]||"opener"}
-
-TRANSCRIPT (last portion):
-${transcript}
-
-Reply ONLY in this exact JSON — no extra text, no line breaks:
-{"objection_handling":75,"call_control":80,"urgency_created":70,"next_step_set":85,"feedback":["Specific strength or area to improve","Another specific observation","Another coaching point","One more actionable note"]}`;
-
+  const winRate=O>0?Math.round((H/O)*100):0;
+  const scoreSys=`You are an elite sales coach scoring a Pinnacle Peak Recovery admissions call. Score 0-100 each category honestly.
+CALL STATS: Duration: ${$("md").textContent}, Objections: ${O}, Handled: ${H}, Win rate: ${winRate}%, Stage reached: ${STAGES[callStage]||"opener"}
+TRANSCRIPT: ${transcript}
+Reply ONLY in JSON: {"objection_handling":75,"call_control":80,"urgency_created":70,"next_step_set":85,"feedback":["specific observation 1","specific observation 2","specific observation 3","specific observation 4"]}`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",
-      headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:600,system:scoreSys,messages:[{role:"user",content:"Score this call now."}]})
-    });
-    if(!r.ok){const t=await r.text();throw new Error("API error "+r.status+": "+t.slice(0,100));}
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:600,system:scoreSys,messages:[{role:"user",content:"Score this call."}]})});
+    if(!r.ok){const t=await r.text();throw new Error("API error "+r.status+": "+t.slice(0,80));}
     const data=await r.json();
-    const raw=(data.content?.[0]?.text||"").trim()
-      .replace(/^```[a-z]*\n?|\n?```$/g,"")
-      .replace(/[\u2018\u2019]/g,"'")
-      .replace(/[\u201C\u201D]/g,'"')
-      .replace(/\r?\n/g," ");
-    if(!raw){throw new Error("Empty response from Claude");}
+    const raw=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"").replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/\r?\n/g," ");
     let res;
     try{res=JSON.parse(raw);}
     catch(e){
-      // Fallback: extract fields individually via regex — handles malformed JSON
       try{
-        const oh=raw.match(/"objection_handling"\s*:\s*(\d+)/)?.[1];
-        const cc=raw.match(/"call_control"\s*:\s*(\d+)/)?.[1];
-        const uc=raw.match(/"urgency_created"\s*:\s*(\d+)/)?.[1];
-        const ns=raw.match(/"next_step_set"\s*:\s*(\d+)/)?.[1];
-        if(!oh||!cc||!uc||!ns)throw new Error("Missing score fields");
+        const oh=raw.match(/"objection_handling"\s*:\s*(\d+)/)?.[1];const cc=raw.match(/"call_control"\s*:\s*(\d+)/)?.[1];
+        const uc=raw.match(/"urgency_created"\s*:\s*(\d+)/)?.[1];const ns=raw.match(/"next_step_set"\s*:\s*(\d+)/)?.[1];
+        if(!oh||!cc||!uc||!ns)throw new Error("Missing fields");
         const fbMatch=raw.match(/"feedback"\s*:\s*\[([\s\S]*?)\]/);
-        let fb=[];
-        if(fbMatch){
-          fb=fbMatch[1].match(/"([^"]+)"/g)?.map(s=>s.replace(/^"|"$/g,""))||[];
-        }
+        const fb=fbMatch?fbMatch[1].match(/"([^"]+)"/g)?.map(s=>s.replace(/^"|"$/g,""))||[]:[];
         res={objection_handling:+oh,call_control:+cc,urgency_created:+uc,next_step_set:+ns,feedback:fb};
-      }catch(e2){
-        throw new Error("Could not parse score: "+raw.slice(0,150));
-      }
+      }catch(e2){throw new Error("Parse failed: "+raw.slice(0,100));}
     }
     const overall=Math.round(res.objection_handling*0.3+res.call_control*0.25+res.urgency_created*0.25+res.next_step_set*0.2);
     const grade=overall>=90?"A+":overall>=85?"A":overall>=80?"B+":overall>=75?"B":overall>=70?"C+":overall>=65?"C":overall>=60?"D":"F";
-    const gradeCol=overall>=80?"#00FF9D":overall>=65?"#FFD60A":"#FF3B5C";
-    document.getElementById("sc-letter").style.color=gradeCol;
-    document.getElementById("sc-letter").textContent=grade;
-    document.getElementById("sc-pct").textContent=`Overall Score: ${overall}/100`;
-    const cats=[
-      ["sc-obj","sc-obj-bar",res.objection_handling,"#FF3B5C"],
-      ["sc-ctrl","sc-ctrl-bar",res.call_control,"#00E5FF"],
-      ["sc-urg","sc-urg-bar",res.urgency_created,"#FFD60A"],
-      ["sc-next","sc-next-bar",res.next_step_set,"#00FF9D"],
-    ];
-    cats.forEach(([vid,bid,val,col])=>{
-      document.getElementById(vid).textContent=val+"/100";
-      document.getElementById(vid).style.color=col;
-      setTimeout(()=>{document.getElementById(bid).style.width=val+"%";},100);
-    });
+    const gradeCol=overall>=80?"var(--green)":overall>=65?"var(--amber)":"var(--red)";
+    $("sc-letter").style.color=gradeCol;$("sc-letter").textContent=grade;$("sc-pct").textContent=`Overall Score: ${overall}/100`;
+    const cats=[["sc-obj","sc-obj-bar",res.objection_handling,"var(--red)"],["sc-ctrl","sc-ctrl-bar",res.call_control,"var(--cyan)"],["sc-urg","sc-urg-bar",res.urgency_created,"var(--amber)"],["sc-next","sc-next-bar",res.next_step_set,"var(--green)"]];
+    cats.forEach(([vid,bid,val,col])=>{$( vid).textContent=val+"/100";$(vid).style.color=col;setTimeout(()=>{$(bid).style.width=val+"%";},100);});
     const fb=res.feedback||[];
-    document.getElementById("sc-feedback").innerHTML=fb.map(f=>`<div class="score-item">• ${f}</div>`).join("");
-  }catch(e){
-    document.getElementById("sc-letter").textContent="!";
-    document.getElementById("sc-pct").textContent="Scoring failed";
-    document.getElementById("sc-feedback").textContent="Error: "+e.message;
-  }
+    $("sc-feedback").innerHTML=fb.map(f=>`<div class="score-item">• ${f}</div>`).join("");
+  }catch(e){$("sc-letter").textContent="!";$("sc-pct").textContent="Scoring failed";$("sc-feedback").textContent="Error: "+e.message;}
+}
+
+async function replayCall(){
+  if(!_CL){showerr("Anthropic API key missing.");return;}
+  if(lines.length<5){showerr("Not enough transcript — complete a call first.");return;}
+  const panel=$("replay-panel");const content=$("replay-content");
+  panel.classList.add("show");panel.scrollIntoView({behavior:"smooth",block:"start"});
+  content.innerHTML=`<div style="color:var(--text-muted);font-size:11px;font-style:italic;padding:8px 0">🔁 Re-running your call through APEX...</div>`;
+  const transcript=lines.join(" ");
+  const sys=`You are an elite admissions coach analyzing a Pinnacle Peak Recovery call. Find 4-6 specific moments. Classify each as "strong", "missed", or "neutral". Be specific.
+CALLER TYPE: ${CALLER_PROFILES[activeCallerType]?.situation||"substance abuse call"}
+TRANSCRIPT: ${transcript.slice(-4000)}
+Reply ONLY in JSON: {"moments":[{"type":"missed","quote":"paraphrased thing said","issue":"what went wrong","alternative":"exact word-for-word alternative script"},{"type":"strong","quote":"paraphrased thing said","issue":"why it worked"}]}`;
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:1000,system:sys,messages:[{role:"user",content:"Analyze this call."}]})});
+    if(!r.ok)throw new Error("API error "+r.status);
+    const data=await r.json();
+    const raw=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"").replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"');
+    const match=raw.match(/\{[\s\S]*\}/);if(!match)throw new Error("No JSON in response");
+    const res=JSON.parse(match[0]);
+    const moments=res.moments||[];
+    if(!moments.length){content.innerHTML=`<div style="color:var(--text-muted);font-size:11px">No moments identified.</div>`;return;}
+    content.innerHTML=moments.map(m=>{
+      const lbl=m.type==="strong"?"✅ STRONG MOVE":m.type==="missed"?"❌ MISSED OPPORTUNITY":"💡 COULD BE STRONGER";
+      return `<div class="replay-item ${m.type}"><div class="replay-moment-lbl ${m.type}">${lbl}</div><div class="replay-body"><strong style="color:var(--text-primary)">"${m.quote}"</strong><br>${m.issue}</div>${m.alternative?`<div class="replay-alt">Instead say: "${m.alternative}"</div>`:""}</div>`;
+    }).join("");
+  }catch(e){content.innerHTML=`<div style="color:var(--red);font-size:11px">Replay failed: ${e.message}</div>`;}
 }
 
 function exportPDF(){
   const now=new Date();
   const dateStr=now.toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
   const timeStr=now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
-  const duration=$("md").textContent;
-  const situation=document.getElementById("prod").value||"—";
-  const persona=document.getElementById("pers").value||"—";
   const winRate=O>0?Math.round((H/O)*100)+"%":"N/A";
-
-  // Build objection cards
   const objCards=$("obj-log").querySelectorAll(".obj-card");
-  let objHTML="";
-  if(objCards.length===0){
-    objHTML="<p style='color:#888;font-size:9pt;font-style:italic'>No objections were detected during this call.</p>";
-  } else {
-    objCards.forEach(card=>{
-      const won=card.classList.contains("won");
-      const q=card.querySelector(".obj-q")?.textContent||"";
-      const rebuttal=card.querySelector(".obj-a")?.textContent||"";
-      const ts=card.querySelector(".obj-ts")?.textContent||"";
-      objHTML+=`<div style="border:1px solid #dde6f4;border-left:4px solid ${won?"#00995C":"#CC2244"};border-radius:6px;padding:10px 12px;margin-bottom:8px;page-break-inside:avoid">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">
-          <div style="font-weight:700;color:${won?"#00995C":"#CC2244"};font-size:10pt;flex:1">${q}</div>
-          <span style="font-size:7pt;font-weight:700;letter-spacing:1px;padding:2px 8px;border-radius:100px;border:1px solid;white-space:nowrap;margin-left:8px;${won?"background:#e0fff2;color:#00773D;border-color:#00BB5C":"background:#fff9e0;color:#996600;border-color:#ccaa00"}">${won?"✅ HANDLED":"⏳ OPEN"}</span>
-        </div>
-        <div style="font-size:7pt;color:#0055CC;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Suggested Response:</div>
-        <div style="font-size:9.5pt;color:#222;line-height:1.6;background:#f8faff;border-left:2px solid #0055CC;padding:6px 10px;border-radius:0 4px 4px 0">${rebuttal}</div>
-        <div style="font-size:7.5pt;color:#888;margin-top:4px">${ts}</div>
-      </div>`;
-    });
-  }
-
-  // Build coaching insights
-  const coachCards=$("cb").querySelectorAll(".cc");
-  let coachHTML="";
-  if(coachCards.length===0){
-    coachHTML="<p style='color:#888;font-size:9pt;font-style:italic'>No coaching insights were generated during this call.</p>";
-  } else {
-    const items=[...coachCards].reverse().slice(-10);
-    items.forEach(card=>{
-      const isObj=card.classList.contains("objection");
-      const isPos=card.classList.contains("positive");
-      const lblEl=card.querySelector(".ct");
-      const lbl=lblEl?lblEl.textContent:"COACHING";
-      const tsEl=card.querySelector(".cts");
-      const t=tsEl?tsEl.textContent:"";
-      const bodyEl=card.querySelector("div[style]");
-      const body=bodyEl?bodyEl.textContent:card.textContent.replace(lbl,"").replace(t,"").trim();
-      const lblStyle=isObj?"background:#fde8ec;color:#CC2244":isPos?"background:#e0fff2;color:#00773D":"background:#e6f4ff;color:#0055CC";
-      coachHTML+=`<div style="border:1px solid #dde6f4;border-radius:6px;padding:8px 12px;margin-bottom:6px;page-break-inside:avoid">
-        <span style="font-size:7pt;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:3px;display:inline-block;margin-bottom:4px;${lblStyle}">${lbl}</span>
-        <span style="font-size:7.5pt;color:#888;float:right">${t}</span>
-        <div style="clear:both"></div>
-        <div style="font-size:9.5pt;color:#222;line-height:1.6">${body}</div>
-      </div>`;
-    });
-  }
-
-  // Build transcript
-  const transcriptLines=$("tb").querySelectorAll(".tl");
-  const transcriptText=transcriptLines.length===0
-    ? "<p style='color:#888;font-style:italic;font-size:9pt'>No transcript recorded.</p>"
-    : `<div style="background:#f8f9fb;border:1px solid #dde6f4;border-radius:6px;padding:10px 14px;font-size:9pt;line-height:1.8;white-space:pre-wrap">${[...transcriptLines].map(l=>l.textContent).join("\n")}</div>`;
-
-  const reportHTML=`<!DOCTYPE html><html><head><meta charset="utf-8">
-  <title>PPR Call Report — ${dateStr}</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:Arial,sans-serif;font-size:11pt;color:#111;background:#fff;padding:32px 40px}
-    h1{font-size:18pt;font-weight:800;color:#0a1628;margin:0}
-    .sub{font-size:8pt;color:#0080CC;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
-    hr{border:none;border-top:2px solid #0055CC;margin:10px 0 18px}
-    .meta{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin-bottom:18px;font-size:9pt}
-    .meta b{color:#444}
-    .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px}
-    .stat{background:#f4f8ff;border:1px solid #d0ddf0;border-radius:6px;padding:8px;text-align:center}
-    .sv{font-size:16pt;font-weight:800;color:#0055CC}
-    .sl{font-size:7pt;color:#666;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
-    .sec{font-size:11pt;font-weight:800;color:#0a1628;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #dde6f4;text-transform:uppercase;letter-spacing:1px}
-    .footer{margin-top:24px;padding-top:10px;border-top:1px solid #dde6f4;font-size:7.5pt;color:#888;display:flex;justify-content:space-between}
-    @media print{body{padding:20px 28px}}
-  </style>
-  </head><body>
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
-    <div style="width:38px;height:38px;background:linear-gradient(135deg,#00B8CC,#0055CC);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🎯</div>
-    <div><h1>Pinnacle Peak Recovery</h1><div class="sub">APEX Call Coach — Post-Call Report</div></div>
-  </div>
+  let objHTML=objCards.length===0?"<p style='color:#888;font-style:italic;font-size:9pt'>No objections detected.</p>":"";
+  objCards.forEach(card=>{
+    const won=card.classList.contains("won");
+    const q=card.querySelector(".obj-q")?.textContent||"";
+    const rebuttal=card.querySelector(".obj-rebuttal")?.textContent||"";
+    const ts=card.querySelector(".obj-ts")?.textContent||"";
+    objHTML+=`<div style="border:1px solid #dde6f4;border-left:4px solid ${won?"#00995C":"#CC2244"};border-radius:6px;padding:10px 12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div style="font-weight:700;color:${won?"#00995C":"#CC2244"};font-size:10pt">${q}</div><span style="font-size:7pt;font-weight:700;padding:2px 8px;border-radius:100px;${won?"background:#e0fff2;color:#00773D;border:1px solid #00BB5C":"background:#fff9e0;color:#996600;border:1px solid #ccaa00"}">${won?"✅ HANDLED":"⏳ OPEN"}</span></div><div style="font-size:9.5pt;line-height:1.6;background:#f8faff;border-left:2px solid #0055CC;padding:6px 10px">${rebuttal}</div><div style="font-size:7.5pt;color:#888;margin-top:4px">${ts}</div></div>`;
+  });
+  const txLines=$("tb").querySelectorAll(".tx-line");
+  const txText=txLines.length===0?"<p style='color:#888;font-style:italic;font-size:9pt'>No transcript recorded.</p>":`<div style="background:#f8f9fb;border:1px solid #dde6f4;border-radius:6px;padding:10px 14px;font-size:9pt;line-height:1.8;white-space:pre-wrap">${[...txLines].map(l=>l.textContent).join("\n")}</div>`;
+  const reportHTML=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>PPR Call Report</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11pt;color:#111;background:#fff;padding:32px 40px}h1{font-size:18pt;font-weight:800;color:#0a1628;margin:0}.sub{font-size:8pt;color:#0080CC;letter-spacing:2px;text-transform:uppercase;margin-top:2px}hr{border:none;border-top:2px solid #0055CC;margin:10px 0 18px}.meta{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin-bottom:18px;font-size:9pt}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px}.stat{background:#f4f8ff;border:1px solid #d0ddf0;border-radius:6px;padding:8px;text-align:center}.sv{font-size:16pt;font-weight:800;color:#0055CC}.sl{font-size:7pt;color:#666;letter-spacing:1px;text-transform:uppercase;margin-top:2px}.sec{font-size:11pt;font-weight:800;color:#0a1628;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #dde6f4;text-transform:uppercase;letter-spacing:1px}.footer{margin-top:24px;padding-top:10px;border-top:1px solid #dde6f4;font-size:7.5pt;color:#888;display:flex;justify-content:space-between}</style></head><body>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px"><div style="width:38px;height:38px;background:linear-gradient(135deg,#00B8CC,#0055CC);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🎯</div><div><h1>Pinnacle Peak Recovery</h1><div class="sub">APEX Call Coach — Post-Call Report</div></div></div>
   <hr>
-  <div class="meta">
-    <div><b>Date:</b> ${dateStr}</div>
-    <div><b>Time:</b> ${timeStr}</div>
-    <div><b>Caller Situation:</b> ${situation}</div>
-    <div><b>Prospect Persona:</b> ${persona}</div>
-  </div>
-  <div class="stats">
-    <div class="stat"><div class="sv">${duration}</div><div class="sl">Duration</div></div>
-    <div class="stat"><div class="sv">${W}</div><div class="sl">Words</div></div>
-    <div class="stat"><div class="sv">${O}</div><div class="sl">Objections</div></div>
-    <div class="stat"><div class="sv">${H}</div><div class="sl">Handled</div></div>
-    <div class="stat"><div class="sv">${winRate}</div><div class="sl">Win Rate</div></div>
-  </div>
-  <div class="sec">🚨 Objections &amp; Rebuttals</div>
-  ${objHTML}
-  <div class="sec">💡 AI Coaching Insights</div>
-  ${coachHTML}
-  <div class="sec">🎙️ Full Transcript</div>
-  ${transcriptText}
-  <div class="footer">
-    <span>Pinnacle Peak Recovery — McCormick Ranch, Scottsdale AZ</span>
-    <span>Generated by APEX Call Coach • ${dateStr} ${timeStr}</span>
-  </div>
-  <script>window.onload=function(){window.print();}<\/script>
-  </body></html>`;
-
+  <div class="meta"><div><b>Date:</b> ${dateStr}</div><div><b>Time:</b> ${timeStr}</div><div><b>Caller Type:</b> ${activeCallerType.replace(/_/g," ")}</div><div><b>Stage Reached:</b> ${STAGES[callStage]||"opener"}</div></div>
+  <div class="stats"><div class="stat"><div class="sv">${$("md").textContent}</div><div class="sl">Duration</div></div><div class="stat"><div class="sv">${W}</div><div class="sl">Words</div></div><div class="stat"><div class="sv">${O}</div><div class="sl">Objections</div></div><div class="stat"><div class="sv">${H}</div><div class="sl">Handled</div></div><div class="stat"><div class="sv">${winRate}</div><div class="sl">Win Rate</div></div></div>
+  <div class="sec">🚨 Objections & Rebuttals</div>${objHTML}
+  <div class="sec">🎙️ Full Transcript</div>${txText}
+  <div class="footer"><span>Pinnacle Peak Recovery — McCormick Ranch, Scottsdale AZ</span><span>Generated by APEX Call Coach • ${dateStr} ${timeStr}</span></div>
+  <script>window.onload=function(){window.print();}<\/script></body></html>`;
   const win=window.open("","_blank","width=900,height=700");
   if(win){win.document.write(reportHTML);win.document.close();}
-  else{showerr("Pop-up blocked — please allow pop-ups for this site to download the report.");}
-}
-// ── TALK/LISTEN RATIO ──
-let talkWords=0,totalWords=0;
-function updateRatio(w){
-  talkWords+=w;totalWords+=w; // all transcribed words are "you" talking
-  // Estimate listen ratio: assume prospect speaks ~40% of time not captured
-  const adjustedTotal=totalWords/0.6;
-  const talkPct=Math.round((talkWords/adjustedTotal)*100);
-  const fill=document.getElementById("ratio-fill");
-  const pct=document.getElementById("ratio-pct");
-  if(!fill||!pct)return;
-  fill.style.width=Math.min(talkPct,100)+"%";
-  fill.className="ratio-fill"+(talkPct>65?" danger":talkPct>50?" warn":"");
-  const status=talkPct>65?"⚠️ TALKING TOO MUCH":talkPct>50?"⚡ Watch your ratio":"✅ Good balance";
-  pct.textContent=`You: ${talkPct}% — ${status}`;
+  else{showerr("Pop-up blocked — allow pop-ups for this site to download the report.");}
 }
 
-// ── HOT MOMENT DETECTION ──
-const HOT_SIGNALS=/\b(how soon|when can (he|she|they) start|what does (insurance|my insurance) cover|is there (availability|a bed)|how (do I|do we) get started|what('?s| is) the (next step|process|cost|price)|I('?m| am) ready|we('?re| are) ready|let('?s| us) do (it|this)|what do (I|we) need|sign (me|him|her|them) up|get (him|her|them) in|I want to (move forward|proceed)|can we (schedule|set|book)|when (is|are) you available)\b/i;
-const HOT_CLOSES={
-  default:"Let's lock in a pre-assessment right now — I have availability today. What's the best number to reach you in the next 30 minutes?",
-  insurance:"Perfect — let me get your insurance info right now and I'll call you back in 30 minutes with exactly what's covered.",
-  family_substance:"Let's get the intake process started right now — I can have someone reach out within the hour. What's the best contact number?",
-  self_substance:"I'm glad you're ready — let's take the next step together right now. Can I get you scheduled for a quick 15-minute pre-assessment call today?",
-  crisis:"We need to move on this right now. Let me get your information and we can have a bed ready as early as tonight.",
-};
-let hotCooldown=false;
-function checkHotMoment(tx){
-  if(hotCooldown||!HOT_SIGNALS.test(tx))return;
-  const close=HOT_CLOSES[activeCallerType]||HOT_CLOSES.default;
-  const flash=document.getElementById("hot-flash");
-  const content=document.getElementById("hot-content");
-  if(!flash||!content)return;
-  content.textContent=close;
-  flash.classList.add("show");
-  hotCooldown=true;
-  setTimeout(()=>{flash.classList.remove("show");hotCooldown=false;},12000);
-}
-
-// ── PRE-CALL INTEL BRIEF ──
-let intelCache={};
-async function generateIntel(key){
-  if(!_CL)return;
-  if(intelCache[key]){applyIntel(intelCache[key]);return;}
-  document.getElementById("intel-loading").textContent="Generating battle card...";
-  document.getElementById("intel-cards").style.display="none";
-  const profile=CALLER_PROFILES[key];
-  if(!profile||key==="custom")return;
-  const sys=`You are an elite admissions coach for Pinnacle Peak Recovery (PPR), a premier substance abuse and mental health treatment center in McCormick Ranch, Scottsdale AZ.
-
-Generate a pre-call battle card for this caller type: ${profile.situation}
-Persona: ${profile.persona}
-
-Reply ONLY in this exact JSON, no extra text, straight quotes only:
-{"objections":"2-3 most likely objections this caller will raise, comma separated, very short","emotional_driver":"The core emotional fear or desire driving this call in one short sentence","recommended_close":"The single best closing move or next step for this caller type in one sentence"}`;
-  try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",
-      headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:300,system:sys,messages:[{role:"user",content:"Generate the battle card now."}]})
-    });
-    if(!r.ok){document.getElementById("intel-loading").textContent="Intel unavailable";return;}
-    const data=await r.json();
-    const raw=(data.content?.[0]?.text||"").trim()
-      .replace(/^```[a-z]*\n?|\n?```$/g,"")
-      .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/\r?\n/g," ");
-    const match=raw.match(/\{[\s\S]*\}/);
-    if(!match){document.getElementById("intel-loading").textContent="Intel unavailable";return;}
-    const res=JSON.parse(match[0]);
-    intelCache[key]=res;
-    applyIntel(res);
-  }catch(e){document.getElementById("intel-loading").textContent="Intel unavailable";}
-}
-function applyIntel(res){
-  document.getElementById("intel-obj").textContent=res.objections||"—";
-  document.getElementById("intel-emo").textContent=res.emotional_driver||"—";
-  document.getElementById("intel-close").textContent=res.recommended_close||"—";
-  document.getElementById("intel-cards").style.display="grid";
-  document.getElementById("intel-loading").textContent="Ready";
-}
-
-// ── CALL REPLAY ANALYSIS ──
-async function replayCall(){
-  if(!_CL){showerr("Anthropic API key missing.");return;}
-  if(lines.length<5){showerr("Not enough transcript to analyze — complete a call first.");return;}
-  const panel=document.getElementById("replay-panel");
-  const content=document.getElementById("replay-content");
-  panel.classList.add("show");
-  panel.scrollIntoView({behavior:"smooth",block:"start"});
-  content.innerHTML="<div style='color:#4A6070;font-size:12px;font-style:italic;padding:8px 0'>🔁 Re-running your call through APEX analysis...</div>";
-  const transcript=lines.join(" ");
-  const sys=`You are an elite admissions sales coach analyzing a call transcript from Pinnacle Peak Recovery. Your job is to find every missed opportunity, flag what was done well, and provide the exact alternative script for each missed moment.
-
-CALLER TYPE: ${CALLER_PROFILES[activeCallerType]?.situation||"substance abuse admissions call"}
-CALL STAGE REACHED: ${STAGES[callStage]||"opener"}
-OBJECTIONS FACED: ${O}, HANDLED: ${H}
-
-FULL TRANSCRIPT:
-${transcript.slice(-4000)}
-
-Identify 4-6 specific moments. For each: classify as "strong", "missed", or "neutral". Be specific about what was said and what should have been said instead.
-
-Reply ONLY in this exact JSON, no extra text:
-{"moments":[{"type":"missed","quote":"exact or paraphrased thing said","issue":"what went wrong in one sentence","alternative":"exact word-for-word script to use instead"},{"type":"strong","quote":"exact or paraphrased thing said","issue":"why this worked"},{"type":"missed","quote":"...","issue":"...","alternative":"..."}]}`;
-  try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",
-      headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:1000,system:sys,messages:[{role:"user",content:"Analyze this call now."}]})
-    });
-    if(!r.ok){const t=await r.text();throw new Error("API error "+r.status+": "+t.slice(0,80));}
-    const data=await r.json();
-    const raw=(data.content?.[0]?.text||"").trim()
-      .replace(/^```[a-z]*\n?|\n?```$/g,"")
-      .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"');
-    const match=raw.match(/\{[\s\S]*\}/);
-    if(!match)throw new Error("No JSON in response");
-    const res=JSON.parse(match[0]);
-    const moments=res.moments||[];
-    if(moments.length===0){content.innerHTML="<div style='color:#4A6070;font-size:12px'>No moments identified.</div>";return;}
-    content.innerHTML=moments.map(m=>{
-      const col=m.type==="strong"?"#00FF9D":m.type==="missed"?"#FF3B5C":"#FFD60A";
-      const lbl=m.type==="strong"?"✅ STRONG MOVE":m.type==="missed"?"❌ MISSED OPPORTUNITY":"💡 COULD BE STRONGER";
-      return `<div class="replay-item ${m.type}">
-        <div class="replay-moment ${m.type}">${lbl}</div>
-        <div class="replay-text"><strong style="color:#EFF6FB">"${m.quote}"</strong><br>${m.issue}</div>
-        ${m.alternative?`<div class="replay-alt">Instead say: "${m.alternative}"</div>`:""}
-      </div>`;
-    }).join("");
-  }catch(e){
-    content.innerHTML=`<div style='color:#FF3B5C;font-size:12px'>Replay failed: ${e.message}</div>`;
-  }
-}
-
-// Auto-init default caller type and intel
+// Init
 setCallerType("family_substance");
 </script>
 </body>
