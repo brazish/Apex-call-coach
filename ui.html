@@ -29,7 +29,7 @@
   --radius-sm:6px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--void);color:var(--text-primary);font-family:var(--font-mono);font-size:13px;overflow-x:hidden;width:100%}
+html,body{background:var(--void);color:var(--text-primary);font-family:var(--font-mono);font-size:13px;overflow-x:hidden;width:100%;margin:0;padding:0}
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:4px;height:4px}
@@ -37,7 +37,7 @@ html,body{background:var(--void);color:var(--text-primary);font-family:var(--fon
 ::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:2px}
 
 /* ── LAYOUT ── */
-.app{display:grid;grid-template-rows:auto auto 1fr;min-height:100vh;padding:16px;gap:12px;max-width:1600px;margin:0 auto}
+.app{display:grid;grid-template-rows:auto auto 1fr;min-height:100vh;padding:14px 16px;gap:12px;width:100%;max-width:100%;margin:0}
 
 /* ── TOPBAR ── */
 .topbar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:14px 20px;background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);position:relative;overflow:hidden}
