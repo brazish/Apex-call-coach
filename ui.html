@@ -638,7 +638,7 @@ function addCoach(type,content,t){
 }
 
 function addInjector(type,script,context,t){
-  if(focusMode||!script||!script.trim()||script===content)return;
+  if(focusMode||!script||!script.trim())return;
   // Script injector now just shows in the same coaching feed as a copy-able card
   const feed=$("injector-feed");if(!feed)return;
   const empty=feed.querySelector(".inj-empty");if(empty)empty.remove();
