@@ -627,37 +627,29 @@ function addLine(t,tx){
 function addCoach(type,content,t){
   if(focusMode)return;
   const b=$("cb"),e=b.querySelector(".coach-empty");if(e)e.remove();
-  const cfg={
-    objection:{col:"var(--red)",bg:"rgba(255,61,107,0.06)",lbl:"🚨 OBJECTION"},
-    coach:{col:"var(--cyan)",bg:"rgba(0,217,255,0.06)",lbl:"🎯 SAY THIS"},
-    positive:{col:"var(--green)",bg:"rgba(0,245,160,0.06)",lbl:"✅ GREAT MOVE"},
-    win:{col:"var(--amber)",bg:"rgba(255,184,0,0.06)",lbl:"🏆 CLOSE NOW"},
-  };
-  const{col,bg,lbl}=cfg[type]||cfg.coach;
+  const cols={objection:"var(--red)",coach:"var(--cyan)",positive:"var(--green)",win:"var(--amber)"};
+  const col=cols[type]||cols.coach;
   const d=document.createElement("div");
-  d.className="coach-card";
-  d.style.cssText=`border-left-color:${col};background:${bg}`;
-  d.innerHTML=`<div class="coach-meta"><span class="coach-tag" style="background:${bg};color:${col};border:1px solid ${col}44">${lbl}</span><span class="coach-time">${t}</span></div><div class="coach-body">${content}</div>`;
+  d.style.cssText=`border-left:3px solid ${col};padding:12px 14px;margin-bottom:8px;background:${col}08;border-radius:0 var(--radius-sm) var(--radius-sm) 0;animation:cardin 0.2s ease`;
+  d.innerHTML=`<div style="font-size:13px;color:var(--text-primary);line-height:1.6;font-weight:500">${content}</div><div style="font-size:9px;color:var(--text-muted);margin-top:5px">${t}</div>`;
   b.insertBefore(d,b.firstChild);
+  // Keep last 6
+  const cards=b.children;while(cards.length>7)b.removeChild(b.lastChild);
 }
 
 function addInjector(type,script,context,t){
-  if(focusMode||!script||!script.trim())return;
+  if(focusMode||!script||!script.trim()||script===content)return;
+  // Script injector now just shows in the same coaching feed as a copy-able card
   const feed=$("injector-feed");if(!feed)return;
   const empty=feed.querySelector(".inj-empty");if(empty)empty.remove();
-  const cfg={
-    objection:{col:"var(--red)",bg:"rgba(255,61,107,0.06)",lbl:"🚨 OBJECTION RESPONSE"},
-    win:{col:"var(--amber)",bg:"rgba(255,184,0,0.06)",lbl:"🏆 CLOSE NOW"},
-    coach:{col:"var(--green)",bg:"rgba(0,245,160,0.06)",lbl:"💬 SAY THIS"},
-  };
-  const{col,bg,lbl}=cfg[type]||cfg.coach;
+  const cols={objection:"var(--red)",win:"var(--amber)",coach:"var(--green)",positive:"var(--green)"};
+  const col=cols[type]||cols.coach;
   const id="inj-"+Date.now();
-  const d=document.createElement("div");
-  d.className="injector-card";d.id=id;
-  d.style.cssText=`border-color:${col}33;background:${bg}`;
-  d.innerHTML=`<span class="inj-tag" style="background:${bg};color:${col};border:1px solid ${col}44">${lbl}</span><span class="inj-time">${t}</span>${context?`<div class="inj-context">${context}</div>`:""}<div class="inj-script">"${script}"</div><button class="inj-copy" onclick="copyScript('${id}',this)">📋 Copy</button>`;
+  const d=document.createElement("div");d.id=id;
+  d.style.cssText=`border:1px solid ${col}33;border-left:3px solid ${col};padding:12px 14px;margin-bottom:8px;background:${col}06;border-radius:0 var(--radius-sm) var(--radius-sm) 0;position:relative;animation:cardin 0.2s ease`;
+  d.innerHTML=`<div style="font-size:15px;color:var(--text-primary);line-height:1.65;font-weight:500;padding-right:60px">"${script}"</div><div style="font-size:9px;color:var(--text-muted);margin-top:5px">${t}</div><button onclick="copyScript('${id}',this)" style="position:absolute;top:10px;right:10px;background:var(--surface-3);border:1px solid var(--border);color:var(--text-muted);border-radius:var(--radius-sm);padding:3px 9px;font-size:9px;cursor:pointer;font-family:var(--font-mono)">📋 Copy</button>`;
   feed.insertBefore(d,feed.firstChild);
-  const cards=feed.querySelectorAll(".injector-card");if(cards.length>5)cards[cards.length-1].remove();
+  const cards=feed.querySelectorAll("div[id^='inj-']");if(cards.length>5)cards[cards.length-1].remove();
 }
 
 function copyScript(id,btn){
@@ -777,39 +769,38 @@ ${chunk}
 
 === COACHING INSTRUCTIONS ===
 
-RESPONSE TYPES:
-"objection" — Resistance detected. TIERED response:
-  TIER 1 (soft hesitation, first time): 1 sharp rhetorical question only.
-  TIER 2 (clear objection, direct pushback): 1 question + 1 reframe sentence. Max 2 sentences.
-  TIER 3 (repeat/hard no): Pattern interrupt — something unexpected. 1-2 sentences.
-  Always set objection_text (under 6 words).
+You are the voice in the ear of an elite admissions rep. Your job is to feed them the sharpest possible thing to say or ask — RIGHT NOW — based on exactly what was just said. Think of yourself as the most charismatic, emotionally intelligent closer you've ever met, whispering in their ear.
 
-"coach" — No objection. Stage-aware: opener=rapport/transition, discovery=uncover pain, pitch=PPR differentiator, close=next step. 1 sentence.
-"positive" — Rep said something excellent. 1 affirming sentence.
-"win" — Prospect sounds ready. 1 decisive closing sentence.
+RULES — SIMPLE:
+- ONE sentence only. Always. No exceptions.
+- If there's resistance or an objection: give them a question or a line with emotional weight that reframes the moment. Make it feel human, not scripted.
+- If no objection: give them the next best move — a question to deepen the conversation, a PPR fact that shifts perception, or a nudge toward the close.
+- Never explain. Never hedge. Never qualify. Just say the thing.
+- Use natural spoken language — how a confident human actually talks, not corporate speak.
+- Straight apostrophes only. No line breaks.
 
-TIERED OBJECTION QUESTIONS:
-TIER 1: "What does your family look like in 6 months if nothing changes?" / "If he had cancer, would you still be waiting?" / "What are you most afraid of — spending the money, or getting the call?" / "At what point does doing nothing become the wrong choice?"
-TIER 2: question + "Every day of delay changes the brain — that's neuroscience, not a sales pitch." / "We've helped people come in resistant and leave changed — readiness comes after the door, not before."
-TIER 3: "I hear you — and I want to be honest, most families who say that call back after something worse happened. You're calling now because part of you knows this is the moment." / "The fact that you're still on this call tells me everything — let's not let that love go to waste."
+WHAT GREAT LOOKS LIKE:
+- "What's the best case scenario if nothing changes in the next 6 months?"
+- "Most people who come in resistant leave changed — readiness happens after they walk through the door."
+- "We're so confident in our results that if they complete the program and slip in their first year, they come back for 30 days free."
+- "That's exactly why we do the insurance check first — no surprises, just clarity."
+- "If it was a medical emergency, you wouldn't be researching — you'd be moving."
+- "The brain actually changes with prolonged use — every week of delay makes this harder, not easier."
+- "You called today for a reason — what would it mean to have them back, really back, six months from now?"
 
-PPR GUARANTEE ON COST: When cost comes up, mention: "And remember — if they successfully complete our program and have a slip in their first year, they come back for 30 days at no cost. We stand behind our results."
+WHAT BAD LOOKS LIKE (never do this):
+- Long explanations with multiple points
+- Starting with "I understand..." or "That's a great question..."
+- Numbered lists or bullet points
+- Anything that sounds like it came from a script library
+- More than one sentence
 
-LENGTH RULES:
-- "coach", "positive", "win": 1 sentence ALWAYS
-- "objection" Tier 1: 1 sentence
-- "objection" Tier 2-3: 2 sentences MAX
-- NO numbered lists, NO bullets, NO line breaks in content
-- Straight apostrophes only
-
-SCRIPT INJECTION — "script" field:
-- "objection": ALWAYS include exact word-for-word script, 1-2 sentences, natural spoken language
-- "win": ALWAYS include exact closing line
-- "coach": include script only when there's something specific to say; otherwise ""
-- "positive": always ""
+"script" field: always the same as "content" — one clean sentence, word for word, ready to say out loud.
+Set "objection_text" only when there's clear resistance (under 5 words). Otherwise empty.
+Set "objection_resolved" if they just agreed or moved past a previous objection.
 
 Reply ONLY in this exact JSON, no extra text:
-{"type":"coach","content":"coaching here","script":"exact script or empty string","objection_text":"","objection_resolved":""}`;
+{"type":"coach","content":"the one thing to say","script":"same thing","objection_text":"","objection_resolved":""}`;
 
     let r,attempts=0;
     while(attempts<3){
