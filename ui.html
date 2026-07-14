@@ -396,21 +396,14 @@ html,body{background:var(--void);color:var(--text-primary);font-family:var(--fon
         </div>
       </div>
 
-      <!-- RIGHT: Coaching + Script Injector -->
+      <!-- RIGHT: Coaching only - full height -->
       <div style="display:flex;flex-direction:column;gap:12px">
         <div class="panel" id="coach-panel">
           <div class="panel-header">
             <div class="panel-title" style="color:var(--amber)">💡 Live Coaching</div>
             <div class="panel-badge" style="background:var(--amber-dim);color:var(--amber)">AI POWERED</div>
           </div>
-          <div class="panel-body" id="cb"><div class="coach-empty">Start listening to receive live coaching...</div></div>
-        </div>
-        <div class="panel" id="inj-panel">
-          <div class="panel-header">
-            <div class="panel-title" style="color:var(--green)">⚡ Script Injector</div>
-            <div class="panel-badge" style="background:var(--green-dim);color:var(--green)">CONTEXTUAL</div>
-          </div>
-          <div style="padding:12px" id="injector-feed"><div class="inj-empty">Scripts auto-surface here based on what's happening on the call. No hunting required.</div></div>
+          <div class="panel-body" id="cb" style="max-height:560px"><div class="coach-empty">Start listening to receive live coaching...</div></div>
         </div>
       </div>
 
@@ -551,14 +544,14 @@ function upd(){
 function toggleFocus(){
   focusMode=!focusMode;
   const btn=$("bfocus");
-  const cb=$("cb");const ol=$("obj-log");const inf=$("injector-feed");
+  const cb=$("cb");const ol=$("obj-log");
   if(focusMode){
     btn.textContent="🔓 Resume";btn.classList.add("active");
-    [cb,ol,inf].forEach(el=>{if(el)el.classList.add("focus-frozen");});
+    [cb,ol].forEach(el=>{if(el)el.classList.add("focus-frozen");});
     ss("🔒 Focus Mode — reading scripts. Hit Resume when done.","var(--amber)");
   } else {
     btn.textContent="🔒 Focus";btn.classList.remove("active");
-    [cb,ol,inf].forEach(el=>{if(el)el.classList.remove("focus-frozen");});
+    [cb,ol].forEach(el=>{if(el)el.classList.remove("focus-frozen");});
     ss("✅ LIVE — Listening...");
   }
 }
@@ -629,28 +622,22 @@ function addCoach(type,content,t){
   const b=$("cb"),e=b.querySelector(".coach-empty");if(e)e.remove();
   const cols={objection:"var(--red)",coach:"var(--cyan)",positive:"var(--green)",win:"var(--amber)"};
   const col=cols[type]||cols.coach;
+  const id="cc-"+Date.now();
   const d=document.createElement("div");
-  d.style.cssText=`border-left:3px solid ${col};padding:12px 14px;margin-bottom:8px;background:${col}08;border-radius:0 var(--radius-sm) var(--radius-sm) 0;animation:cardin 0.2s ease`;
-  d.innerHTML=`<div style="font-size:13px;color:var(--text-primary);line-height:1.6;font-weight:500">${content}</div><div style="font-size:9px;color:var(--text-muted);margin-top:5px">${t}</div>`;
+  d.id=id;
+  d.style.cssText=`border-left:3px solid ${col};padding:12px 14px;margin-bottom:8px;background:${col}08;border-radius:0 var(--radius-sm) var(--radius-sm) 0;animation:cardin 0.2s ease;position:relative`;
+  d.innerHTML=`<div style="font-size:13px;color:var(--text-primary);line-height:1.6;font-weight:500;padding-right:58px">${content}</div><div style="font-size:9px;color:var(--text-muted);margin-top:5px">${t}</div><button onclick="copyCoach('${id}',this)" style="position:absolute;top:10px;right:10px;background:var(--surface-3);border:1px solid var(--border);color:var(--text-muted);border-radius:var(--radius-sm);padding:3px 9px;font-size:9px;cursor:pointer;font-family:var(--font-mono)">📋</button>`;
   b.insertBefore(d,b.firstChild);
-  // Keep last 6
-  const cards=b.children;while(cards.length>7)b.removeChild(b.lastChild);
+  const cards=b.children;while(cards.length>8)b.removeChild(b.lastChild);
 }
 
-function addInjector(type,script,context,t){
-  if(focusMode||!script||!script.trim())return;
-  // Script injector now just shows in the same coaching feed as a copy-able card
-  const feed=$("injector-feed");if(!feed)return;
-  const empty=feed.querySelector(".inj-empty");if(empty)empty.remove();
-  const cols={objection:"var(--red)",win:"var(--amber)",coach:"var(--green)",positive:"var(--green)"};
-  const col=cols[type]||cols.coach;
-  const id="inj-"+Date.now();
-  const d=document.createElement("div");d.id=id;
-  d.style.cssText=`border:1px solid ${col}33;border-left:3px solid ${col};padding:12px 14px;margin-bottom:8px;background:${col}06;border-radius:0 var(--radius-sm) var(--radius-sm) 0;position:relative;animation:cardin 0.2s ease`;
-  d.innerHTML=`<div style="font-size:15px;color:var(--text-primary);line-height:1.65;font-weight:500;padding-right:60px">"${script}"</div><div style="font-size:9px;color:var(--text-muted);margin-top:5px">${t}</div><button onclick="copyScript('${id}',this)" style="position:absolute;top:10px;right:10px;background:var(--surface-3);border:1px solid var(--border);color:var(--text-muted);border-radius:var(--radius-sm);padding:3px 9px;font-size:9px;cursor:pointer;font-family:var(--font-mono)">📋 Copy</button>`;
-  feed.insertBefore(d,feed.firstChild);
-  const cards=feed.querySelectorAll("div[id^='inj-']");if(cards.length>5)cards[cards.length-1].remove();
+function copyCoach(id,btn){
+  const card=document.getElementById(id);if(!card)return;
+  const text=card.querySelector("div")?.textContent||"";
+  navigator.clipboard.writeText(text.trim()).then(()=>{btn.textContent="✅";setTimeout(()=>{btn.textContent="📋";},2000);});
 }
+
+function addInjector(){} // merged into coaching feed
 
 function copyScript(id,btn){
   const card=document.getElementById(id);if(!card)return;
@@ -898,7 +885,6 @@ function clr(){
   $("tb").innerHTML='<div class="tx-empty">Transcript will appear here when you start listening...</div>';
   $("cb").innerHTML='<div class="coach-empty">Start listening to receive live coaching...</div>';
   $("obj-log").innerHTML='<div class="obj-empty">No objections detected yet.</div>';
-  $("injector-feed").innerHTML='<div class="inj-empty">Scripts auto-surface here based on what\'s happening on the call. No hunting required.</div>';
   cerr();upd();ss("Select who\'s calling then hit Start Listening.","var(--text-muted)");
   setCallerType("family_substance");
 }
