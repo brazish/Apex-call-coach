@@ -3,276 +3,673 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ── TOKENS ── */
-:root{
-  --void:#060912;
-  --surface-1:#0B1120;
-  --surface-2:#111827;
-  --surface-3:#1a2236;
-  --border:#1E2D45;
-  --border-bright:#2A3F5F;
-  --text-primary:#E8F4FF;
-  --text-secondary:#8BA4C0;
-  --text-muted:#3D5470;
-  --cyan:#00D9FF;
-  --cyan-dim:rgba(0,217,255,0.12);
-  --cyan-glow:rgba(0,217,255,0.25);
-  --green:#00F5A0;
-  --green-dim:rgba(0,245,160,0.10);
-  --amber:#FFB800;
-  --amber-dim:rgba(255,184,0,0.10);
-  --red:#FF3D6B;
-  --red-dim:rgba(255,61,107,0.10);
-  --font-mono:'SF Mono','Fira Code','Cascadia Code',monospace;
-  --radius:10px;
-  --radius-sm:6px;
+/* ─── TOKENS ─────────────────────────────────────────────────── */
+:root {
+  /* PPR Brand */
+  --clay:       #883E27;
+  --clay-mid:   #A04E33;
+  --clay-soft:  rgba(136,62,39,.07);
+  --clay-line:  rgba(136,62,39,.18);
+  --gold:       #BC9642;
+  --gold-soft:  rgba(188,150,66,.09);
+  /* Neutrals */
+  --ink:        #17120E;
+  --ink-70:     #5C4E46;
+  --ink-40:     #9E9189;
+  --ink-15:     #EAE6E3;
+  --ink-06:     #F6F4F2;
+  --white:      #FFFFFF;
+  --canvas:     #F9F8F6;
+  /* Status */
+  --success:    #1E7C50;
+  --success-soft: rgba(30,124,80,.08);
+  --danger:     #B83030;
+  --danger-soft:rgba(184,48,48,.07);
+  --warn:       #A07020;
+  --warn-soft:  rgba(160,112,32,.08);
+  /* Geometry */
+  --r:          10px;
+  --r-sm:       7px;
+  --r-xs:       5px;
+  /* Elevation */
+  --s1: 0 1px 2px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.04);
+  --s2: 0 2px 6px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.07);
+  --s3: 0 8px 32px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.05);
+  /* Type */
+  --f: 'Plus Jakarta Sans', -apple-system, sans-serif;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--void);color:var(--text-primary);font-family:var(--font-mono);font-size:13px;overflow-x:hidden;width:100%;margin:0;padding:0}
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:2px}
+/* ─── DARK MODE ──────────────────────────────────────────────── */
+body.dark {
+  --clay:         #C4724E;
+  --clay-mid:     #D4845E;
+  --clay-soft:    rgba(196,114,78,.12);
+  --clay-line:    rgba(196,114,78,.25);
+  --gold:         #D4AA5E;
+  --gold-soft:    rgba(212,170,94,.12);
+  --bg:           #111010;
+  --bg-white:     #1A1917;
+  --canvas:       #111010;
+  --surface:      #1A1917;
+  --surface-2:    #221F1C;
+  --surface-3:    #2C2825;
+  --border:       #2E2A26;
+  --border-strong:#3D3830;
+  --ink:          #F0EDE8;
+  --ink-70:       #B8B0A6;
+  --ink-40:       #6E665E;
+  --ink-15:       #2E2A26;
+  --ink-06:       #201D1A;
+  --white:        #1A1917;
+  --success:      #3DAA70;
+  --success-soft: rgba(61,170,112,.10);
+  --danger:       #D45858;
+  --danger-soft:  rgba(212,88,88,.10);
+  --warn:         #C49040;
+  --warn-soft:    rgba(196,144,64,.10);
+  --s1: 0 1px 3px rgba(0,0,0,.3), 0 2px 8px rgba(0,0,0,.2);
+  --s2: 0 2px 8px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  --s3: 0 8px 32px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.3);
+}
+body, body * { transition: background-color .2s ease, border-color .2s ease, color .15s ease; }
 
-/* ── LAYOUT ── */
-.app{display:grid;grid-template-rows:auto auto 1fr;min-height:100vh;padding:14px 16px;gap:12px;width:100%;max-width:100%;margin:0}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; width: 100%; overflow: hidden;
+  font-family: var(--f);
+  background: var(--canvas);
+  color: var(--ink);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--ink-15); border-radius: 2px; }
 
-/* ── TOPBAR ── */
-.topbar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:14px 20px;background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);position:relative;overflow:hidden}
-.topbar::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.5}
-.brand{display:flex;align-items:center;gap:12px}
-.brand-icon{width:38px;height:38px;background:linear-gradient(135deg,#0044FF,#00AAFF);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 0 20px rgba(0,170,255,0.3)}
-.brand-name{font-size:15px;font-weight:700;color:var(--text-primary);letter-spacing:0.5px}
-.brand-sub{font-size:9px;color:var(--cyan);letter-spacing:2.5px;text-transform:uppercase;margin-top:2px}
-.metrics-strip{display:flex;gap:0;justify-content:center}
-.metric{padding:6px 18px;border-right:1px solid var(--border);text-align:center;min-width:90px}
-.metric:last-child{border-right:none}
-.metric-val{font-size:18px;font-weight:800;color:var(--text-primary);line-height:1}
-.metric-lbl{font-size:8px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px}
-.live-indicator{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:100px;position:relative}
-.signal-ring{width:10px;height:10px;border-radius:50%;background:var(--text-muted);position:relative;flex-shrink:0}
-.signal-ring.live{background:var(--green)}
-.signal-ring.live::before,.signal-ring.live::after{content:'';position:absolute;border-radius:50%;border:1px solid var(--green);top:50%;left:50%;transform:translate(-50%,-50%);animation:ripple 1.8s ease-out infinite}
-.signal-ring.live::after{animation-delay:0.6s}
-@keyframes ripple{0%{width:10px;height:10px;opacity:1}100%{width:28px;height:28px;opacity:0}}
-.live-text{font-size:10px;font-weight:600;color:var(--text-secondary);letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+/* ─── SHELL ───────────────────────────────────────────────────── */
+.shell {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 56px 40px 1fr;
+  grid-template-columns: 280px 1fr;
+  grid-template-areas:
+    "nav   nav"
+    "stage stage"
+    "side  main";
+}
 
-/* ── STAGE BAR ── */
-.stagebar{display:flex;background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.stage{flex:1;padding:9px 4px;text-align:center;font-size:8px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-muted);transition:all 0.4s;cursor:default;position:relative}
-.stage.done{color:var(--cyan);background:var(--cyan-dim)}
-.stage.done::after{content:'✓ ';font-size:7px}
-.stage.active{color:#000;background:linear-gradient(135deg,var(--cyan),#0088FF);box-shadow:0 0 20px var(--cyan-glow)}
-.stage-sep{width:1px;background:var(--border);flex-shrink:0}
+/* ─── NAV ─────────────────────────────────────────────────────── */
+.nav {
+  grid-area: nav;
+  background: var(--white);
+  border-bottom: 1px solid var(--ink-15);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 0;
+  box-shadow: var(--s1);
+  z-index: 10;
+}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-right: 32px;
+  flex-shrink: 0;
+}
+.nav-mark {
+  width: 32px; height: 32px;
+  background: var(--clay);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.nav-mark svg { width: 16px; height: 16px; fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; }
+.nav-name { font-size: 13px; font-weight: 700; color: var(--ink); letter-spacing: -.2px; line-height: 1.2; }
+.nav-sub  { font-size: 10px; font-weight: 500; color: var(--ink-40); letter-spacing: .3px; }
+.nav-divider { width: 1px; height: 28px; background: var(--ink-15); margin-right: 24px; }
+.nav-stats {
+  display: flex;
+  gap: 0;
+  flex: 1;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px;
+  border-right: 1px solid var(--ink-15);
+  min-width: 80px;
+}
+.stat:last-child { border-right: none; }
+.stat-v {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.5px;
+}
+.stat-l {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--ink-40);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-top: 2px;
+}
+/* Live indicator — the signature element */
+.live-word {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-40);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: color .3s;
+  flex-shrink: 0;
+}
+.live-word.on {
+  color: var(--clay);
+  animation: breathe 2.4s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .55; }
+}
 
-/* ── CONTROL ROW ── */
-.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
-.ctx-input{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text-primary);font-family:var(--font-mono);font-size:12px;transition:border-color 0.2s;outline:none}
-.ctx-input:focus{border-color:var(--cyan)}
-.ctx-lbl{font-size:8px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+/* ─── STAGE STRIP ─────────────────────────────────────────────── */
+.stage-strip {
+  grid-area: stage;
+  background: var(--white);
+  border-bottom: 1px solid var(--ink-15);
+  display: flex;
+  padding: 0 24px 0 280px;
+}
+.stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink-40);
+  letter-spacing: .3px;
+  position: relative;
+  transition: color .25s;
+  cursor: default;
+}
+.stage::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: transparent;
+  transition: background .25s;
+}
+.stage.done { color: var(--clay-mid); }
+.stage.done::after { background: rgba(136,62,39,.25); }
+.stage.active { color: var(--clay); }
+.stage.active::after { background: var(--clay); }
+.stage-n {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--ink-15);
+  color: var(--ink-40);
+  font-size: 8px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: all .25s;
+}
+.stage.done .stage-n { background: var(--clay-soft); color: var(--clay); }
+.stage.active .stage-n { background: var(--clay); color: white; }
 
-/* ── CALLER CHIPS ── */
-.chips-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.chip{padding:5px 12px;border-radius:100px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface-2);color:var(--text-muted);font-family:var(--font-mono);transition:all 0.15s;white-space:nowrap}
-.chip:hover{color:var(--text-primary);border-color:var(--border-bright)}
-.chip.active{background:var(--cyan-dim);color:var(--cyan);border-color:rgba(0,217,255,0.4)}
-.chip.crisis-active{background:var(--red-dim);color:var(--red);border-color:rgba(255,61,107,0.4)}
+/* ─── SIDEBAR ─────────────────────────────────────────────────── */
+.sidebar {
+  grid-area: side;
+  background: var(--white);
+  border-right: 1px solid var(--ink-15);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.s-section {
+  padding: 20px;
+  border-bottom: 1px solid var(--ink-15);
+}
+.s-section:last-child { border-bottom: none; }
+.s-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--ink-40);
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  margin-bottom: 12px;
+}
+/* Caller chips */
+.chips { display: flex; flex-direction: column; gap: 4px; }
+.chip {
+  padding: 8px 11px;
+  border-radius: var(--r-sm);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--ink-70);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all .15s;
+  text-align: left;
+  width: 100%;
+  font-family: var(--f);
+}
+.chip:hover { background: var(--ink-06); border-color: var(--ink-15); }
+.chip.active {
+  background: var(--clay-soft);
+  border-color: var(--clay-line);
+  color: var(--clay);
+  font-weight: 600;
+}
+.chip.crisis-active {
+  background: var(--danger-soft);
+  border-color: rgba(184,48,48,.2);
+  color: var(--danger);
+  font-weight: 600;
+}
+/* ctx inputs */
+.ctx-field { display: none; flex-direction: column; gap: 8px; }
+.ctx-field.show { display: flex; }
+.ctx-lbl { font-size: 10px; font-weight: 600; color: var(--ink-40); }
+.ctx-ta {
+  width: 100%;
+  background: var(--ink-06);
+  border: 1px solid var(--ink-15);
+  border-radius: var(--r-xs);
+  padding: 8px 10px;
+  color: var(--ink);
+  font-family: var(--f);
+  font-size: 11px;
+  resize: none;
+  outline: none;
+  transition: border-color .2s;
+  min-height: 48px;
+}
+.ctx-ta:focus { border-color: var(--clay); }
+/* Intel */
+.intel-cards { display: flex; flex-direction: column; gap: 6px; }
+.intel-c {
+  border-left: 2px solid;
+  padding: 8px 10px;
+  background: var(--ink-06);
+  border-radius: 0 var(--r-xs) var(--r-xs) 0;
+}
+.intel-c-lbl { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+.intel-c-body { font-size: 11px; color: var(--ink-70); line-height: 1.55; }
+.intel-loading { font-size: 10px; color: var(--ink-40); font-style: italic; }
+/* Ratio */
+.ratio-row { display: flex; align-items: center; gap: 10px; }
+.ratio-track { flex: 1; height: 4px; background: var(--ink-15); border-radius: 2px; overflow: hidden; }
+.ratio-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--success), #34D283);
+  transition: width .7s ease;
+}
+.ratio-fill.warn { background: linear-gradient(90deg, var(--warn), #D4A020); }
+.ratio-fill.danger { background: linear-gradient(90deg, var(--danger), #CC2020); }
+.ratio-pct { font-size: 11px; font-weight: 700; color: var(--ink); white-space: nowrap; min-width: 32px; text-align: right; }
+.ratio-status { font-size: 10px; color: var(--ink-40); margin-top: 5px; }
+/* Quick ref */
+.ref-card { padding: 10px 0; border-bottom: 1px solid var(--ink-15); }
+.ref-card:last-child { border-bottom: none; }
+.ref-title { font-size: 10px; font-weight: 700; color: var(--clay); letter-spacing: .3px; margin-bottom: 4px; }
+.ref-body { font-size: 11px; color: var(--ink-70); line-height: 1.6; }
 
-/* ── ACTION BUTTONS ── */
-.actions{display:flex;gap:8px;flex-wrap:wrap}
-.btn{padding:10px 16px;border:none;border-radius:var(--radius-sm);font-weight:700;font-size:11px;cursor:pointer;font-family:var(--font-mono);letter-spacing:0.5px;transition:all 0.15s;white-space:nowrap}
-.btn-start{background:linear-gradient(135deg,#0055FF,#00AAFF);color:#fff;flex:2;min-width:160px;box-shadow:0 0 20px rgba(0,120,255,0.3)}
-.btn-start:hover{box-shadow:0 0 30px rgba(0,120,255,0.5)}
-.btn-start:disabled{opacity:0.3;cursor:not-allowed;box-shadow:none}
-.btn-stop{background:var(--surface-2);color:var(--red);border:1px solid rgba(255,61,107,0.3);flex:1}
-.btn-stop:disabled{opacity:0.3;cursor:not-allowed}
-.btn-ghost{background:var(--surface-2);color:var(--text-secondary);border:1px solid var(--border);flex:1}
-.btn-ghost:hover{border-color:var(--border-bright);color:var(--text-primary)}
-.btn-green{background:var(--surface-2);color:var(--green);border:1px solid rgba(0,245,160,0.3)}
-.btn-amber{background:var(--surface-2);color:var(--amber);border:1px solid rgba(255,184,0,0.3)}
-.btn-cyan{background:var(--surface-2);color:var(--cyan);border:1px solid rgba(0,217,255,0.3)}
-.btn-focus{background:var(--surface-2);color:var(--amber);border:1px solid rgba(255,184,0,0.3)}
-.btn-focus.active{background:var(--amber-dim);border-color:var(--amber);box-shadow:0 0 12px var(--amber-dim)}
+/* ─── MAIN ────────────────────────────────────────────────────── */
+.main {
+  grid-area: main;
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+  overflow: hidden;
+  background: var(--canvas);
+}
 
-/* ── STATUS / ERROR ── */
-.status-row{display:flex;align-items:center;gap:8px;min-height:20px}
-.status-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);flex-shrink:0}
-.status-text{font-size:11px;color:var(--cyan)}
-.interim{font-size:11px;color:var(--text-muted);font-style:italic}
-.error-bar{background:rgba(255,61,107,0.08);border:1px solid rgba(255,61,107,0.25);border-radius:var(--radius-sm);padding:8px 12px;color:var(--red);font-size:11px;display:none;margin-top:6px}
+/* ─── ACTION BAR ──────────────────────────────────────────────── */
+.action-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: var(--white);
+  border-bottom: 1px solid var(--ink-15);
+  flex-wrap: wrap;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--f);
+  cursor: pointer;
+  border: none;
+  transition: all .15s;
+  white-space: nowrap;
+  letter-spacing: .1px;
+}
+.btn-primary {
+  background: var(--clay);
+  color: white;
+  box-shadow: 0 1px 3px rgba(136,62,39,.3), 0 4px 12px rgba(136,62,39,.15);
+}
+.btn-primary:hover { background: var(--clay-mid); box-shadow: 0 2px 6px rgba(136,62,39,.35), 0 6px 16px rgba(136,62,39,.2); }
+.btn-primary:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; }
+.btn-danger { background: var(--danger-soft); color: var(--danger); border: 1px solid rgba(184,48,48,.15); }
+.btn-danger:disabled { opacity: .35; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--ink-70); border: 1px solid var(--ink-15); }
+.btn-ghost:hover { background: var(--ink-06); border-color: var(--ink-40); color: var(--ink); }
+.btn-subtle { background: transparent; color: var(--ink-70); border: 1px solid var(--ink-15); }
+.btn-subtle:hover { background: var(--ink-06); }
+.btn-gold { background: var(--gold-soft); color: var(--gold); border: 1px solid rgba(188,150,66,.2); }
+.btn-gold:hover { background: rgba(188,150,66,.14); }
+.btn-focus { background: transparent; color: var(--ink-40); border: 1px solid var(--ink-15); }
+.btn-focus.active { background: var(--warn-soft); color: var(--warn); border-color: rgba(160,112,32,.25); font-weight: 700; }
+.status-inline {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--ink-40);
+}
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-15); flex-shrink: 0; }
+.interim { font-style: italic; font-size: 10px; }
 
-/* ── HOT FLASH ── */
-.hot-flash{display:none;background:linear-gradient(135deg,rgba(0,245,160,0.08),rgba(0,217,255,0.06));border:1px solid rgba(0,245,160,0.4);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;position:relative;overflow:hidden}
-.hot-flash::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),var(--cyan));animation:scanline 2s linear infinite}
-@keyframes scanline{0%{transform:scaleX(0);transform-origin:left}50%{transform:scaleX(1);transform-origin:left}51%{transform:scaleX(1);transform-origin:right}100%{transform:scaleX(0);transform-origin:right}}
-.hot-flash.show{display:block;animation:flashin 0.3s ease}
-@keyframes flashin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-.hot-tag{font-size:8px;font-weight:700;letter-spacing:2px;color:var(--green);text-transform:uppercase;margin-bottom:6px}
-.hot-script{font-size:13px;color:var(--text-primary);line-height:1.65;font-weight:500}
+/* ─── ALERTS ──────────────────────────────────────────────────── */
+.err-bar {
+  display: none;
+  padding: 9px 20px;
+  background: var(--danger-soft);
+  border-bottom: 1px solid rgba(184,48,48,.12);
+  color: var(--danger);
+  font-size: 11px;
+  font-weight: 500;
+}
+.hot-bar {
+  display: none;
+  padding: 10px 20px;
+  background: linear-gradient(90deg, var(--success-soft), transparent);
+  border-bottom: 1px solid rgba(30,124,80,.12);
+  align-items: center;
+  gap: 12px;
+}
+.hot-bar.show { display: flex; animation: slidedown .25s ease; }
+@keyframes slidedown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+.hot-tag {
+  font-size: 9px; font-weight: 800; color: var(--success);
+  text-transform: uppercase; letter-spacing: 1.2px;
+  background: var(--success-soft);
+  padding: 3px 8px; border-radius: 100px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.hot-text { font-size: 12px; font-weight: 500; color: var(--ink); flex: 1; }
 
-/* ── INTEL PANEL ── */
-.intel-panel{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px}
-.intel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.intel-title{font-size:9px;font-weight:700;color:var(--green);letter-spacing:2px;text-transform:uppercase}
-.intel-status{font-size:10px;color:var(--text-muted);font-style:italic}
-.intel-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.intel-card{background:var(--surface-2);border-radius:var(--radius-sm);padding:10px 12px;border-top:2px solid}
-.intel-lbl{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
-.intel-body{font-size:11px;color:var(--text-secondary);line-height:1.6}
+/* ─── INLINE PANELS (score / replay) ─────────────────────────── */
+.inline-panel {
+  display: none;
+  margin: 12px 20px;
+  background: var(--white);
+  border-radius: var(--r);
+  box-shadow: var(--s2);
+  padding: 20px;
+  animation: fadeup .25s ease;
+}
+.inline-panel.show { display: block; }
+@keyframes fadeup { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+.ip-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.ip-title { font-size: 14px; font-weight: 700; color: var(--ink); }
+.ip-sub { font-size: 10px; color: var(--ink-40); margin-top: 2px; }
+.close-btn {
+  background: none; border: 1px solid var(--ink-15);
+  color: var(--ink-40); border-radius: var(--r-xs);
+  padding: 4px 10px; cursor: pointer; font-family: var(--f);
+  font-size: 10px; transition: all .15s;
+}
+.close-btn:hover { color: var(--ink); border-color: var(--ink-40); }
 
-/* ── RATIO BAR ── */
-.ratio-wrap{display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px}
-.ratio-lbl{font-size:8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
-.ratio-track{flex:1;height:6px;background:var(--surface-3);border-radius:3px;overflow:hidden}
-.ratio-fill{height:100%;border-radius:3px;transition:width 0.6s ease;background:linear-gradient(90deg,var(--green),var(--cyan))}
-.ratio-fill.warn{background:linear-gradient(90deg,var(--amber),#FF8C00)}
-.ratio-fill.danger{background:linear-gradient(90deg,var(--red),#CC0033)}
-.ratio-val{font-size:10px;font-weight:700;color:var(--text-primary);white-space:nowrap;min-width:140px;text-align:right}
+/* Score */
+.score-grade { text-align: center; padding: 24px; background: var(--ink-06); border-radius: var(--r-sm); margin-bottom: 14px; }
+.score-letter { font-size: 72px; font-weight: 900; line-height: 1; letter-spacing: -3px; }
+.score-sub { font-size: 11px; color: var(--ink-40); margin-top: 6px; }
+.score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.score-cat { background: var(--ink-06); border-radius: var(--r-sm); padding: 12px 14px; }
+.score-cat-lbl { font-size: 9px; font-weight: 700; color: var(--ink-40); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.score-cat-val { font-size: 22px; font-weight: 800; margin-bottom: 7px; letter-spacing: -.5px; }
+.score-bar-bg { height: 3px; background: var(--ink-15); border-radius: 2px; }
+.score-bar-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
+.score-fb { background: var(--ink-06); border-radius: var(--r-sm); padding: 14px 16px; }
+.score-fb-lbl { font-size: 9px; font-weight: 700; color: var(--clay); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.score-item { font-size: 11.5px; color: var(--ink-70); line-height: 1.7; padding: 5px 0; border-bottom: 1px solid var(--ink-15); }
+.score-item:last-child { border: none; }
 
-/* ── MAIN GRID ── */
-.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+/* Replay */
+.replay-item { border-left: 3px solid var(--ink-15); padding: 10px 13px; margin-bottom: 8px; background: var(--ink-06); border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+.replay-item.missed { border-left-color: var(--danger); }
+.replay-item.strong { border-left-color: var(--success); }
+.replay-item.neutral { border-left-color: var(--warn); }
+.replay-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+.replay-lbl.missed { color: var(--danger); }
+.replay-lbl.strong { color: var(--success); }
+.replay-lbl.neutral { color: var(--warn); }
+.replay-body { font-size: 11.5px; color: var(--ink-70); line-height: 1.65; }
+.replay-alt { font-size: 11px; color: var(--clay); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--ink-15); font-style: italic; }
 
-/* ── PANELS ── */
-.panel{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.panel-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface-2)}
-.panel-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
-.panel-badge{font-size:8px;padding:2px 7px;border-radius:100px;font-weight:600}
-.panel-body{padding:12px;max-height:280px;overflow-y:auto}
+/* ─── CONTENT GRID ────────────────────────────────────────────── */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border-top: 1px solid var(--ink-15);
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid var(--ink-15);
+}
+.col:last-child { border-right: none; }
+.col-head {
+  padding: 14px 20px;
+  background: var(--white);
+  border-bottom: 1px solid var(--ink-15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.col-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: .2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.col-title-icon {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.col-badge {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 100px;
+  letter-spacing: .3px;
+}
+.col-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+.col-body.split {
+  /* objection tracker is split — shared with transcript */
+  flex: none;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 16px 20px;
+  border-top: 1px solid var(--ink-15);
+}
+.col-split-head {
+  padding: 12px 20px;
+  border-top: 1px solid var(--ink-15);
+  border-bottom: 1px solid var(--ink-15);
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 80px;
+  color: var(--ink-40);
+  font-size: 11px;
+  text-align: center;
+  line-height: 1.6;
+}
 
-/* ── TRANSCRIPT ── */
-.tx-line{padding:4px 0;border-bottom:1px solid var(--surface-3);font-size:11px;line-height:1.6;display:flex;gap:8px}
-.tx-line:last-child{border-bottom:none}
-.tx-time{color:var(--text-muted);flex-shrink:0;font-size:10px;padding-top:1px}
-.tx-name{color:var(--cyan);font-weight:600;flex-shrink:0}
-.tx-text{color:var(--text-secondary)}
-.tx-empty{color:var(--text-muted);font-style:italic;font-size:11px;padding:16px 0;text-align:center}
+/* ─── TRANSCRIPT LINES ────────────────────────────────────────── */
+.tx { display: flex; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--ink-15); }
+.tx:last-child { border-bottom: none; }
+.tx-t { font-size: 9.5px; color: var(--ink-40); font-variant-numeric: tabular-nums; padding-top: 1px; flex-shrink: 0; width: 50px; }
+.tx-n { font-size: 11.5px; font-weight: 700; color: var(--clay); flex-shrink: 0; }
+.tx-x { font-size: 11.5px; color: var(--ink-70); line-height: 1.55; }
 
-/* ── COACHING CARDS ── */
-.coach-card{border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:8px;border-left:3px solid;font-size:12px;line-height:1.65;animation:cardin 0.25s ease}
-@keyframes cardin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-.coach-card:last-child{margin-bottom:0}
-.coach-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.coach-tag{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:100px}
-.coach-time{font-size:9px;color:var(--text-muted)}
-.coach-body{color:var(--text-primary)}
-.coach-empty{color:var(--text-muted);font-style:italic;font-size:11px;text-align:center;padding:24px 0}
+/* ─── COACHING CARDS — the signature ─────────────────────────── */
+/* Bare rule + text. No box. No shadow. Just the line and the words. */
+.coach-card {
+  display: flex;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ink-15);
+  position: relative;
+  animation: coachin .2s ease;
+}
+.coach-card:first-child { padding-top: 0; }
+.coach-card:last-child { border-bottom: none; }
+@keyframes coachin { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+.coach-rule {
+  width: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  align-self: stretch;
+  min-height: 24px;
+}
+.coach-inner { flex: 1; min-width: 0; }
+.coach-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.65;
+  padding-right: 36px;
+}
+.coach-meta { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+.coach-time { font-size: 9.5px; color: var(--ink-40); font-variant-numeric: tabular-nums; }
+.coach-copy-btn {
+  position: absolute;
+  top: 12px;
+  right: 0;
+  background: none;
+  border: 1px solid var(--ink-15);
+  color: var(--ink-40);
+  border-radius: var(--r-xs);
+  padding: 2px 7px;
+  font-size: 10px;
+  cursor: pointer;
+  font-family: var(--f);
+  transition: all .15s;
+  opacity: 0;
+}
+.coach-card:hover .coach-copy-btn { opacity: 1; }
+.coach-copy-btn:hover { background: var(--ink-06); color: var(--ink); border-color: var(--ink-40); }
 
-/* ── SCRIPT INJECTOR ── */
-.injector-card{border-radius:var(--radius-sm);padding:13px 15px;margin-bottom:8px;position:relative;border:1px solid;animation:cardin 0.25s ease}
-.injector-card:last-child{margin-bottom:0}
-.inj-tag{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:100px;display:inline-block;margin-bottom:8px}
-.inj-time{font-size:9px;color:var(--text-muted);float:right;margin-top:1px}
-.inj-context{font-size:9px;color:var(--text-muted);margin-bottom:6px;font-style:italic}
-.inj-script{font-size:14px;color:var(--text-primary);line-height:1.7;font-weight:500;letter-spacing:0.1px}
-.inj-copy{position:absolute;bottom:10px;right:10px;background:var(--surface-3);border:1px solid var(--border);color:var(--text-muted);border-radius:var(--radius-sm);padding:3px 9px;font-size:9px;cursor:pointer;font-family:var(--font-mono);transition:all 0.15s}
-.inj-copy:hover{color:var(--green);border-color:rgba(0,245,160,0.4)}
-.inj-copy.copied{color:var(--green);border-color:rgba(0,245,160,0.6)}
-.inj-empty{color:var(--text-muted);font-style:italic;font-size:11px;text-align:center;padding:20px 0;line-height:1.6}
-
-/* ── OBJECTION TRACKER ── */
-.obj-card{border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:8px;border:1px solid rgba(255,61,107,0.2);border-left:3px solid var(--red);background:rgba(255,61,107,0.04)}
-.obj-card.won{border-color:rgba(0,245,160,0.2);border-left-color:var(--green);background:rgba(0,245,160,0.04)}
-.obj-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
-.obj-q{font-size:11px;font-weight:600;color:var(--red);flex:1}
-.obj-q.won{color:var(--green)}
-.obj-badge{font-size:8px;font-weight:700;letter-spacing:1px;padding:2px 8px;border-radius:100px;border:1px solid;white-space:nowrap;margin-left:8px}
-.badge-open{background:var(--amber-dim);color:var(--amber);border-color:rgba(255,184,0,0.3)}
-.badge-won{background:var(--green-dim);color:var(--green);border-color:rgba(0,245,160,0.3)}
-.obj-rebuttal-lbl{font-size:8px;color:var(--cyan);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:3px}
-.obj-rebuttal{font-size:11px;color:var(--text-secondary);line-height:1.65;background:var(--surface-2);border-left:2px solid var(--cyan);padding:6px 9px;border-radius:0 4px 4px 0}
-.obj-ts{font-size:9px;color:var(--text-muted);margin-top:4px}
-.obj-empty{color:var(--text-muted);font-style:italic;font-size:11px;text-align:center;padding:16px 0}
-
-/* ── PPR QUICK REF ── */
-.ppr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}
-.ppr-card{background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--radius-sm);padding:10px 12px}
-.ppr-card-title{font-size:8px;color:var(--green);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;font-weight:700}
-.ppr-card-body{font-size:10.5px;color:var(--text-secondary);line-height:1.7}
-
-/* ── SCORE PANEL ── */
-#score-modal{display:none;background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px;animation:cardin 0.3s ease}
-.score-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
-.score-grade-box{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:14px}
-.score-letter{font-size:72px;font-weight:900;line-height:1}
-.score-overall{font-size:11px;color:var(--text-muted);margin-top:4px}
-.score-cats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.score-cat{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px}
-.score-cat-lbl{font-size:8px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
-.score-cat-val{font-size:20px;font-weight:800;margin-bottom:6px}
-.score-bar-bg{height:3px;background:var(--surface-3);border-radius:2px}
-.score-bar-fill{height:100%;border-radius:2px;transition:width 1s ease}
-.score-feedback{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px}
-.score-feedback-title{font-size:8px;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
-.score-item{font-size:11px;color:var(--text-secondary);line-height:1.7;padding:4px 0;border-bottom:1px solid var(--border)}
-.score-item:last-child{border:none}
-
-/* ── REPLAY PANEL ── */
-.replay-panel{display:none;background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-top:12px}
-.replay-panel.show{display:block;animation:cardin 0.3s ease}
-.replay-item{background:var(--surface-2);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:8px;border-left:3px solid}
-.replay-item.missed{border-left-color:var(--red)}
-.replay-item.strong{border-left-color:var(--green)}
-.replay-item.neutral{border-left-color:var(--amber)}
-.replay-moment-lbl{font-size:8px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px}
-.replay-moment-lbl.missed{color:var(--red)}
-.replay-moment-lbl.strong{color:var(--green)}
-.replay-moment-lbl.neutral{color:var(--amber)}
-.replay-body{font-size:11px;color:var(--text-secondary);line-height:1.65}
-.replay-alt{font-size:11px;color:var(--cyan);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-style:italic}
-
-/* ── CLOSE BTN ── */
-.close-btn{background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:var(--radius-sm);padding:3px 10px;cursor:pointer;font-family:var(--font-mono);font-size:10px;transition:all 0.15s}
-.close-btn:hover{color:var(--text-primary);border-color:var(--border-bright)}
-
-/* ── FOCUS FROZEN ── */
-.focus-frozen{border:1px solid rgba(255,184,0,0.4)!important;border-radius:var(--radius)!important}
-
-@media print{body *{visibility:hidden!important}#pdf-report,#pdf-report *{visibility:visible!important}#pdf-report{display:block!important;position:fixed;top:0;left:0;width:100%;background:#fff;color:#111;font-family:Arial,sans-serif;padding:28px 36px}}
+/* ─── OBJECTION CARDS ─────────────────────────────────────────── */
+.obj-card {
+  background: var(--white);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  box-shadow: var(--s1);
+  border-left: 3px solid var(--danger);
+  animation: coachin .2s ease;
+}
+.obj-card.won { border-left-color: var(--success); }
+.obj-card:last-child { margin-bottom: 0; }
+.obj-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 7px; }
+.obj-q { font-size: 11.5px; font-weight: 600; color: var(--danger); flex: 1; }
+.obj-q.won { color: var(--success); }
+.obj-badge { font-size: 8.5px; font-weight: 700; padding: 2px 8px; border-radius: 100px; white-space: nowrap; flex-shrink: 0; }
+.badge-open { background: var(--warn-soft); color: var(--warn); border: 1px solid rgba(160,112,32,.2); }
+.badge-won  { background: var(--success-soft); color: var(--success); border: 1px solid rgba(30,124,80,.2); }
+.obj-rebuttal-lbl { font-size: 9px; font-weight: 700; color: var(--clay); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.obj-rebuttal { font-size: 11px; color: var(--ink-70); line-height: 1.6; padding: 7px 10px; background: var(--ink-06); border-radius: var(--r-xs); }
+.obj-ts { font-size: 9px; color: var(--ink-40); margin-top: 5px; }
 </style>
 </head>
 <body>
-<div class="app">
+<div class="shell">
 
-  <!-- ── TOPBAR ── -->
-  <div class="topbar">
-    <div class="brand">
-      <div class="brand-icon">🎯</div>
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="nav-mark">
+        <svg viewBox="0 0 16 16"><path d="M8 2 L14 6 L14 12 L8 14 L2 12 L2 6 Z" stroke-linejoin="round"/></svg>
+      </div>
       <div>
-        <div class="brand-name">APEX Call Coach</div>
-        <div class="brand-sub">Pinnacle Peak Recovery · Scottsdale AZ</div>
+        <div class="nav-name">Pinnacle Peak Recovery</div>
+        <div class="nav-sub">APEX · Admissions Intelligence</div>
       </div>
     </div>
-    <div class="metrics-strip">
-      <div class="metric"><div class="metric-val" id="md">00:00</div><div class="metric-lbl">Duration</div></div>
-      <div class="metric"><div class="metric-val" id="mw">0</div><div class="metric-lbl">Words</div></div>
-      <div class="metric"><div class="metric-val" id="mo" style="color:var(--red)">0</div><div class="metric-lbl">Objections</div></div>
-      <div class="metric"><div class="metric-val" id="mh" style="color:var(--green)">0</div><div class="metric-lbl">Handled</div></div>
-      <div class="metric"><div class="metric-val" id="mi" style="color:var(--cyan)">0</div><div class="metric-lbl">Insights</div></div>
-      <div class="metric"><div class="metric-val" id="mwr" style="color:var(--amber)">—</div><div class="metric-lbl">Win Rate</div></div>
+    <div class="nav-divider"></div>
+    <div class="nav-stats">
+      <div class="stat"><div class="stat-v" id="md">00:00</div><div class="stat-l">Duration</div></div>
+      <div class="stat"><div class="stat-v" id="mw">0</div><div class="stat-l">Words</div></div>
+      <div class="stat"><div class="stat-v" id="mo" style="color:var(--danger)">0</div><div class="stat-l">Objections</div></div>
+      <div class="stat"><div class="stat-v" id="mh" style="color:var(--success)">0</div><div class="stat-l">Handled</div></div>
+      <div class="stat"><div class="stat-v" id="mi" style="color:var(--clay)">0</div><div class="stat-l">Insights</div></div>
+      <div class="stat"><div class="stat-v" id="mwr" style="color:var(--gold)">—</div><div class="stat-l">Win Rate</div></div>
     </div>
-    <div class="live-indicator" id="live-ind">
-      <div class="signal-ring" id="signal-ring"></div>
-      <span class="live-text" id="live-text">IDLE</span>
-    </div>
+    <div class="live-word" id="live-word">Idle</div>
+    <button id="theme-toggle" onclick="toggleDark()" style="margin-left:16px;background:none;border:1px solid var(--ink-15);color:var(--ink-40);border-radius:7px;padding:5px 11px;cursor:pointer;font-family:var(--f);font-size:11px;font-weight:600;transition:all .15s;white-space:nowrap" title="Toggle dark mode">☀️ Light</button>
+  </nav>
+
+  <!-- STAGE STRIP -->
+  <div class="stage-strip">
+    <div class="stage active" id="stage-0"><div class="stage-n">1</div>Opener</div>
+    <div class="stage" id="stage-1"><div class="stage-n">2</div>Discovery</div>
+    <div class="stage" id="stage-2"><div class="stage-n">3</div>Pitch</div>
+    <div class="stage" id="stage-3"><div class="stage-n">4</div>Objection</div>
+    <div class="stage" id="stage-4"><div class="stage-n">5</div>Close</div>
   </div>
 
-  <!-- ── STAGE BAR ── -->
-  <div class="stagebar">
-    <div class="stage active" id="stage-0">🎙 Opener</div><div class="stage-sep"></div>
-    <div class="stage" id="stage-1">🔍 Discovery</div><div class="stage-sep"></div>
-    <div class="stage" id="stage-2">💡 Pitch</div><div class="stage-sep"></div>
-    <div class="stage" id="stage-3">🚨 Objection</div><div class="stage-sep"></div>
-    <div class="stage" id="stage-4">✅ Close</div>
-  </div>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
 
-  <!-- ── CONTROL AREA ── -->
-  <div>
-    <!-- Caller type -->
-    <div style="margin-bottom:8px">
-      <div class="ctx-lbl" style="margin-bottom:6px">Who's Calling?</div>
-      <div class="chips-row" id="caller-chips">
+    <div class="s-section">
+      <div class="s-label">Who's Calling</div>
+      <div class="chips" id="caller-chips">
         <div class="chip active" onclick="setCallerType('family_substance')" data-key="family_substance">👨‍👩‍👧 Family · Substance</div>
         <div class="chip" onclick="setCallerType('family_mental')" data-key="family_mental">🧠 Family · Mental Health</div>
         <div class="chip" onclick="setCallerType('self_substance')" data-key="self_substance">🙋 Self · Substance</div>
@@ -282,181 +679,129 @@ html,body{background:var(--void);color:var(--text-primary);font-family:var(--fon
         <div class="chip" onclick="setCallerType('insurance')" data-key="insurance">📋 Insurance / VOB</div>
         <div class="chip" onclick="setCallerType('custom')" data-key="custom">✏️ Custom</div>
       </div>
-    </div>
-
-    <!-- Context inputs (shown for custom) -->
-    <div class="controls" id="ctx-fields" style="display:none;margin-bottom:8px">
-      <div><div class="ctx-lbl">Caller Situation</div><input id="prod" class="ctx-input" type="text" placeholder="Describe the situation..."></div>
-      <div><div class="ctx-lbl">Prospect Persona</div><input id="pers" class="ctx-input" type="text" placeholder="Describe the prospect..."></div>
-    </div>
-
-    <!-- Intel brief -->
-    <div class="intel-panel" id="intel-panel">
-      <div class="intel-header">
-        <span class="intel-title">⚡ Pre-Call Battle Card</span>
-        <span class="intel-status" id="intel-loading">Select a caller type to generate intel...</span>
+      <div class="ctx-field" id="ctx-fields">
+        <div style="margin-top:10px"><div class="ctx-lbl">Situation</div><textarea id="prod" class="ctx-ta" rows="2" placeholder="Describe the caller situation..."></textarea></div>
+        <div><div class="ctx-lbl">Persona</div><textarea id="pers" class="ctx-ta" rows="2" placeholder="Describe the prospect..."></textarea></div>
       </div>
-      <div class="intel-grid" id="intel-cards" style="display:none">
-        <div class="intel-card" style="border-top-color:var(--red)">
-          <div class="intel-lbl" style="color:var(--red)">🚨 Likely Objections</div>
-          <div class="intel-body" id="intel-obj">—</div>
-        </div>
-        <div class="intel-card" style="border-top-color:var(--amber)">
-          <div class="intel-lbl" style="color:var(--amber)">💛 Emotional Driver</div>
-          <div class="intel-body" id="intel-emo">—</div>
-        </div>
-        <div class="intel-card" style="border-top-color:var(--green)">
-          <div class="intel-lbl" style="color:var(--green)">🎯 Recommended Close</div>
-          <div class="intel-body" id="intel-close">—</div>
-        </div>
-      </div>
+      <input type="hidden" id="prod-hidden"><input type="hidden" id="pers-hidden">
     </div>
 
-    <!-- Ratio bar -->
-    <div class="ratio-wrap">
-      <span class="ratio-lbl">🎙 You're Talking</span>
-      <div class="ratio-track"><div class="ratio-fill" id="ratio-fill" style="width:0%"></div></div>
-      <span class="ratio-val" id="ratio-pct">— · Waiting for call</span>
-    </div>
-
-    <!-- Hot moment -->
-    <div class="hot-flash" id="hot-flash">
-      <div class="hot-tag">🔥 Buying Signal — Close Now</div>
-      <div class="hot-script" id="hot-content">—</div>
-    </div>
-
-    <!-- Actions -->
-    <div class="actions" style="margin-bottom:8px">
-      <button class="btn btn-start" id="bst" onclick="go()">▶ Start Listening</button>
-      <button class="btn btn-stop" id="bsp" onclick="stop()" disabled>◼ Stop</button>
-      <button class="btn btn-ghost" onclick="clr()">🗑 Clear</button>
-      <button class="btn btn-green" onclick="exportPDF()">⬇ Report</button>
-      <button class="btn btn-cyan" onclick="scoreCall()">📊 Score</button>
-      <button class="btn btn-amber" onclick="replayCall()">🔁 Replay</button>
-      <button class="btn btn-focus" id="bfocus" onclick="toggleFocus()">🔒 Focus</button>
-    </div>
-
-    <!-- Status + error -->
-    <div class="status-row">
-      <div class="status-dot" id="sdot" style="background:var(--text-muted)"></div>
-      <span class="sb" id="sb" style="font-size:11px;color:var(--text-muted)">Select who's calling then hit Start Listening.</span>
-      <span class="interim" id="ib" style="margin-left:8px"></span>
-    </div>
-    <div class="error-bar" id="eb"></div>
-
-    <!-- Score panel -->
-    <div id="score-modal">
-      <div class="score-header">
-        <div>
-          <div style="font-size:14px;font-weight:800;color:var(--text-primary)">📊 Call Performance</div>
-          <div style="font-size:9px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px">APEX Analysis · Pinnacle Peak Recovery</div>
-        </div>
-        <button class="close-btn" onclick="document.getElementById('score-modal').style.display='none'">✕ Close</button>
-      </div>
-      <div class="score-grade-box">
-        <div class="score-letter" id="sc-letter">—</div>
-        <div class="score-overall" id="sc-pct">Complete a call to see your score</div>
-      </div>
-      <div class="score-cats">
-        <div class="score-cat"><div class="score-cat-lbl">Objection Handling</div><div class="score-cat-val" id="sc-obj" style="color:var(--red)">—</div><div class="score-bar-bg"><div class="score-bar-fill" id="sc-obj-bar" style="width:0%;background:var(--red)"></div></div></div>
-        <div class="score-cat"><div class="score-cat-lbl">Call Control</div><div class="score-cat-val" id="sc-ctrl" style="color:var(--cyan)">—</div><div class="score-bar-bg"><div class="score-bar-fill" id="sc-ctrl-bar" style="width:0%;background:var(--cyan)"></div></div></div>
-        <div class="score-cat"><div class="score-cat-lbl">Urgency Created</div><div class="score-cat-val" id="sc-urg" style="color:var(--amber)">—</div><div class="score-bar-bg"><div class="score-bar-fill" id="sc-urg-bar" style="width:0%;background:var(--amber)"></div></div></div>
-        <div class="score-cat"><div class="score-cat-lbl">Next Step Set</div><div class="score-cat-val" id="sc-next" style="color:var(--green)">—</div><div class="score-bar-bg"><div class="score-bar-fill" id="sc-next-bar" style="width:0%;background:var(--green)"></div></div></div>
-      </div>
-      <div class="score-feedback"><div class="score-feedback-title">💡 Coaching Feedback</div><div id="sc-feedback">Complete a call to get feedback.</div></div>
-    </div>
-
-    <!-- Replay panel -->
-    <div class="replay-panel" id="replay-panel">
+    <div class="s-section">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-size:10px;font-weight:700;color:var(--amber);letter-spacing:2px;text-transform:uppercase">🔁 Call Replay Analysis</div>
-        <button class="close-btn" onclick="document.getElementById('replay-panel').classList.remove('show')">✕ Close</button>
+        <div class="s-label" style="margin-bottom:0">Pre-Call Intel</div>
+        <span class="intel-loading" id="intel-loading" style="font-size:10px;color:var(--ink-40);font-style:italic">—</span>
       </div>
-      <div id="replay-content"><div style="color:var(--text-muted);font-size:11px;font-style:italic">Analyzing your call...</div></div>
-    </div>
-
-    <!-- Main grid -->
-    <div class="main-grid" style="margin-top:12px">
-
-      <!-- LEFT: Transcript + Objection Tracker -->
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div class="panel" id="tx-panel">
-          <div class="panel-header">
-            <div class="panel-title" style="color:var(--cyan)">🎙 Live Transcript</div>
-            <div id="tx-badge" class="panel-badge" style="background:var(--surface-3);color:var(--text-muted)">IDLE</div>
-          </div>
-          <div class="panel-body" id="tb"><div class="tx-empty">Transcript will appear here when you start listening...</div></div>
-        </div>
-        <div class="panel" id="obj-panel">
-          <div class="panel-header">
-            <div class="panel-title" style="color:var(--red)">🚨 Objection Tracker</div>
-            <div class="panel-badge" style="background:var(--red-dim);color:var(--red)" id="obj-badge">WIN RATE: —</div>
-          </div>
-          <div style="padding:12px" id="obj-log"><div class="obj-empty">No objections detected yet.</div></div>
-        </div>
-      </div>
-
-      <!-- RIGHT: Coaching only - full height -->
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div class="panel" id="coach-panel">
-          <div class="panel-header">
-            <div class="panel-title" style="color:var(--amber)">💡 Live Coaching</div>
-            <div class="panel-badge" style="background:var(--amber-dim);color:var(--amber)">AI POWERED</div>
-          </div>
-          <div class="panel-body" id="cb" style="max-height:560px"><div class="coach-empty">Start listening to receive live coaching...</div></div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- PPR Quick Reference -->
-    <div class="panel" style="margin-top:12px">
-      <div class="panel-header">
-        <div class="panel-title" style="color:var(--green)">🏥 PPR Quick Reference</div>
-        <div class="panel-badge" style="background:var(--green-dim);color:var(--green)">PINNACLE PEAK RECOVERY</div>
-      </div>
-      <div class="ppr-grid">
-        <div class="ppr-card">
-          <div class="ppr-card-title">📍 Location & Levels of Care</div>
-          <div class="ppr-card-body">McCormick Ranch, Scottsdale AZ<br>Detox → Residential → PHP → IOP → EIOP → VOP<br>Small group sizes — individualized care</div>
-        </div>
-        <div class="ppr-card">
-          <div class="ppr-card-title">🧠 Clinical Differentiators</div>
-          <div class="ppr-card-body">Trauma-focused / root-cause model<br>Master's level therapists<br>Somatic Experiencing · ART · CPT · DBT · Holistic Groups</div>
-        </div>
-        <div class="ppr-card">
-          <div class="ppr-card-title">🏨 Detox FAQs</div>
-          <div class="ppr-card-body">Provider seen within 12hrs of arrival<br>Individualized detox plan — varies by substance<br>Non-narcotic available for opiates only (not alcohol/benzos)</div>
-        </div>
-        <div class="ppr-card">
-          <div class="ppr-card-title">📱 Phone Policy</div>
-          <div class="ppr-card-body"><strong>Detox:</strong> No personal phone<br><strong>Residential:</strong> House phone access<br><strong>7–10 days + approval:</strong> full electronics after clinical hours</div>
-        </div>
-        <div class="ppr-card">
-          <div class="ppr-card-title">💰 Self-Pay Pricing</div>
-          <div class="ppr-card-body">
-            Detox: $7,000 · Residential 30d: $24,500<br>
-            Residential + Detox: $27,000<br>
-            PHP: $15,000 · IOP: $10,000 · EIOP: $12,000<br>
-            VOP: $3,500 · <strong>150-day full: $45,000</strong><br>
-            Housing: $1,500 one-time
-          </div>
-        </div>
-        <div class="ppr-card">
-          <div class="ppr-card-title">🏆 PPR Guarantee</div>
-          <div class="ppr-card-body">Complete our program + slip within <strong>first year</strong> → <strong>30 days residential FREE</strong>. Use this to overcome cost hesitation.</div>
-        </div>
-        <div class="ppr-card">
-          <div class="ppr-card-title">💼 Work / FMLA</div>
-          <div class="ppr-card-body">Case managers handle LOA + employer communication<br>FMLA: up to 12 wks job-protected unpaid leave<br>ADA protections if FMLA doesn't apply</div>
-        </div>
-        <div class="ppr-card">
-          <div class="ppr-card-title">⏱️ Admissions Process</div>
-          <div class="ppr-card-body">1. Gather insurance → VOB (30–45 min callback)<br>2. 15–20 min pre-assessment over phone<br>3. Schedule admission date</div>
-        </div>
+      <div class="intel-cards" id="intel-cards" style="display:none">
+        <div class="intel-c" style="border-left-color:var(--danger)"><div class="intel-c-lbl" style="color:var(--danger)">Likely Objections</div><div class="intel-c-body" id="intel-obj">—</div></div>
+        <div class="intel-c" style="border-left-color:var(--gold)"><div class="intel-c-lbl" style="color:var(--gold)">Emotional Driver</div><div class="intel-c-body" id="intel-emo">—</div></div>
+        <div class="intel-c" style="border-left-color:var(--success)"><div class="intel-c-lbl" style="color:var(--success)">Recommended Close</div><div class="intel-c-body" id="intel-close">—</div></div>
       </div>
     </div>
 
+    <div class="s-section">
+      <div class="s-label">Talk Ratio</div>
+      <div class="ratio-row">
+        <div class="ratio-track"><div class="ratio-fill" id="ratio-fill" style="width:0%"></div></div>
+        <span class="ratio-pct" id="ratio-pct">—</span>
+      </div>
+      <div class="ratio-status" id="ratio-status">Waiting for call</div>
+    </div>
+
+    <div class="s-section" style="flex:1">
+      <div class="s-label">PPR Quick Reference</div>
+      <div class="ref-card"><div class="ref-title">💰 Self-Pay Pricing</div><div class="ref-body">Detox $7k · Residential 30d $24.5k<br>Res + Detox $27k · PHP $15k<br>IOP $10k<br><strong>Full 90-day continuum: $45k (+ $3.5k if detox needed)</strong></div></div>
+      <div class="ref-card"><div class="ref-title">🏆 PPR Guarantee</div><div class="ref-body">Complete program + slip in year 1 → <strong>30 days residential free.</strong> Lead with this on cost objections.</div></div>
+      <div class="ref-card"><div class="ref-title">📱 Phone Policy</div><div class="ref-body">Detox: no personal phone · Residential: house phone · 7–10 days + approval: full access after clinical hours</div></div>
+      <div class="ref-card"><div class="ref-title">🏨 Detox</div><div class="ref-body">Provider within 12hrs · Non-narcotic for opiates only · Not for alcohol or benzos</div></div>
+      <div class="ref-card"><div class="ref-title">💼 Work / FMLA</div><div class="ref-body">Case managers handle LOA · FMLA: 12 wks job-protected · ADA if FMLA doesn't apply</div></div>
+      <div class="ref-card"><div class="ref-title">⏱️ Admissions</div><div class="ref-body">Insurance → VOB (30–45 min) → 15–20 min pre-assessment → schedule admission</div></div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- ACTION BAR -->
+    <div class="action-bar">
+      <button class="btn btn-primary" id="bst" onclick="go()">▶ Start Listening</button>
+      <button class="btn btn-danger" id="bsp" onclick="stop()" disabled>◼ Stop</button>
+      <button class="btn btn-ghost" onclick="clr()">Clear</button>
+      <button class="btn btn-gold" onclick="exportPDF()">↓ Report</button>
+      <button class="btn btn-gold" onclick="scoreCall()">Score Call</button>
+      <button class="btn btn-gold" onclick="replayCall()">Replay</button>
+      <button class="btn btn-focus" id="bfocus" onclick="toggleFocus()">Focus Mode</button>
+      <div class="status-inline">
+        <div class="status-dot" id="sdot"></div>
+        <span id="sb">Select who's calling, then start listening.</span>
+        <span class="interim" id="ib"></span>
+      </div>
+    </div>
+
+    <!-- ERR / HOT -->
+    <div class="err-bar" id="eb"></div>
+    <div class="hot-bar" id="hot-flash">
+      <div class="hot-tag">Buying Signal</div>
+      <div class="hot-text" id="hot-content">—</div>
+    </div>
+
+    <!-- SCORE / REPLAY -->
+    <div id="score-modal" class="inline-panel">
+      <div class="ip-header">
+        <div><div class="ip-title">Call Performance</div><div class="ip-sub">APEX · Pinnacle Peak Recovery</div></div>
+        <button class="close-btn" onclick="document.getElementById('score-modal').classList.remove('show')">Close</button>
+      </div>
+      <div class="score-grade"><div class="score-letter" id="sc-letter">—</div><div class="score-sub" id="sc-pct">Complete a call to see your score</div></div>
+      <div class="score-grid">
+        <div class="score-cat"><div class="score-cat-lbl">Objection Handling</div><div class="score-cat-val" id="sc-obj" style="color:var(--danger)">—</div><div class="score-bar-bg"><div class="score-bar-fill" id="sc-obj-bar" style="width:0%;background:var(--danger)"></div></div></div>
+        <div class="score-cat"><div class="score-cat-lbl">Call Control</div><div class="score-cat-val" id="sc-ctrl" style="color:var(--clay)">—</div><div class="score-bar-bg"><div class="score-bar-fill" id="sc-ctrl-bar" style="width:0%;background:var(--clay)"></div></div></div>
+        <div class="score-cat"><div class="score-cat-lbl">Urgency Created</div><div class="score-cat-val" id="sc-urg" style="color:var(--gold)">—</div><div class="score-bar-bg"><div class="score-bar-fill" id="sc-urg-bar" style="width:0%;background:var(--gold)"></div></div></div>
+        <div class="score-cat"><div class="score-cat-lbl">Next Step Set</div><div class="score-cat-val" id="sc-next" style="color:var(--success)">—</div><div class="score-bar-bg"><div class="score-bar-fill" id="sc-next-bar" style="width:0%;background:var(--success)"></div></div></div>
+      </div>
+      <div class="score-fb"><div class="score-fb-lbl">Coaching Feedback</div><div id="sc-feedback">Complete a call to see feedback.</div></div>
+    </div>
+
+    <div id="replay-panel" class="inline-panel">
+      <div class="ip-header">
+        <div><div class="ip-title">Call Replay</div><div class="ip-sub">Moment-by-moment breakdown</div></div>
+        <button class="close-btn" onclick="document.getElementById('replay-panel').classList.remove('show')">Close</button>
+      </div>
+      <div id="replay-content"><div class="empty-state">Analyzing your call...</div></div>
+    </div>
+
+    <!-- CONTENT GRID -->
+    <div class="content-grid">
+
+      <!-- LEFT: Transcript + Objections -->
+      <div class="col">
+        <div class="col-head">
+          <div class="col-title"><div class="col-title-icon" style="background:var(--clay-soft)">🎙</div>Transcript</div>
+          <span class="col-badge" style="background:var(--ink-06);color:var(--ink-40);border:1px solid var(--ink-15)" id="tx-badge">Idle</span>
+        </div>
+        <div class="col-body" id="tb" style="flex:1;border-bottom:1px solid var(--ink-15)">
+          <div class="empty-state">Transcript will appear here when the call starts.</div>
+        </div>
+        <div class="col-split-head">
+          <div class="col-title"><div class="col-title-icon" style="background:var(--danger-soft)">🚨</div>Objections</div>
+          <span class="col-badge" style="background:var(--gold-soft);color:var(--gold);border:1px solid rgba(188,150,66,.2)" id="obj-badge">Win Rate: —</span>
+        </div>
+        <div class="col-body split" id="obj-log">
+          <div class="empty-state">No objections detected yet.</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Coaching -->
+      <div class="col">
+        <div class="col-head">
+          <div class="col-title"><div class="col-title-icon" style="background:var(--gold-soft)">💡</div>Live Coaching</div>
+          <span class="col-badge" style="background:var(--clay-soft);color:var(--clay);border:1px solid var(--clay-line)">AI Powered</span>
+        </div>
+        <div class="col-body" id="cb">
+          <div class="empty-state">Your AI co-pilot surfaces here during the call.<br>One line. Always the right one.</div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 
@@ -468,52 +813,81 @@ const CI=(()=>{try{return __CI__;}catch(e){return 20;}})();
 const _DG=DG.startsWith("__")||DG===""?"":DG;
 const _CL=CL.startsWith("__")||CL===""?"":CL;
 
+function toggleDark(){
+  const dark=document.body.classList.toggle("dark");
+  const btn=document.getElementById("theme-toggle");
+  if(btn)btn.textContent=dark?"🌙 Dark":"☀️ Light";
+  try{localStorage.setItem("apex-theme",dark?"dark":"light");}catch(e){}
+}
+// Restore saved theme
+try{if(localStorage.getItem("apex-theme")==="dark"){document.body.classList.add("dark");const b=document.getElementById("theme-toggle");if(b)b.textContent="🌙 Dark";}}catch(e){}
+
 const CALLER_PROFILES={
-  family_substance:{situation:"Family member calling about loved one struggling with substance abuse (alcohol/drugs) — seeking residential treatment",persona:"Concerned family member — likely exhausted, fearful, and researching options. May face resistance from loved one. High emotional urgency.",label:"family_substance"},
-  family_mental:{situation:"Family member calling about loved one struggling with mental health — depression, anxiety, bipolar, or co-occurring disorder",persona:"Worried family member dealing with mental health crisis in a loved one. May be unsure if treatment is needed or what level of care is appropriate.",label:"family_mental"},
-  self_substance:{situation:"Individual calling for themselves regarding substance abuse — seeking detox or residential treatment",persona:"Person acknowledging their own addiction and looking for help. May be ambivalent, scared, or have tried treatment before. Needs encouragement and clear next steps.",label:"self_substance"},
-  self_mental:{situation:"Individual calling for themselves regarding mental health struggles — depression, anxiety, trauma, or co-occurring disorder",persona:"Person seeking mental health support for themselves. May feel shame or uncertainty. Needs compassionate guidance toward the right level of care.",label:"self_mental"},
-  dual:{situation:"Caller inquiring about dual diagnosis treatment — substance abuse combined with mental health disorder",persona:"Family or individual dealing with complex co-occurring disorder. Likely frustrated with programs that only treated one issue. Needs to understand PPR integrated approach.",label:"dual"},
-  crisis:{situation:"URGENT — Crisis call. Active substance use emergency, safety concern, or immediate intervention needed",persona:"Highly distressed caller. Possibly in acute crisis. Needs immediate reassurance, fast admissions path, and direct action. Do not delay — move toward admission now.",label:"crisis"},
-  insurance:{situation:"Caller focused on insurance coverage and verification of benefits before making treatment decision",persona:"Practical, financially-driven caller. Needs clear coverage information before committing. Goal: complete VOB and transition into clinical conversation.",label:"insurance"},
+  family_substance:{situation:"Family member calling about loved one struggling with substance abuse (alcohol/drugs) — seeking residential treatment",persona:"Concerned family member — likely exhausted, fearful, researching options. May face resistance from loved one. High emotional urgency.",label:"family_substance"},
+  family_mental:{situation:"Family member calling about loved one struggling with mental health — depression, anxiety, bipolar, or co-occurring disorder",persona:"Worried family member dealing with mental health crisis. May be unsure if treatment is needed or what level of care is right.",label:"family_mental"},
+  self_substance:{situation:"Individual calling for themselves regarding substance abuse — seeking detox or residential treatment",persona:"Person acknowledging their own addiction. May be ambivalent, scared, or have tried treatment before. Needs encouragement and clear next steps.",label:"self_substance"},
+  self_mental:{situation:"Individual calling for themselves regarding mental health — depression, anxiety, trauma, or co-occurring disorder",persona:"Person seeking mental health support. May feel shame or uncertainty. Needs compassionate guidance toward the right level of care.",label:"self_mental"},
+  dual:{situation:"Caller inquiring about dual diagnosis treatment — substance abuse combined with mental health disorder",persona:"Family or individual dealing with complex co-occurring disorder. Likely frustrated with programs that only treated one issue.",label:"dual"},
+  crisis:{situation:"URGENT — Crisis call. Active substance use emergency, safety concern, or immediate intervention needed",persona:"Highly distressed caller. Possibly in acute crisis. Needs immediate reassurance, fast admissions path, direct action.",label:"crisis"},
+  insurance:{situation:"Caller focused on insurance coverage and verification of benefits before making treatment decision",persona:"Practical, financially-driven caller. Needs clear coverage information. Goal: complete VOB and transition into clinical conversation.",label:"insurance"},
   custom:{situation:"",persona:"",label:"custom"}
 };
+
 let activeCallerType="family_substance";
+
 function setCallerType(key){
   activeCallerType=key;
   document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active","crisis-active"));
   const chip=document.querySelector(`[data-key="${key}"]`);
   if(chip)chip.classList.add(key==="crisis"?"crisis-active":"active");
   const profile=CALLER_PROFILES[key];
-  const prodEl=document.getElementById("prod");
-  const persEl=document.getElementById("pers");
+  const ctxFields=document.getElementById("ctx-fields");
   if(key==="custom"){
-    document.getElementById("ctx-fields").style.display="grid";
-    prodEl.value="";persEl.value="";prodEl.focus();
-    document.getElementById("intel-loading").textContent="Enter custom details above";
+    ctxFields.classList.add("show");
+    document.getElementById("prod").value="";
+    document.getElementById("pers").value="";
+    document.getElementById("intel-loading").textContent="Enter details above";
     document.getElementById("intel-cards").style.display="none";
   } else {
-    document.getElementById("ctx-fields").style.display="grid";
-    prodEl.value=profile.situation;persEl.value=profile.persona;
+    ctxFields.classList.remove("show");
+    document.getElementById("prod-hidden").value=profile.situation;
+    document.getElementById("pers-hidden").value=profile.persona;
     generateIntel(key);
   }
 }
-function getPROD(){const v=document.getElementById("prod")?.value;if(v&&v.trim())return v;return CALLER_PROFILES[activeCallerType]?.situation||"Family member calling about substance abuse treatment";}
-function getPERS(){const v=document.getElementById("pers")?.value;if(v&&v.trim())return v;return CALLER_PROFILES[activeCallerType]?.persona||"Concerned family member or individual seeking addiction treatment help";}
+
+function getPROD(){
+  const cv=document.getElementById("prod");
+  const hv=document.getElementById("prod-hidden");
+  const v=cv?.value||hv?.value;
+  return(v&&v.trim())?v:CALLER_PROFILES[activeCallerType]?.situation||"Family member calling about substance abuse treatment";
+}
+function getPERS(){
+  const cv=document.getElementById("pers");
+  const hv=document.getElementById("pers-hidden");
+  const v=cv?.value||hv?.value;
+  return(v&&v.trim())?v:CALLER_PROFILES[activeCallerType]?.persona||"Concerned family member seeking addiction treatment help";
+}
 
 const STAGES=["opener","discovery","pitch","objection","close"];
 const STAGE_KW=[
-  /\b(hello|hi there|calling|how are you|my name is|pinnacle|who am i speaking|thanks for calling)\b/i,
-  /\b(tell me|how long|what's going on|what happened|when did|how often|how serious|walk me through|situation|using|drinking|history)\b/i,
-  /\b(what we do|our program|let me tell you|we offer|we specialize|our clinical|our facility|trauma|detox|levels of care)\b/i,
-  /\b(too expensive|can't afford|need to think|not ready|doesn't want|won't go|insurance|tried before|call back|talk to my|not sure)\b/i,
-  /\b(move forward|get started|next step|pre.?assessment|schedule|when can|bed available|admission|reserve|let's do this|ready to)\b/i
+  /\b(hello|hi there|calling|how are you|my name is|pinnacle|thanks for calling)\b/i,
+  /\b(tell me|how long|what's going on|when did|how often|situation|using|drinking|history)\b/i,
+  /\b(our program|let me tell you|we specialize|our clinical|trauma|detox|levels of care)\b/i,
+  /\b(too expensive|can't afford|need to think|not ready|insurance|tried before|call back|talk to my)\b/i,
+  /\b(move forward|get started|next step|pre.?assessment|schedule|bed available|admission|ready to)\b/i
 ];
 let callStage=0;
 function detectStage(tx){for(let i=Math.max(callStage,0);i<STAGE_KW.length;i++){if(STAGE_KW[i].test(tx)){if(i>callStage)setStage(i);break;}}}
 function setStage(n){
   callStage=n;
-  for(let i=0;i<5;i++){const el=document.getElementById("stage-"+i);if(!el)continue;el.classList.remove("active","done");if(i<n)el.classList.add("done");else if(i===n)el.classList.add("active");}
+  for(let i=0;i<5;i++){
+    const el=document.getElementById("stage-"+i);
+    if(!el)continue;
+    el.classList.remove("active","done");
+    if(i<n)el.classList.add("done");
+    else if(i===n)el.classList.add("active");
+  }
 }
 
 let sock,actx,proc,src,ms2,rec=false,t0=null,tmr=null;
@@ -522,37 +896,38 @@ let talkWords=0,totalWords=0,hotCooldown=false;
 const $=x=>document.getElementById(x);
 const ts=()=>new Date().toLocaleTimeString("en-US",{hour12:false});
 
-function ss(m,c="var(--cyan)"){const el=$("sb");if(el){el.style.color=c;el.textContent=m;}const dot=$("sdot");if(dot)dot.style.background=c;}
+function ss(m,c="var(--clay)"){
+  const el=$("sb");if(el){el.style.color=c;el.textContent=m;}
+  const dot=$("sdot");if(dot)dot.style.background=c;
+}
 function showerr(m){const e=$("eb");if(e){e.textContent="❌ "+m;e.style.display="block";}}
 function cerr(){const e=$("eb");if(e)e.style.display="none";}
 
 function setLive(on){
-  const ring=$("signal-ring");const text=$("live-text");
+  const word=$("live-word");
   const badge=$("tx-badge");
-  if(ring)ring.className="signal-ring"+(on?" live":"");
-  if(text)text.textContent=on?"LIVE":"IDLE";
-  if(badge){badge.textContent=on?"● LIVE":"IDLE";badge.style.background=on?"rgba(0,245,160,0.1)":"var(--surface-3)";badge.style.color=on?"var(--green)":"var(--text-muted)";}
+  if(word){word.textContent=on?"Listening":"Idle";word.className="live-word"+(on?" on":"");}
+  if(badge){badge.textContent=on?"● Live":"Idle";badge.style.background=on?"var(--success-soft)":"var(--ink-06)";badge.style.color=on?"var(--success)":"var(--ink-40)";}
   $("bst").disabled=on;$("bsp").disabled=!on;
 }
 
 function upd(){
   $("mw").textContent=W;$("mo").textContent=O;$("mh").textContent=H;$("mi").textContent=I;
   $("mwr").textContent=O>0?Math.round((H/O)*100)+"%":"—";
-  const ob=$("obj-badge");if(ob)ob.textContent="WIN RATE: "+(O>0?Math.round((H/O)*100)+"%":"—");
+  const ob=$("obj-badge");if(ob)ob.textContent="Win Rate: "+(O>0?Math.round((H/O)*100)+"%":"—");
 }
 
 function toggleFocus(){
   focusMode=!focusMode;
-  const btn=$("bfocus");
-  const cb=$("cb");const ol=$("obj-log");
+  const btn=$("bfocus");const cb=$("cb");const ol=$("obj-log");
   if(focusMode){
-    btn.textContent="🔓 Resume";btn.classList.add("active");
-    [cb,ol].forEach(el=>{if(el)el.classList.add("focus-frozen");});
-    ss("🔒 Focus Mode — reading scripts. Hit Resume when done.","var(--amber)");
+    btn.textContent="Resume";btn.classList.add("active");
+    [cb,ol].forEach(el=>{if(el)el.style.outline="2px solid var(--warn)";});
+    ss("Focus Mode — reading. Hit Resume when done.","var(--warn)");
   } else {
-    btn.textContent="🔒 Focus";btn.classList.remove("active");
-    [cb,ol].forEach(el=>{if(el)el.classList.remove("focus-frozen");});
-    ss("✅ LIVE — Listening...");
+    btn.textContent="Focus Mode";btn.classList.remove("active");
+    [cb,ol].forEach(el=>{if(el)el.style.outline="none";});
+    ss("Listening...");
   }
 }
 
@@ -568,88 +943,84 @@ function xtmr(){clearInterval(tmr);}
 function updateRatio(w){
   talkWords+=w;totalWords+=w;
   const pct=Math.round((talkWords/(totalWords/0.6))*100);
-  const fill=$("ratio-fill");const val=$("ratio-pct");
+  const fill=$("ratio-fill");const val=$("ratio-pct");const status=$("ratio-status");
   if(!fill||!val)return;
   fill.style.width=Math.min(pct,100)+"%";
   fill.className="ratio-fill"+(pct>65?" danger":pct>50?" warn":"");
-  val.textContent=`You: ${pct}% · `+(pct>65?"⚠️ Too much talking":pct>50?"⚡ Watch your ratio":"✅ Good balance");
+  val.textContent=pct+"%";
+  if(status)status.textContent=pct>65?"⚠️ Talking too much — listen more":pct>50?"⚡ Watch the balance":"✅ Good balance";
 }
 
-const HOT_SIGNALS=/\b(how soon|when can (he|she|they) start|what does (insurance|my insurance) cover|is there (availability|a bed)|how (do I|do we) get started|what('?s| is) the (next step|process|cost|price)|I('?m| am) ready|we('?re| are) ready|let('?s| us) do (it|this)|what do (I|we) need|sign (me|him|her|them) up|get (him|her|them) in|I want to (move forward|proceed)|can we (schedule|set|book)|when (is|are) you available)\b/i;
-const HOT_CLOSES={default:"Let's lock in a pre-assessment right now — I have availability today. What's the best number to reach you in the next 30 minutes?",insurance:"Perfect — let me get your insurance info right now and I'll call you back in 30 minutes with exactly what's covered.",family_substance:"Let's get the intake process started right now — I can have someone reach out within the hour. What's the best contact number?",self_substance:"I'm glad you're ready — let's take the next step together right now. Can I get you scheduled for a quick 15-minute pre-assessment call today?",crisis:"We need to move on this right now. Let me get your information and we can have a bed ready as early as tonight."};
+const HOT_SIGNALS=/\b(how soon|when can (he|she|they) start|what does (insurance|my insurance) cover|is there (availability|a bed)|how (do I|do we) get started|what('?s| is) the (next step|process|cost|price)|I('?m| am) ready|we('?re| are) ready|let('?s| us) do (it|this)|what do (I|we) need|get (him|her|them) in|I want to (move forward|proceed)|can we (schedule|set|book))\b/i;
+const HOT_CLOSES={default:"Let's lock in a pre-assessment right now — I have availability today. What's the best number?",insurance:"Perfect — give me your insurance info and I'll call back in 30 minutes with exactly what's covered.",family_substance:"Let's start the intake right now — someone can reach out within the hour. What's the best contact?",self_substance:"I'm glad you're ready — can I get you scheduled for a quick 15-minute pre-assessment today?",crisis:"We need to move right now. Give me your information and we can have a bed ready as early as tonight."};
+let hotCooldown2=false;
 function checkHotMoment(tx){
-  if(hotCooldown||!HOT_SIGNALS.test(tx))return;
+  if(hotCooldown2||!HOT_SIGNALS.test(tx))return;
   const close=HOT_CLOSES[activeCallerType]||HOT_CLOSES.default;
   const flash=$("hot-flash");const content=$("hot-content");
   if(!flash||!content)return;
-  content.textContent=close;flash.classList.add("show");hotCooldown=true;
-  setTimeout(()=>{flash.classList.remove("show");hotCooldown=false;},12000);
+  content.textContent=close;flash.classList.add("show");hotCooldown2=true;
+  setTimeout(()=>{flash.classList.remove("show");hotCooldown2=false;},12000);
 }
 
 let intelCache={};
 async function generateIntel(key){
   if(!_CL)return;
   if(intelCache[key]){applyIntel(intelCache[key]);return;}
-  $("intel-loading").textContent="Generating battle card...";
+  $("intel-loading").textContent="Generating...";
   $("intel-cards").style.display="none";
   const profile=CALLER_PROFILES[key];
   if(!profile||key==="custom")return;
-  const sys=`You are an elite admissions coach for Pinnacle Peak Recovery (PPR) in McCormick Ranch, Scottsdale AZ. Generate a pre-call battle card for: ${profile.situation}. Persona: ${profile.persona}. Reply ONLY in JSON, no extra text, straight quotes: {"objections":"2-3 most likely objections, comma separated, very short","emotional_driver":"core emotional fear or desire in one short sentence","recommended_close":"single best closing move for this caller type in one sentence"}`;
+  const sys=`You are an elite admissions coach for Pinnacle Peak Recovery, Scottsdale AZ. Generate a pre-call battle card for: ${profile.situation}. Reply ONLY in JSON, straight quotes: {"objections":"2-3 most likely objections, very short, comma separated","emotional_driver":"core fear or desire driving this call, one short sentence","recommended_close":"single best closing move for this caller type, one sentence"}`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:300,system:sys,messages:[{role:"user",content:"Generate the battle card now."}]})});
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:250,system:sys,messages:[{role:"user",content:"Generate now."}]})});
     if(!r.ok)return;
     const data=await r.json();
     const raw=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"").replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/\r?\n/g," ");
     const match=raw.match(/\{[\s\S]*\}/);if(!match)return;
     const res=JSON.parse(match[0]);
     intelCache[key]=res;applyIntel(res);
-  }catch(e){$("intel-loading").textContent="Intel unavailable";}
+  }catch(e){$("intel-loading").textContent="Unavailable";}
 }
 function applyIntel(res){
-  $("intel-obj").textContent=res.objections||"—";$("intel-emo").textContent=res.emotional_driver||"—";$("intel-close").textContent=res.recommended_close||"—";
-  $("intel-cards").style.display="grid";$("intel-loading").textContent="Ready";
+  $("intel-obj").textContent=res.objections||"—";
+  $("intel-emo").textContent=res.emotional_driver||"—";
+  $("intel-close").textContent=res.recommended_close||"—";
+  $("intel-cards").style.display="flex";
+  $("intel-loading").textContent="Ready";
 }
 
 function addLine(t,tx){
-  const b=$("tb"),e=b.querySelector(".tx-empty");if(e)e.remove();
-  const d=document.createElement("div");d.className="tx-line";
-  d.innerHTML=`<span class="tx-time">${t}</span><span class="tx-name">You</span><span class="tx-text">${tx}</span>`;
+  const b=$("tb"),e=b.querySelector(".empty-state");if(e)e.remove();
+  const d=document.createElement("div");d.className="tx";
+  d.innerHTML=`<span class="tx-t">${t}</span><span class="tx-n">You</span><span class="tx-x">${tx}</span>`;
   b.appendChild(d);b.scrollTop=b.scrollHeight;
 }
 
 function addCoach(type,content,t){
   if(focusMode)return;
-  const b=$("cb"),e=b.querySelector(".coach-empty");if(e)e.remove();
-  const cols={objection:"var(--red)",coach:"var(--cyan)",positive:"var(--green)",win:"var(--amber)"};
+  const b=$("cb"),e=b.querySelector(".empty-state");if(e)e.remove();
+  const cols={objection:"var(--danger)",coach:"var(--clay)",positive:"var(--success)",win:"var(--gold)"};
   const col=cols[type]||cols.coach;
   const id="cc-"+Date.now();
-  const d=document.createElement("div");
-  d.id=id;
-  d.style.cssText=`border-left:3px solid ${col};padding:12px 14px;margin-bottom:8px;background:${col}08;border-radius:0 var(--radius-sm) var(--radius-sm) 0;animation:cardin 0.2s ease;position:relative`;
-  d.innerHTML=`<div style="font-size:13px;color:var(--text-primary);line-height:1.6;font-weight:500;padding-right:58px">${content}</div><div style="font-size:9px;color:var(--text-muted);margin-top:5px">${t}</div><button onclick="copyCoach('${id}',this)" style="position:absolute;top:10px;right:10px;background:var(--surface-3);border:1px solid var(--border);color:var(--text-muted);border-radius:var(--radius-sm);padding:3px 9px;font-size:9px;cursor:pointer;font-family:var(--font-mono)">📋</button>`;
+  const d=document.createElement("div");d.className="coach-card";d.id=id;
+  d.innerHTML=`<div class="coach-rule" style="background:${col}"></div><div class="coach-inner"><div class="coach-text">${content}</div><div class="coach-meta"><span class="coach-time">${t}</span></div></div><button class="coach-copy-btn" onclick="copyCoach('${id}',this)">Copy</button>`;
   b.insertBefore(d,b.firstChild);
-  const cards=b.children;while(cards.length>8)b.removeChild(b.lastChild);
+  const cards=b.querySelectorAll(".coach-card");if(cards.length>8)cards[cards.length-1].remove();
 }
+function addInjector(){} // merged into coaching feed
 
 function copyCoach(id,btn){
   const card=document.getElementById(id);if(!card)return;
-  const text=card.querySelector("div")?.textContent||"";
-  navigator.clipboard.writeText(text.trim()).then(()=>{btn.textContent="✅";setTimeout(()=>{btn.textContent="📋";},2000);});
-}
-
-function addInjector(){} // merged into coaching feed
-
-function copyScript(id,btn){
-  const card=document.getElementById(id);if(!card)return;
-  const text=card.querySelector(".inj-script")?.textContent||"";
-  navigator.clipboard.writeText(text.replace(/^"|"$/g,"")).then(()=>{btn.textContent="✅ Copied!";btn.classList.add("copied");setTimeout(()=>{btn.textContent="📋 Copy";btn.classList.remove("copied");},2000);});
+  const text=card.querySelector(".coach-text")?.textContent||"";
+  navigator.clipboard.writeText(text.trim()).then(()=>{btn.textContent="Copied";setTimeout(()=>{btn.textContent="Copy";},2000);});
 }
 
 function addObjLog(id,objText,rebuttal,t){
   if(focusMode)return;
-  const log=$("obj-log");const empty=log.querySelector(".obj-empty");if(empty)empty.remove();
+  const log=$("obj-log");const empty=log.querySelector(".empty-state");if(empty)empty.remove();
   const d=document.createElement("div");d.className="obj-card";d.id="obj-"+id;
-  d.innerHTML=`<div class="obj-header"><div class="obj-q">🚨 ${objText}</div><span class="obj-badge badge-open" id="badge-${id}">⏳ OPEN</span></div><div class="obj-rebuttal-lbl">Suggested Response:</div><div class="obj-rebuttal">${rebuttal}</div><div class="obj-ts">Heard at ${t}</div>`;
+  d.innerHTML=`<div class="obj-row"><div class="obj-q">${objText}</div><span class="obj-badge badge-open" id="badge-${id}">Open</span></div><div class="obj-rebuttal-lbl">Response</div><div class="obj-rebuttal">${rebuttal}</div><div class="obj-ts">${t}</div>`;
   log.insertBefore(d,log.firstChild);
 }
 
@@ -657,156 +1028,86 @@ function markObjWon(id){
   const card=document.getElementById("obj-"+id);const badge=document.getElementById("badge-"+id);
   if(card&&badge&&!card.classList.contains("won")){
     card.classList.add("won");
-    card.querySelector(".obj-q").classList.add("won");
-    badge.className="obj-badge badge-won";badge.textContent="✅ HANDLED";
+    const qEl=card.querySelector(".obj-q");if(qEl)qEl.style.color="var(--success)";
+    badge.className="obj-badge badge-won";badge.textContent="Handled";
     H++;upd();
   }
 }
 
-const OBJECTION_KEYWORDS=/\b(can'?t afford|too expensive|too much|not ready|need to think|think about it|call me back|talk to (my |the )?spouse|talk to (my |the )?husband|talk to (my |the )?wife|need to talk|do more research|tried (treatment|before|it before)|doesn'?t want|won'?t go|leave AMA|not sure|doing nothing|just leave|what if it|doesn'?t work|no insurance|don'?t have insurance|only have medicaid|insurance (denied|won'?t cover|doesn'?t cover)|too far|too long|how long|how much|what does it cost|what'?s the cost|what'?s the price|price|cost|expensive|money|afford|payment|covered|coverage|not covered|not going|force him|force her|force them|want to do it|ready to go|not ready to go|tried before|done this before|didn'?t work|never works|pointless|waste of time|what makes you different|why (you|your program|pinnacle)|other programs|somewhere else|closer to home|local|near|distance|drive|far away|phone|cell phone|keep (his|her|their) phone|medication|meds|adderall|suboxone|methadone|job|work|fired|fmla|leave of absence|roommate|private room|food|diet|vegan|gluten|family|visit|see them|when can|how soon|tonight|today|tomorrow|this week)\b/i;
+const OBJECTION_KEYWORDS=/\b(can'?t afford|too expensive|not ready|need to think|think about it|call me back|talk to (my |the )?spouse|need to talk|do more research|tried (treatment|before)|doesn'?t want|won'?t go|not sure|no insurance|don'?t have insurance|only have medicaid|insurance (denied|won'?t cover)|how much|what does it cost|expensive|money|afford|payment|not covered|force him|force her|tried before|didn'?t work|what makes you different|other programs|phone|cell phone|medication|meds|job|work|fired|fmla|roommate|private room|food|family|visit|how soon|tonight|today|tomorrow)\b/i;
 
 async function coach(chunk,full){
   if(!_CL){showerr("Anthropic API key missing.");return;}
   if(focusMode)return;
-  ss("🧠 Analyzing...");
+  ss("Analyzing...");
   try{
     const prod=getPROD();const pers=getPERS();
     const openObjs=objections.filter(o=>!o.won).map(o=>o.text).join("; ");
-    const sys=`You are APEX, an elite real-time admissions coach for PINNACLE PEAK RECOVERY (PPR) — a premier substance abuse and mental health treatment center in McCormick Ranch, Scottsdale, Arizona.
+    const sys=`You are APEX — the elite real-time co-pilot for Pinnacle Peak Recovery (PPR) admissions coordinators. McCormick Ranch, Scottsdale AZ.
 
-=== PINNACLE PEAK RECOVERY — PROGRAM KNOWLEDGE BASE ===
-
-CLINICAL IDENTITY:
-- One of the strongest clinical programs in Arizona
-- Trauma-focused / root-cause model: treat underlying conditions → addiction becomes easier to treat
-- Master's level therapists (not just counselors)
-- Small group sizes — highly individualized care
-- Modalities: Somatic Experiencing, ART (Accelerated Resolution Therapy), CPT (Cognitive Processing Therapy), DBT (Dialectical Behavioral Therapy)
-- Holistic and psychoeducational group programming
-
-LEVELS OF CARE (full continuum):
-- Medical Detox → Residential Inpatient → PHP → IOP → EIOP (Evening Intensive Outpatient) → VOP (Virtual Outpatient)
-
-LOCATION: McCormick Ranch, Scottsdale AZ — world-class facility
-
-DETOX:
-- Provider sees patient within 12 hours of arrival
-- Individualized detox plan — length varies by substance, amount, duration of use, presentation
-- Medically assisted with comfort medications (safe + comfortable)
-- Non-narcotic detox: available for opiates (non-narcotic alternatives + vitamins/supplements)
-- NOT available for alcohol or benzos — too dangerous, medical management required
-
-PHONE POLICY:
-- Detox: No personal phone (case managers handle calls, outside stressors)
-- Residential: House phone access
-- After 7-10 days + clinical approval: full electronics access after clinical hours
-
-ROOMS: Spacious shared rooms (large beds). Private rooms available at added cost. Having a roommate is clinically beneficial.
-
-FOOD: Private chef, high-quality ingredients. Accommodates dietary restrictions — must notify admissions before arrival.
-
-MEDICATIONS:
-- Adderall/benzos/controlled substances: provider will prescribe non-narcotic alternatives
-- Testosterone: full blood panel on arrival, provider evaluates for continuation — don't bring existing Rx
-- All meds: provider does full assessment on arrival
-
-FAMILY INVOLVEMENT:
-- Family therapy sessions, update calls from therapist/case manager
-- Family groups and workshops for residential clients
-- All involvement requires client consent + ROI (release of information) — NOT mandatory
-
-WORK / FMLA:
-- Case managers handle LOA, outside stressors, communication with employer
-- FMLA: up to 12 weeks job-protected unpaid leave (eligible employees)
-- ADA: substance use = disability protection if FMLA doesn't apply
-
-ADMISSIONS PROCESS:
-1. Gather insurance info → VOB (call back in 30-45 min with coverage details)
-2. 15-20 min pre-assessment phone call
-3. Schedule admission date
-
-SELF-PAY PRICING (effective 3/10/2023):
-- Detox only: $7,000 upfront
-- Residential (30 days): $24,500
-- Residential + Detox: $27,000
-- PHP (20 sessions / 30 days): $15,000
-- IOP (20 sessions / 30 days): $10,000 (optional housing available)
-- Evening IOP / EIOP (24 sessions / 60 days): $12,000 (no housing included)
-- Virtual Outpatient / VOP (8 sessions / 60 days): $3,500
-- Full 150-day continuum: $45,000 (+$3,500 if detox needed) — must be paid upfront
-- Housing fee: $1,500 one-time (room, board, transport)
-
-PPR GUARANTEE:
-Clients who successfully complete PPR's proven process and have a slip within their first year of recovery can return for 30 days of residential treatment at NO COST. Use this on cost objections — "We're so confident in our program that if they complete it and relapse in the first year, we bring them back for free."
-
-TREATMENT LENGTH:
-- Individualized — based on medical progress, clinical progress, insurance authorization
+=== PPR KNOWLEDGE ===
+CLINICAL: Trauma-focused / root-cause model. Master's level therapists. Modalities: Somatic Experiencing, ART, CPT, DBT. Small group sizes.
+LEVELS OF CARE: Detox → Residential → PHP → IOP
+DETOX: Provider within 12hrs. Individualized plan. Non-narcotic for opiates only. NOT for alcohol or benzos.
+PHONE: Detox=no personal phone. Residential=house phone. After 7-10 days + approval=full electronics after clinical hours.
+ROOMS: Spacious shared (large beds). Private rooms at added cost.
+FOOD: Private chef. Accommodates dietary restrictions — notify admissions before arrival.
+MEDS: Adderall/benzos → non-narcotic alternatives. Testosterone → full blood panel, provider evaluates.
+FAMILY: Therapy sessions, update calls, workshops. Requires consent + ROI. Not mandatory.
+FMLA: Case managers handle LOA. FMLA=12 wks job-protected. ADA if FMLA doesn't apply.
+ADMISSIONS: VOB (30-45 min callback) → 15-20 min pre-assessment → schedule admission.
+PRICING: Detox $7k · Residential $24.5k · Res+Detox $27k · PHP $15k · IOP $10k · Full 90-day $45k (+$3.5k w/ detox)
+PPR GUARANTEE: Complete program + slip in year 1 = 30 days residential FREE. Use this on cost objections.
 
 === CALL CONTEXT ===
-SITUATION: ${prod}
-PROSPECT: ${pers}
-OPEN UNRESOLVED OBJECTIONS: ${openObjs||"none"}
-CURRENT CALL STAGE: ${STAGES[callStage]||"opener"}
+CALLER: ${prod}
+PERSONA: ${pers}
+STAGE: ${STAGES[callStage]||"opener"}
+OPEN OBJECTIONS: ${openObjs||"none"}
 
-FULL TRANSCRIPT:
-${full.slice(-3000)}
+TRANSCRIPT (recent):
+${full.slice(-2500)}
 
-LATEST WORDS:
+JUST SAID:
 ${chunk}
 
-=== COACHING INSTRUCTIONS ===
+=== YOUR JOB ===
+You are the voice in their ear. Feed them the sharpest possible thing to say or ask RIGHT NOW.
 
-You are the voice in the ear of an elite admissions rep. Your job is to feed them the sharpest possible thing to say or ask — RIGHT NOW — based on exactly what was just said. Think of yourself as the most charismatic, emotionally intelligent closer you've ever met, whispering in their ear.
-
-RULES — SIMPLE:
-- ONE sentence only. Always. No exceptions.
-- If there's resistance or an objection: give them a question or a line with emotional weight that reframes the moment. Make it feel human, not scripted.
-- If no objection: give them the next best move — a question to deepen the conversation, a PPR fact that shifts perception, or a nudge toward the close.
-- Never explain. Never hedge. Never qualify. Just say the thing.
-- Use natural spoken language — how a confident human actually talks, not corporate speak.
+RULES:
+- ONE sentence. Always. No exceptions.
+- Natural spoken language — how a confident, warm human actually talks.
+- If resistance: a question that makes them feel the weight, OR a reframe that shifts their reality.
+- If no objection: the next best move — a discovery question, a PPR fact that changes perception, or a nudge toward close.
+- Never explain. Never hedge. Just say the thing.
+- Use PPR specifics (the guarantee, pricing, policies) when they fit naturally.
 - Straight apostrophes only. No line breaks.
 
-WHAT GREAT LOOKS LIKE:
-- "What's the best case scenario if nothing changes in the next 6 months?"
-- "Most people who come in resistant leave changed — readiness happens after they walk through the door."
-- "We're so confident in our results that if they complete the program and slip in their first year, they come back for 30 days free."
-- "That's exactly why we do the insurance check first — no surprises, just clarity."
-- "If it was a medical emergency, you wouldn't be researching — you'd be moving."
-- "The brain actually changes with prolonged use — every week of delay makes this harder, not easier."
-- "You called today for a reason — what would it mean to have them back, really back, six months from now?"
+Set objection_text (under 5 words) only when there's clear resistance. Otherwise "".
+Set objection_resolved if they just moved past an objection.
 
-WHAT BAD LOOKS LIKE (never do this):
-- Long explanations with multiple points
-- Starting with "I understand..." or "That's a great question..."
-- Numbered lists or bullet points
-- Anything that sounds like it came from a script library
-- More than one sentence
-
-"script" field: always the same as "content" — one clean sentence, word for word, ready to say out loud.
-Set "objection_text" only when there's clear resistance (under 5 words). Otherwise empty.
-Set "objection_resolved" if they just agreed or moved past a previous objection.
-
-Reply ONLY in this exact JSON, no extra text:
-{"type":"coach","content":"the one thing to say","script":"same thing","objection_text":"","objection_resolved":""}`;
+Reply ONLY in JSON:
+{"type":"coach","content":"one sentence","objection_text":"","objection_resolved":""}`;
 
     let r,attempts=0;
     while(attempts<3){
-      r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:400,system:sys,messages:[{role:"user",content:"Analyze and respond now."}]})});
-      if(r.status===529){attempts++;if(attempts<3){ss("⏳ API busy — retrying...");await new Promise(res=>setTimeout(res,3000));}continue;}
+      r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:350,system:sys,messages:[{role:"user",content:"Respond now."}]})});
+      if(r.status===529){attempts++;if(attempts<3){ss("API busy — retrying...");await new Promise(res=>setTimeout(res,3000));}continue;}
       break;
     }
-    if(!r.ok){const t=await r.text();showerr("Claude API error "+r.status+": "+t.slice(0,100));ss("⚠️ Error","var(--red)");return;}
+    if(!r.ok){const t=await r.text();showerr("API error "+r.status+": "+t.slice(0,80));return;}
     const data=await r.json();
-    const clean=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"").replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/\r?\n/g," ");
-    if(!clean){ss("✅ LIVE — Listening...");return;}
+    const clean=(data.content?.[0]?.text||"").trim()
+      .replace(/^```[a-z]*\n?|\n?```$/g,"")
+      .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"')
+      .replace(/\r?\n/g," ");
+    if(!clean){ss("Listening...");return;}
     let res;
     try{res=JSON.parse(clean);}
     catch(pe){
       const match=clean.match(/\{[\s\S]*\}/);
-      if(match){
-        try{res=JSON.parse(match[0]);}
-        catch(e2){try{res=JSON.parse(match[0].replace(/,\s*\}$/,"}"));}catch(e3){ss("✅ LIVE — Listening...");return;}}
-      } else {ss("✅ LIVE — Listening...");return;}
+      if(match){try{res=JSON.parse(match[0]);}catch(e2){try{res=JSON.parse(match[0].replace(/,\s*\}$/,"}"));}catch(e3){ss("Listening...");return;}}}
+      else{ss("Listening...");return;}
     }
     if(res.objection_resolved&&res.objection_resolved.length>2){
       const match=objections.find(o=>!o.won&&o.text.toLowerCase().includes(res.objection_resolved.toLowerCase().slice(0,10)));
@@ -814,7 +1115,6 @@ Reply ONLY in this exact JSON, no extra text:
     }
     if(res.type&&res.content){
       I++;addCoach(res.type,res.content,ts());
-      if(res.script&&res.script.trim())addInjector(res.type,res.script,res.objection_text||"",ts());
       if(res.type==="objection"&&res.objection_text&&res.objection_text.length>1){
         O++;const id=Date.now();
         objections.push({id,text:res.objection_text,won:false});
@@ -822,8 +1122,8 @@ Reply ONLY in this exact JSON, no extra text:
       }
       upd();
     }
-    ss("✅ LIVE — Listening...");
-  }catch(e){showerr("Coach error: "+e.message);ss("⚠️ Error","var(--red)");console.error(e);}
+    ss("Listening...");
+  }catch(e){console.error("Coach:",e);ss("Listening...");}
 }
 
 function final(tx){
@@ -842,14 +1142,14 @@ async function go(){
   if(!_CL){showerr("Anthropic API key missing — check sidebar.");return;}
   try{
     ms2=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
-    ss("🎙 Connecting to Deepgram...");
+    ss("Connecting...");
     const p=new URLSearchParams({language:LANG,model:"nova-2",smart_format:"true",interim_results:"true",punctuate:"true",endpointing:"300",encoding:"linear16",sample_rate:"16000"});
     sock=new WebSocket("wss://api.deepgram.com/v1/listen?"+p,["token",_DG]);
     sock.binaryType="arraybuffer";
     sock.onopen=()=>{
-      ss("✅ LIVE — Listening...");setLive(true);rec=true;stmr();
-      actx=new AudioContext({sampleRate:16000});src=actx.createMediaStreamSource(ms2);proc=actx.createScriptProcessor(4096,1,1);
-      src.connect(proc);proc.connect(actx.destination);
+      ss("Listening...");setLive(true);rec=true;stmr();
+      actx=new AudioContext({sampleRate:16000});src=actx.createMediaStreamSource(ms2);
+      proc=actx.createScriptProcessor(4096,1,1);src.connect(proc);proc.connect(actx.destination);
       proc.onaudioprocess=e=>{
         if(sock.readyState!==WebSocket.OPEN)return;
         const f=e.inputBuffer.getChannelData(0),i=new Int16Array(f.length);
@@ -860,100 +1160,100 @@ async function go(){
     sock.onmessage=e=>{
       const d=JSON.parse(e.data);if(d.type!=="Results")return;
       const a=(d.channel?.alternatives||[{}])[0];const tx=(a.transcript||"").trim();if(!tx)return;
-      if(d.is_final){$("ib").textContent="";final(tx);}else{$("ib").textContent="… "+tx;}
+      if(d.is_final){$("ib").textContent="";final(tx);}else{$("ib").textContent=tx;}
     };
-    sock.onerror=()=>{showerr("Deepgram connection error — check your API key.");stop();};
-    sock.onclose=()=>{if(rec)ss("⏹ Disconnected.");setLive(false);rec=false;xtmr();};
+    sock.onerror=()=>{showerr("Deepgram error — check your API key.");stop();};
+    sock.onclose=()=>{if(rec)ss("Stopped.");setLive(false);rec=false;xtmr();};
   }catch(e){showerr("Mic error: "+e.message);}
 }
 
 function stop(){
-  rec=false;xtmr();setLive(false);ss("⏹ Stopped.","var(--text-muted)");$("ib").textContent="";
+  rec=false;xtmr();setLive(false);
   if(focusMode)toggleFocus();
-  if(sock)sock.close();if(proc){proc.disconnect();proc=null;}if(src){src.disconnect();src=null;}if(actx){actx.close();actx=null;}if(ms2){ms2.getTracks().forEach(t=>t.stop());ms2=null;}
+  ss("Stopped.","var(--ink-40)");$("ib").textContent="";
+  if(sock)sock.close();if(proc){proc.disconnect();proc=null;}
+  if(src){src.disconnect();src=null;}if(actx){actx.close();actx=null;}
+  if(ms2){ms2.getTracks().forEach(t=>t.stop());ms2=null;}
 }
 
 function clr(){
   stop();W=0;O=0;H=0;I=0;WC=0;lines=[];pend="";lc=0;objections=[];callStage=0;setStage(0);
-  talkWords=0;totalWords=0;hotCooldown=false;
+  talkWords=0;totalWords=0;hotCooldown2=false;
   $("md").textContent="00:00";$("ib").textContent="";
-  const rf=$("ratio-fill");const rv=$("ratio-pct");
-  if(rf)rf.style.width="0%";if(rv)rv.textContent="— · Waiting for call";
+  const rf=$("ratio-fill");if(rf)rf.style.width="0%";
+  const rv=$("ratio-pct");if(rv)rv.textContent="—";
+  const rs=$("ratio-status");if(rs)rs.textContent="Waiting for call";
   $("hot-flash")?.classList.remove("show");
-  $("score-modal").style.display="none";
-  $("replay-panel")?.classList.remove("show");
-  $("tb").innerHTML='<div class="tx-empty">Transcript will appear here when you start listening...</div>';
-  $("cb").innerHTML='<div class="coach-empty">Start listening to receive live coaching...</div>';
-  $("obj-log").innerHTML='<div class="obj-empty">No objections detected yet.</div>';
-  cerr();upd();ss("Select who\'s calling then hit Start Listening.","var(--text-muted)");
+  const sm=$("score-modal");if(sm)sm.classList.remove("show");
+  const rp=$("replay-panel");if(rp)rp.classList.remove("show");
+  $("tb").innerHTML='<div class="empty-state">Transcript will appear here when the call starts.</div>';
+  $("cb").innerHTML='<div class="empty-state">Your AI co-pilot surfaces here during the call.<br>One line. Always the right one.</div>';
+  $("obj-log").innerHTML='<div class="empty-state">No objections detected yet.</div>';
+  cerr();upd();ss("Select who's calling, then start listening.","var(--ink-40)");
   setCallerType("family_substance");
 }
 
 async function scoreCall(){
   if(!_CL){showerr("Anthropic API key missing.");return;}
   if(lines.length<3){showerr("Not enough transcript — complete a call first.");return;}
-  $("score-modal").style.display="block";
-  $("score-modal").scrollIntoView({behavior:"smooth",block:"start"});
-  $("sc-letter").textContent="...";$("sc-pct").textContent="Analyzing your call...";$("sc-feedback").textContent="Running APEX analysis...";
+  const modal=$("score-modal");modal.classList.add("show");
+  modal.scrollIntoView({behavior:"smooth",block:"nearest"});
+  $("sc-letter").textContent="...";$("sc-pct").textContent="Analyzing...";$("sc-feedback").textContent="Running analysis...";
   const transcript=lines.slice(-60).join(" ");
   const winRate=O>0?Math.round((H/O)*100):0;
-  const scoreSys=`You are an elite sales coach scoring a Pinnacle Peak Recovery admissions call. Score 0-100 each category honestly.
-CALL STATS: Duration: ${$("md").textContent}, Objections: ${O}, Handled: ${H}, Win rate: ${winRate}%, Stage reached: ${STAGES[callStage]||"opener"}
+  const sys=`Score a Pinnacle Peak Recovery admissions call honestly. 0-100 each.
+STATS: Duration ${$("md").textContent}, Objections ${O}, Handled ${H}, Win rate ${winRate}%, Stage: ${STAGES[callStage]||"opener"}
 TRANSCRIPT: ${transcript}
-Reply ONLY in JSON: {"objection_handling":75,"call_control":80,"urgency_created":70,"next_step_set":85,"feedback":["specific observation 1","specific observation 2","specific observation 3","specific observation 4"]}`;
+Reply ONLY in JSON: {"objection_handling":75,"call_control":80,"urgency_created":70,"next_step_set":85,"feedback":["observation 1","observation 2","observation 3","observation 4"]}`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:600,system:scoreSys,messages:[{role:"user",content:"Score this call."}]})});
-    if(!r.ok){const t=await r.text();throw new Error("API error "+r.status+": "+t.slice(0,80));}
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:600,system:sys,messages:[{role:"user",content:"Score now."}]})});
+    if(!r.ok)throw new Error("API error "+r.status);
     const data=await r.json();
     const raw=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"").replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/\r?\n/g," ");
     let res;
     try{res=JSON.parse(raw);}
     catch(e){
-      try{
-        const oh=raw.match(/"objection_handling"\s*:\s*(\d+)/)?.[1];const cc=raw.match(/"call_control"\s*:\s*(\d+)/)?.[1];
-        const uc=raw.match(/"urgency_created"\s*:\s*(\d+)/)?.[1];const ns=raw.match(/"next_step_set"\s*:\s*(\d+)/)?.[1];
-        if(!oh||!cc||!uc||!ns)throw new Error("Missing fields");
-        const fbMatch=raw.match(/"feedback"\s*:\s*\[([\s\S]*?)\]/);
-        const fb=fbMatch?fbMatch[1].match(/"([^"]+)"/g)?.map(s=>s.replace(/^"|"$/g,""))||[]:[];
-        res={objection_handling:+oh,call_control:+cc,urgency_created:+uc,next_step_set:+ns,feedback:fb};
-      }catch(e2){throw new Error("Parse failed: "+raw.slice(0,100));}
+      const oh=raw.match(/"objection_handling"\s*:\s*(\d+)/)?.[1];const cc=raw.match(/"call_control"\s*:\s*(\d+)/)?.[1];
+      const uc=raw.match(/"urgency_created"\s*:\s*(\d+)/)?.[1];const ns=raw.match(/"next_step_set"\s*:\s*(\d+)/)?.[1];
+      if(!oh||!cc||!uc||!ns)throw new Error("Parse failed");
+      const fbMatch=raw.match(/"feedback"\s*:\s*\[([\s\S]*?)\]/);
+      const fb=fbMatch?fbMatch[1].match(/"([^"]+)"/g)?.map(s=>s.replace(/^"|"$/g,""))||[]:[];
+      res={objection_handling:+oh,call_control:+cc,urgency_created:+uc,next_step_set:+ns,feedback:fb};
     }
-    const overall=Math.round(res.objection_handling*0.3+res.call_control*0.25+res.urgency_created*0.25+res.next_step_set*0.2);
+    const overall=Math.round(res.objection_handling*.3+res.call_control*.25+res.urgency_created*.25+res.next_step_set*.2);
     const grade=overall>=90?"A+":overall>=85?"A":overall>=80?"B+":overall>=75?"B":overall>=70?"C+":overall>=65?"C":overall>=60?"D":"F";
-    const gradeCol=overall>=80?"var(--green)":overall>=65?"var(--amber)":"var(--red)";
-    $("sc-letter").style.color=gradeCol;$("sc-letter").textContent=grade;$("sc-pct").textContent=`Overall Score: ${overall}/100`;
-    const cats=[["sc-obj","sc-obj-bar",res.objection_handling,"var(--red)"],["sc-ctrl","sc-ctrl-bar",res.call_control,"var(--cyan)"],["sc-urg","sc-urg-bar",res.urgency_created,"var(--amber)"],["sc-next","sc-next-bar",res.next_step_set,"var(--green)"]];
-    cats.forEach(([vid,bid,val,col])=>{$( vid).textContent=val+"/100";$(vid).style.color=col;setTimeout(()=>{$(bid).style.width=val+"%";},100);});
-    const fb=res.feedback||[];
-    $("sc-feedback").innerHTML=fb.map(f=>`<div class="score-item">• ${f}</div>`).join("");
-  }catch(e){$("sc-letter").textContent="!";$("sc-pct").textContent="Scoring failed";$("sc-feedback").textContent="Error: "+e.message;}
+    const col=overall>=80?"var(--success)":overall>=65?"var(--gold)":"var(--danger)";
+    $("sc-letter").style.color=col;$("sc-letter").textContent=grade;
+    $("sc-pct").textContent="Overall: "+overall+"/100";
+    [["sc-obj","sc-obj-bar",res.objection_handling,"var(--danger)"],["sc-ctrl","sc-ctrl-bar",res.call_control,"var(--clay)"],["sc-urg","sc-urg-bar",res.urgency_created,"var(--gold)"],["sc-next","sc-next-bar",res.next_step_set,"var(--success)"]].forEach(([vid,bid,val,c])=>{
+      $(vid).textContent=val+"/100";$(vid).style.color=c;
+      setTimeout(()=>{$(bid).style.width=val+"%";},100);
+    });
+    $("sc-feedback").innerHTML=(res.feedback||[]).map(f=>`<div class="score-item">• ${f}</div>`).join("");
+  }catch(e){$("sc-letter").textContent="!";$("sc-pct").textContent="Failed";$("sc-feedback").textContent=e.message;}
 }
 
 async function replayCall(){
   if(!_CL){showerr("Anthropic API key missing.");return;}
-  if(lines.length<5){showerr("Not enough transcript — complete a call first.");return;}
-  const panel=$("replay-panel");const content=$("replay-content");
-  panel.classList.add("show");panel.scrollIntoView({behavior:"smooth",block:"start"});
-  content.innerHTML=`<div style="color:var(--text-muted);font-size:11px;font-style:italic;padding:8px 0">🔁 Re-running your call through APEX...</div>`;
-  const transcript=lines.join(" ");
-  const sys=`You are an elite admissions coach analyzing a Pinnacle Peak Recovery call. Find 4-6 specific moments. Classify each as "strong", "missed", or "neutral". Be specific.
-CALLER TYPE: ${CALLER_PROFILES[activeCallerType]?.situation||"substance abuse call"}
-TRANSCRIPT: ${transcript.slice(-4000)}
-Reply ONLY in JSON: {"moments":[{"type":"missed","quote":"paraphrased thing said","issue":"what went wrong","alternative":"exact word-for-word alternative script"},{"type":"strong","quote":"paraphrased thing said","issue":"why it worked"}]}`;
+  if(lines.length<5){showerr("Not enough transcript.");return;}
+  const panel=$("replay-panel");panel.classList.add("show");
+  panel.scrollIntoView({behavior:"smooth",block:"nearest"});
+  $("replay-content").innerHTML='<div class="empty-state">Analyzing your call...</div>';
+  const sys=`Analyze a Pinnacle Peak Recovery admissions call. Find 4-6 moments. Classify: "strong", "missed", "neutral".
+CALLER: ${CALLER_PROFILES[activeCallerType]?.situation||"admissions call"}
+TRANSCRIPT: ${lines.join(" ").slice(-4000)}
+Reply ONLY in JSON: {"moments":[{"type":"missed","quote":"what was said","issue":"what went wrong","alternative":"exact alternative script"},{"type":"strong","quote":"what was said","issue":"why it worked"}]}`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:1000,system:sys,messages:[{role:"user",content:"Analyze this call."}]})});
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"x-api-key":_CL,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:1000,system:sys,messages:[{role:"user",content:"Analyze now."}]})});
     if(!r.ok)throw new Error("API error "+r.status);
     const data=await r.json();
     const raw=(data.content?.[0]?.text||"").trim().replace(/^```[a-z]*\n?|\n?```$/g,"").replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"');
-    const match=raw.match(/\{[\s\S]*\}/);if(!match)throw new Error("No JSON in response");
+    const match=raw.match(/\{[\s\S]*\}/);if(!match)throw new Error("No JSON");
     const res=JSON.parse(match[0]);
     const moments=res.moments||[];
-    if(!moments.length){content.innerHTML=`<div style="color:var(--text-muted);font-size:11px">No moments identified.</div>`;return;}
-    content.innerHTML=moments.map(m=>{
-      const lbl=m.type==="strong"?"✅ STRONG MOVE":m.type==="missed"?"❌ MISSED OPPORTUNITY":"💡 COULD BE STRONGER";
-      return `<div class="replay-item ${m.type}"><div class="replay-moment-lbl ${m.type}">${lbl}</div><div class="replay-body"><strong style="color:var(--text-primary)">"${m.quote}"</strong><br>${m.issue}</div>${m.alternative?`<div class="replay-alt">Instead say: "${m.alternative}"</div>`:""}</div>`;
-    }).join("");
-  }catch(e){content.innerHTML=`<div style="color:var(--red);font-size:11px">Replay failed: ${e.message}</div>`;}
+    if(!moments.length){$("replay-content").innerHTML='<div class="empty-state">No moments identified.</div>';return;}
+    $("replay-content").innerHTML=moments.map(m=>`<div class="replay-item ${m.type}"><div class="replay-lbl ${m.type}">${m.type==="strong"?"✓ Strong Move":m.type==="missed"?"✗ Missed":"◦ Could Be Stronger"}</div><div class="replay-body"><strong>"${m.quote}"</strong> — ${m.issue}</div>${m.alternative?`<div class="replay-alt">Try: "${m.alternative}"</div>`:""}</div>`).join("");
+  }catch(e){$("replay-content").innerHTML=`<div class="empty-state" style="color:var(--danger)">Failed: ${e.message}</div>`;}
 }
 
 function exportPDF(){
@@ -962,28 +1262,30 @@ function exportPDF(){
   const timeStr=now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
   const winRate=O>0?Math.round((H/O)*100)+"%":"N/A";
   const objCards=$("obj-log").querySelectorAll(".obj-card");
-  let objHTML=objCards.length===0?"<p style='color:#888;font-style:italic;font-size:9pt'>No objections detected.</p>":"";
+  let objHTML=objCards.length===0?"<p style='color:#888;font-style:italic'>No objections detected.</p>":"";
   objCards.forEach(card=>{
     const won=card.classList.contains("won");
     const q=card.querySelector(".obj-q")?.textContent||"";
     const rebuttal=card.querySelector(".obj-rebuttal")?.textContent||"";
     const ts=card.querySelector(".obj-ts")?.textContent||"";
-    objHTML+=`<div style="border:1px solid #dde6f4;border-left:4px solid ${won?"#00995C":"#CC2244"};border-radius:6px;padding:10px 12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div style="font-weight:700;color:${won?"#00995C":"#CC2244"};font-size:10pt">${q}</div><span style="font-size:7pt;font-weight:700;padding:2px 8px;border-radius:100px;${won?"background:#e0fff2;color:#00773D;border:1px solid #00BB5C":"background:#fff9e0;color:#996600;border:1px solid #ccaa00"}">${won?"✅ HANDLED":"⏳ OPEN"}</span></div><div style="font-size:9.5pt;line-height:1.6;background:#f8faff;border-left:2px solid #0055CC;padding:6px 10px">${rebuttal}</div><div style="font-size:7.5pt;color:#888;margin-top:4px">${ts}</div></div>`;
+    objHTML+=`<div style="border-left:4px solid ${won?"#1E7C50":"#B83030"};padding:10px 12px;margin-bottom:8px;background:#f8f8f8;border-radius:0 6px 6px 0"><div style="font-weight:700;color:${won?"#1E7C50":"#B83030"};margin-bottom:6px">${q} <span style="font-size:10px;padding:2px 8px;border-radius:100px;background:${won?"#EAF5EE":"#FBF5E6"};color:${won?"#1E7C50":"#A07020"}">${won?"Handled":"Open"}</span></div><div style="font-size:11pt;color:#444;line-height:1.6">${rebuttal}</div><div style="font-size:9pt;color:#999;margin-top:4px">${ts}</div></div>`;
   });
-  const txLines=$("tb").querySelectorAll(".tx-line");
-  const txText=txLines.length===0?"<p style='color:#888;font-style:italic;font-size:9pt'>No transcript recorded.</p>":`<div style="background:#f8f9fb;border:1px solid #dde6f4;border-radius:6px;padding:10px 14px;font-size:9pt;line-height:1.8;white-space:pre-wrap">${[...txLines].map(l=>l.textContent).join("\n")}</div>`;
-  const reportHTML=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>PPR Call Report</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11pt;color:#111;background:#fff;padding:32px 40px}h1{font-size:18pt;font-weight:800;color:#0a1628;margin:0}.sub{font-size:8pt;color:#0080CC;letter-spacing:2px;text-transform:uppercase;margin-top:2px}hr{border:none;border-top:2px solid #0055CC;margin:10px 0 18px}.meta{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin-bottom:18px;font-size:9pt}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px}.stat{background:#f4f8ff;border:1px solid #d0ddf0;border-radius:6px;padding:8px;text-align:center}.sv{font-size:16pt;font-weight:800;color:#0055CC}.sl{font-size:7pt;color:#666;letter-spacing:1px;text-transform:uppercase;margin-top:2px}.sec{font-size:11pt;font-weight:800;color:#0a1628;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #dde6f4;text-transform:uppercase;letter-spacing:1px}.footer{margin-top:24px;padding-top:10px;border-top:1px solid #dde6f4;font-size:7.5pt;color:#888;display:flex;justify-content:space-between}</style></head><body>
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px"><div style="width:38px;height:38px;background:linear-gradient(135deg,#00B8CC,#0055CC);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🎯</div><div><h1>Pinnacle Peak Recovery</h1><div class="sub">APEX Call Coach — Post-Call Report</div></div></div>
-  <hr>
-  <div class="meta"><div><b>Date:</b> ${dateStr}</div><div><b>Time:</b> ${timeStr}</div><div><b>Caller Type:</b> ${activeCallerType.replace(/_/g," ")}</div><div><b>Stage Reached:</b> ${STAGES[callStage]||"opener"}</div></div>
-  <div class="stats"><div class="stat"><div class="sv">${$("md").textContent}</div><div class="sl">Duration</div></div><div class="stat"><div class="sv">${W}</div><div class="sl">Words</div></div><div class="stat"><div class="sv">${O}</div><div class="sl">Objections</div></div><div class="stat"><div class="sv">${H}</div><div class="sl">Handled</div></div><div class="stat"><div class="sv">${winRate}</div><div class="sl">Win Rate</div></div></div>
-  <div class="sec">🚨 Objections & Rebuttals</div>${objHTML}
-  <div class="sec">🎙️ Full Transcript</div>${txText}
-  <div class="footer"><span>Pinnacle Peak Recovery — McCormick Ranch, Scottsdale AZ</span><span>Generated by APEX Call Coach • ${dateStr} ${timeStr}</span></div>
-  <script>window.onload=function(){window.print();}<\/script></body></html>`;
+  const txLines=$("tb").querySelectorAll(".tx");
+  const txHTML=txLines.length===0?"<p style='color:#888;font-style:italic'>No transcript recorded.</p>":`<div style="background:#f8f8f8;border-radius:6px;padding:12px;font-size:10pt;line-height:1.8;white-space:pre-wrap">${[...txLines].map(l=>{const t=l.querySelector(".tx-t")?.textContent||"";const x=l.querySelector(".tx-x")?.textContent||"";return `[${t}] ${x}`;}).join("\n")}</div>`;
+  const report=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Call Report — Pinnacle Peak Recovery</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Plus Jakarta Sans',sans-serif;font-size:11pt;color:#111;background:#fff;padding:36px 40px}h1{font-size:20pt;font-weight:800;color:#17120E;letter-spacing:-.5px}hr{border:none;border-top:2px solid #883E27;margin:10px 0 20px}.meta{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin-bottom:18px;font-size:10pt}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px}.stat{background:#FAF9F7;border:1px solid #EAE6E3;border-radius:8px;padding:10px;text-align:center}.sv{font-size:18pt;font-weight:800;color:#883E27}.sl{font-size:8pt;color:#9E9189;text-transform:uppercase;letter-spacing:1px;margin-top:2px}.sec{font-size:11pt;font-weight:800;color:#17120E;margin:18px 0 10px;padding-bottom:5px;border-bottom:1px solid #EAE6E3;text-transform:uppercase;letter-spacing:.5px}.footer{margin-top:28px;padding-top:10px;border-top:1px solid #EAE6E3;font-size:9pt;color:#9E9189;display:flex;justify-content:space-between}</style></head><body>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px"><div style="width:36px;height:36px;background:#883E27;border-radius:8px;display:grid;place-items:center;color:white;font-size:14px;font-weight:800">P</div><div><h1>Pinnacle Peak Recovery</h1><div style="font-size:9pt;color:#BC9642;letter-spacing:1.5px;text-transform:uppercase;font-weight:600">APEX Admissions Intelligence</div></div></div>
+<hr>
+<div class="meta"><div><b>Date:</b> ${dateStr}</div><div><b>Time:</b> ${timeStr}</div><div><b>Caller Type:</b> ${activeCallerType.replace(/_/g," ")}</div><div><b>Stage Reached:</b> ${STAGES[callStage]||"opener"}</div></div>
+<div class="stats"><div class="stat"><div class="sv">${$("md").textContent}</div><div class="sl">Duration</div></div><div class="stat"><div class="sv">${W}</div><div class="sl">Words</div></div><div class="stat"><div class="sv">${O}</div><div class="sl">Objections</div></div><div class="stat"><div class="sv">${H}</div><div class="sl">Handled</div></div><div class="stat"><div class="sv">${winRate}</div><div class="sl">Win Rate</div></div></div>
+<div class="sec">Objections & Responses</div>${objHTML}
+<div class="sec">Full Transcript</div>${txHTML}
+<div class="footer"><span>Pinnacle Peak Recovery · McCormick Ranch, Scottsdale AZ</span><span>APEX Call Coach · ${dateStr}</span></div>
+<script>window.onload=function(){window.print();}<\/script></body></html>`;
   const win=window.open("","_blank","width=900,height=700");
-  if(win){win.document.write(reportHTML);win.document.close();}
-  else{showerr("Pop-up blocked — allow pop-ups for this site to download the report.");}
+  if(win){win.document.write(report);win.document.close();}
+  else showerr("Pop-up blocked — allow pop-ups to download the report.");
 }
 
 // Init
