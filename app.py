@@ -25,56 +25,47 @@ st.markdown("""
   div[data-testid="stVerticalBlock"] { gap: 0 !important; padding: 0 !important; }
   iframe { display: block !important; width: 100vw !important; border: none !important; margin: 0 !important; }
 
-  /* Tab nav */
-  .apex-nav {
-    background: #FFFFFF;
-    border-bottom: 1px solid #E2DDD8;
-    display: flex;
-    align-items: center;
-    padding: 0;
-    height: 52px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    position: sticky;
-    top: 0;
-    z-index: 100;
+  /* Hide Streamlit's own button styles, replace with our nav */
+  div[data-testid="stHorizontalBlock"] { gap: 0 !important; background: #FFFFFF; border-bottom: 1px solid #E2DDD8; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+  /* Nav tab buttons */
+  .nav-wrap { background: white; border-bottom: 1px solid #E2DDD8; box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: flex; align-items: stretch; height: 52px; width: 100%; }
+  .nav-brand { display: flex; align-items: center; gap: 10px; padding: 0 24px; border-right: 1px solid #E2DDD8; flex-shrink: 0; }
+  .nav-logo { width: 30px; height: 30px; background: #883E27; border-radius: 7px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 14px; }
+  .nav-name { font-weight: 700; font-size: 13px; color: #17120E; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .nav-sub { font-size: 10px; color: #BC9642; font-weight: 600; letter-spacing: 0.3px; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .nav-tabs { display: flex; align-items: stretch; flex: 1; }
+
+  /* Style Streamlit buttons inside nav to look like tabs */
+  .nav-tabs .stButton > button {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0 !important;
+    color: #9E9189 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif !important;
+    padding: 0 24px !important;
+    height: 52px !important;
+    cursor: pointer !important;
+    transition: all .15s !important;
+    box-shadow: none !important;
+    width: auto !important;
+    white-space: nowrap !important;
   }
-  .apex-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0 24px;
-    border-right: 1px solid #E2DDD8;
-    height: 100%;
+  .nav-tabs .stButton > button:hover {
+    color: #883E27 !important;
+    background: rgba(136,62,39,0.03) !important;
+    border-bottom-color: rgba(136,62,39,0.3) !important;
   }
-  .apex-logo {
-    width: 30px; height: 30px;
-    background: #883E27;
-    border-radius: 7px;
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-weight: 800; font-size: 14px;
+  .nav-tabs .stButton.active-tab > button {
+    color: #883E27 !important;
+    border-bottom-color: #883E27 !important;
+    background: transparent !important;
   }
-  .apex-name { font-weight: 700; font-size: 13px; color: #17120E; }
-  .apex-tabs { display: flex; height: 100%; }
-  .apex-tab {
-    padding: 0 24px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    font-size: 12px;
-    font-weight: 600;
-    color: #9E9189;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all .15s;
-    text-decoration: none;
-  }
-  .apex-tab:hover { color: #883E27; }
-  .apex-tab.active { color: #883E27; border-bottom-color: #883E27; }
 
   /* Alumni dashboard styles */
-  .alumni-page { background: #F9F8F6; min-height: 100vh; font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; }
-  .alumni-header { background: white; border-bottom: 1px solid #E2DDD8; padding: 20px 28px; }
-  .alumni-body { padding: 24px 28px; }
   .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 16px; border: 1px solid #E2DDD8; }
   .flag-crisis { border-left: 4px solid #B83030 !important; background: #FDF5F5 !important; }
   .flag-relapse { border-left: 4px solid #B83030 !important; }
@@ -96,6 +87,59 @@ st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 """, unsafe_allow_html=True)
 
+# ── NAV BAR ──────────────────────────────────────────────────────
+st.markdown("""
+<div class="nav-wrap">
+  <div class="nav-brand">
+    <div class="nav-logo">P</div>
+    <div>
+      <div class="nav-name">Pinnacle Peak Recovery</div>
+      <div class="nav-sub">APEX Platform</div>
+    </div>
+  </div>
+  <div class="nav-tabs" id="nav-tabs">
+""", unsafe_allow_html=True)
+
+# Render tab buttons inline inside the nav div
+nav_col1, nav_col2, nav_spacer = st.columns([1, 1, 8])
+with nav_col1:
+    if st.button("🎯  Call Coach", key="tab_coach"):
+        st.session_state.active_tab = "coach"
+        st.rerun()
+with nav_col2:
+    if st.button("👥  Alumni Outreach", key="tab_alumni"):
+        st.session_state.active_tab = "alumni"
+        st.rerun()
+
+st.markdown("</div></div>", unsafe_allow_html=True)
+
+# Inject active tab highlight via JS
+active = st.session_state.get("active_tab", "coach")
+st.markdown(f"""
+<script>
+  // Highlight active tab button
+  window.addEventListener('load', function() {{
+    const btns = window.parent.document.querySelectorAll('[data-testid="stButton"] button');
+    btns.forEach(btn => {{
+      if (btn.textContent.includes('{"Call Coach" if active == "coach" else "Alumni Outreach"}')) {{
+        btn.style.color = '#883E27';
+        btn.style.borderBottom = '2px solid #883E27';
+      }}
+    }});
+  }});
+</script>
+""", unsafe_allow_html=True)
+
+# ── SESSION STATE ────────────────────────────────────────────────
+if "active_tab" not in st.session_state:
+    st.session_state.active_tab = "coach"
+if "selected_client" not in st.session_state:
+    st.session_state.selected_client = None
+if "last_poll" not in st.session_state:
+    st.session_state.last_poll = datetime.now()
+if "notifications" not in st.session_state:
+    st.session_state.notifications = []
+
 # ── SIDEBAR CONFIG ───────────────────────────────────────────────
 with st.sidebar:
     st.markdown("### ⚙️ APEX Config")
@@ -113,38 +157,6 @@ if twilio_sid: os.environ["TWILIO_ACCOUNT_SID"] = twilio_sid
 if twilio_token: os.environ["TWILIO_AUTH_TOKEN"] = twilio_token
 if twilio_number: os.environ["TWILIO_PHONE_NUMBER"] = twilio_number
 if claude_key: os.environ["ANTHROPIC_API_KEY"] = claude_key
-
-# ── TAB STATE ────────────────────────────────────────────────────
-if "active_tab" not in st.session_state:
-    st.session_state.active_tab = "coach"
-if "selected_client" not in st.session_state:
-    st.session_state.selected_client = None
-if "last_poll" not in st.session_state:
-    st.session_state.last_poll = datetime.now()
-if "notifications" not in st.session_state:
-    st.session_state.notifications = []
-
-# ── TOP NAV ──────────────────────────────────────────────────────
-tab_coach = "active" if st.session_state.active_tab == "coach" else ""
-tab_alumni = "active" if st.session_state.active_tab == "alumni" else ""
-
-st.markdown(f"""
-<div class="apex-nav">
-  <div class="apex-brand">
-    <div class="apex-logo">P</div>
-    <span class="apex-name">Pinnacle Peak Recovery</span>
-  </div>
-  <div class="apex-tabs">
-    <a class="apex-tab {tab_coach}" href="?tab=coach">🎯 Call Coach</a>
-    <a class="apex-tab {tab_alumni}" href="?tab=alumni">👥 Alumni Re-Engagement</a>
-  </div>
-</div>
-""", unsafe_allow_html=True)
-
-# Handle URL tab param
-query_params = st.query_params
-if "tab" in query_params:
-    st.session_state.active_tab = query_params["tab"]
 
 # ── CALL COACH TAB ───────────────────────────────────────────────
 if st.session_state.active_tab == "coach":
