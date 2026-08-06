@@ -131,11 +131,20 @@ html, body {
 .nav-name { font-size: 13px; font-weight: 700; color: var(--ink); letter-spacing: -.2px; line-height: 1.2; }
 .nav-sub  { font-size: 10px; font-weight: 500; color: var(--ink-40); letter-spacing: .3px; }
 .nav-divider { width: 1px; height: 28px; background: var(--ink-15); margin-right: 24px; }
-.nav-stats {
-  display: flex;
-  gap: 0;
-  flex: 1;
+.nav-stats { display: flex; gap: 0; flex: 1; }
+
+/* ─── TAB SWITCHER ───────────────────────────────────────────── */
+.tab-switcher { display: flex; align-items: center; gap: 4px; margin: 0 20px; }
+.tab-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 7px;
+  font-size: 11.5px; font-weight: 600; font-family: var(--f);
+  cursor: pointer; border: 1px solid transparent;
+  background: transparent; color: var(--ink-40);
+  transition: all .15s; white-space: nowrap;
 }
+.tab-btn:hover { background: var(--ink-06); color: var(--ink-70); }
+.tab-btn.active { background: var(--clay-soft); color: var(--clay); border-color: var(--clay-line); }
 .stat {
   display: flex;
   flex-direction: column;
@@ -651,6 +660,11 @@ html, body {
       <div class="stat"><div class="stat-v" id="mi" style="color:var(--clay)">0</div><div class="stat-l">Insights</div></div>
       <div class="stat"><div class="stat-v" id="mwr" style="color:var(--gold)">—</div><div class="stat-l">Win Rate</div></div>
     </div>
+    <div class="tab-switcher">
+      <button class="tab-btn active" id="tab-coach" onclick="switchTab('coach')">🎯 Call Coach</button>
+      <button class="tab-btn" id="tab-alumni" onclick="switchTab('alumni')">👥 Alumni Outreach</button>
+    </div>
+    <div class="nav-divider"></div>
     <div class="live-word" id="live-word">Idle</div>
     <button id="theme-toggle" onclick="toggleDark()" style="margin-left:16px;background:none;border:1px solid var(--ink-15);color:var(--ink-40);border-radius:7px;padding:5px 11px;cursor:pointer;font-family:var(--f);font-size:11px;font-weight:600;transition:all .15s;white-space:nowrap" title="Toggle dark mode">☀️ Light</button>
   </nav>
@@ -806,6 +820,54 @@ html, body {
 </div>
 
 <div id="pdf-report" style="display:none"></div>
+
+<!-- ── ALUMNI OVERLAY ─────────────────────────────────────────── -->
+<div id="alumni-overlay" style="display:none;position:fixed;top:56px;left:0;right:0;bottom:0;background:var(--canvas);z-index:50;overflow-y:auto;font-family:var(--f)">
+  <div style="padding:28px 32px;max-width:1200px;margin:0 auto">
+    <div style="margin-bottom:24px">
+      <div style="font-size:20px;font-weight:800;color:var(--ink);letter-spacing:-.4px">Alumni Re-Engagement</div>
+      <div style="font-size:12px;color:var(--ink-40);margin-top:3px">Autonomous outreach · 24hr · 72hr · 7-day post-discharge</div>
+    </div>
+    <div id="alumni-alerts" style="margin-bottom:16px"></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px">
+      <div style="background:var(--white);border:1px solid var(--ink-15);border-radius:var(--r);padding:16px 20px;text-align:center;box-shadow:var(--s1)"><div style="font-size:28px;font-weight:800;color:var(--ink);line-height:1" id="al-stat-active">0</div><div style="font-size:9px;font-weight:600;color:var(--ink-40);text-transform:uppercase;letter-spacing:1.2px;margin-top:4px">Active Alumni</div></div>
+      <div style="background:var(--white);border:1px solid var(--ink-15);border-radius:var(--r);padding:16px 20px;text-align:center;box-shadow:var(--s1)"><div style="font-size:28px;font-weight:800;color:var(--danger);line-height:1" id="al-stat-flagged">0</div><div style="font-size:9px;font-weight:600;color:var(--ink-40);text-transform:uppercase;letter-spacing:1.2px;margin-top:4px">Flagged</div></div>
+      <div style="background:var(--white);border:1px solid var(--ink-15);border-radius:var(--r);padding:16px 20px;text-align:center;box-shadow:var(--s1)"><div style="font-size:28px;font-weight:800;color:var(--success);line-height:1" id="al-stat-interested">0</div><div style="font-size:9px;font-weight:600;color:var(--ink-40);text-transform:uppercase;letter-spacing:1.2px;margin-top:4px">Re-Interested</div></div>
+      <div style="background:var(--white);border:1px solid var(--ink-15);border-radius:var(--r);padding:16px 20px;text-align:center;box-shadow:var(--s1)"><div style="font-size:28px;font-weight:800;color:var(--ink);line-height:1" id="al-stat-msgs">0</div><div style="font-size:9px;font-weight:600;color:var(--ink-40);text-transform:uppercase;letter-spacing:1.2px;margin-top:4px">Total Messages</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start">
+      <!-- Add + List -->
+      <div>
+        <div style="background:var(--white);border:1px solid var(--ink-15);border-radius:var(--r);padding:18px;box-shadow:var(--s1);margin-bottom:16px">
+          <div style="font-size:11px;font-weight:700;color:var(--ink);margin-bottom:14px">➕ Add Discharged Client</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div><label style="font-size:10px;font-weight:600;color:var(--ink-40);display:block;margin-bottom:4px">Full Name *</label><input id="al-name" type="text" placeholder="Jane Smith" style="width:100%;padding:8px 10px;border:1px solid var(--ink-15);border-radius:var(--r-xs);font-family:var(--f);font-size:12px;color:var(--ink);background:var(--ink-06);outline:none"></div>
+            <div><label style="font-size:10px;font-weight:600;color:var(--ink-40);display:block;margin-bottom:4px">Phone Number *</label><input id="al-phone" type="tel" placeholder="+1 (480) 555-0100" style="width:100%;padding:8px 10px;border:1px solid var(--ink-15);border-radius:var(--r-xs);font-family:var(--f);font-size:12px;color:var(--ink);background:var(--ink-06);outline:none"></div>
+            <div><label style="font-size:10px;font-weight:600;color:var(--ink-40);display:block;margin-bottom:4px">Discharge Date *</label><input id="al-date" type="date" style="width:100%;padding:8px 10px;border:1px solid var(--ink-15);border-radius:var(--r-xs);font-family:var(--f);font-size:12px;color:var(--ink);background:var(--ink-06);outline:none"></div>
+            <div><label style="font-size:10px;font-weight:600;color:var(--ink-40);display:block;margin-bottom:4px">Clinical Notes</label><textarea id="al-notes" placeholder="Opioid use disorder, completed 30-day residential..." rows="3" style="width:100%;padding:8px 10px;border:1px solid var(--ink-15);border-radius:var(--r-xs);font-family:var(--f);font-size:12px;color:var(--ink);background:var(--ink-06);outline:none;resize:none"></textarea></div>
+            <button onclick="addAlumniClient()" style="background:var(--clay);color:white;border:none;border-radius:var(--r-sm);padding:10px;font-family:var(--f);font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(136,62,39,0.25)">Add Client & Start Sequence</button>
+            <div id="al-add-msg" style="font-size:11px;color:var(--success);display:none;text-align:center">✅ Client added successfully</div>
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--ink);margin-bottom:10px">Clients</div>
+        <div id="al-client-list"><div style="color:var(--ink-40);font-size:12px;text-align:center;padding:32px 0;background:var(--white);border:1px solid var(--ink-15);border-radius:var(--r)">No clients yet. Add one above.</div></div>
+      </div>
+      <!-- Conversation -->
+      <div style="background:var(--white);border:1px solid var(--ink-15);border-radius:var(--r);box-shadow:var(--s1);min-height:500px;display:flex;flex-direction:column">
+        <div style="padding:18px 20px;border-bottom:1px solid var(--ink-15);display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:14px;font-weight:700;color:var(--ink)" id="al-convo-name">Select a client</div><div style="font-size:11px;color:var(--ink-40);margin-top:2px" id="al-convo-sub">Click a client to view their conversation</div></div>
+          <div id="al-convo-flag"></div>
+        </div>
+        <div id="al-timeline" style="padding:12px 20px;border-bottom:1px solid var(--ink-15);display:none"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="al-timeline-grid"></div></div>
+        <div id="al-messages" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:6px;min-height:280px"><div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-40);font-size:12px;text-align:center;line-height:1.7">Select a client to see their conversation</div></div>
+        <div style="padding:14px 20px;border-top:1px solid var(--ink-15);display:flex;gap:8px">
+          <input id="al-manual-msg" type="text" placeholder="Send a manual message..." style="flex:1;padding:9px 12px;border:1px solid var(--ink-15);border-radius:var(--r-sm);font-family:var(--f);font-size:12px;color:var(--ink);background:var(--ink-06);outline:none" onkeydown="if(event.key==='Enter')sendManualMsg()">
+          <button onclick="sendManualMsg()" style="background:var(--clay);color:white;border:none;border-radius:var(--r-sm);padding:9px 16px;font-family:var(--f);font-size:12px;font-weight:600;cursor:pointer">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 const DG="__DG__",CL="__CL__",LANG="__LANG__";
@@ -1288,7 +1350,165 @@ function exportPDF(){
   else showerr("Pop-up blocked — allow pop-ups to download the report.");
 }
 
-// Init
+// ── TAB SWITCHING ──────────────────────────────────────────────
+function switchTab(tab){
+  const coach=document.querySelector('.shell');
+  const alumni=document.getElementById('alumni-overlay');
+  const tbCoach=document.getElementById('tab-coach');
+  const tbAlumni=document.getElementById('tab-alumni');
+  if(tab==='alumni'){
+    coach.style.display='none';alumni.style.display='block';
+    tbCoach.classList.remove('active');tbAlumni.classList.add('active');
+    renderAlumniClients();
+  } else {
+    alumni.style.display='none';coach.style.display='grid';
+    tbAlumni.classList.remove('active');tbCoach.classList.add('active');
+  }
+}
+
+// ── ALUMNI CLIENT MANAGEMENT ───────────────────────────────────
+let alumniDB={clients:[]};
+let selectedAlumniId=null;
+
+function loadAlumniDB(){
+  try{const s=localStorage.getItem('apex-alumni');if(s)alumniDB=JSON.parse(s);}catch(e){}
+}
+function saveAlumniDB(){
+  try{localStorage.setItem('apex-alumni',JSON.stringify(alumniDB));}catch(e){}
+}
+
+function addAlumniClient(){
+  const name=document.getElementById('al-name').value.trim();
+  const phone=document.getElementById('al-phone').value.trim();
+  const date=document.getElementById('al-date').value;
+  const notes=document.getElementById('al-notes').value.trim();
+  if(!name||!phone||!date){alert('Name, phone, and discharge date are required.');return;}
+  let p=phone.replace(/[\s\-\(\)]/g,'');
+  if(!p.startsWith('+'))p='+1'+p;
+  const client={
+    id:'ppr_'+Date.now(),name,phone:p,discharge_date:date,notes,
+    status:'active',flag:null,conversations:[],
+    scheduled:{h24:false,h72:false,d7:false},created_at:new Date().toISOString()
+  };
+  loadAlumniDB();alumniDB.clients.push(client);saveAlumniDB();
+  document.getElementById('al-name').value='';
+  document.getElementById('al-phone').value='';
+  document.getElementById('al-notes').value='';
+  const msg=document.getElementById('al-add-msg');msg.style.display='block';
+  setTimeout(()=>{msg.style.display='none';},3000);
+  renderAlumniClients();
+}
+
+function renderAlumniClients(){
+  loadAlumniDB();
+  const clients=alumniDB.clients.filter(c=>c.status==='active').reverse();
+  // Update stats
+  const flagged=clients.filter(c=>c.flag&&['crisis','relapse'].includes(c.flag.type));
+  const interested=clients.filter(c=>c.flag&&c.flag.type==='interested');
+  const msgs=clients.reduce((a,c)=>a+c.conversations.length,0);
+  const el=id=>document.getElementById(id);
+  if(el('al-stat-active'))el('al-stat-active').textContent=clients.length;
+  if(el('al-stat-flagged'))el('al-stat-flagged').textContent=flagged.length+clients.filter(c=>c.flag&&c.flag.type==='concerning').length;
+  if(el('al-stat-interested'))el('al-stat-interested').textContent=interested.length;
+  if(el('al-stat-msgs'))el('al-stat-msgs').textContent=msgs;
+  // Alerts
+  const alertDiv=el('alumni-alerts');
+  if(alertDiv){
+    alertDiv.innerHTML=flagged.slice(0,2).map(c=>`
+      <div style="background:#FDE8E8;border-left:4px solid var(--danger);padding:12px 16px;border-radius:0 var(--r-sm) var(--r-sm) 0;margin-bottom:8px;display:flex;align-items:center;gap:10px;font-size:13px">
+        <span style="font-size:16px">🚨</span>
+        <div><strong style="color:var(--danger)">${c.name} — ${c.flag.type.toUpperCase()} FLAGGED</strong>
+        ${c.flag.message?`<div style="font-size:11px;color:var(--ink-70);margin-top:2px">${c.flag.message}</div>`:''}</div>
+      </div>`).join('');
+  }
+  // Client list
+  const list=el('al-client-list');
+  if(!list)return;
+  if(!clients.length){list.innerHTML='<div style="color:var(--ink-40);font-size:12px;text-align:center;padding:32px 0;background:var(--white);border:1px solid var(--ink-15);border-radius:var(--r)">No clients yet. Add one above.</div>';return;}
+  list.innerHTML=clients.map(c=>{
+    const ft=c.flag?.type;
+    const flagColors={crisis:'var(--danger)',relapse:'var(--danger)',interested:'var(--success)',concerning:'var(--warn)'};
+    const fc=ft?flagColors[ft]:'var(--ink-15)';
+    const sent=Object.values(c.scheduled||{}).filter(Boolean).length;
+    const isSelected=selectedAlumniId===c.id;
+    return `<div onclick="selectAlumniClient('${c.id}')" style="background:var(--white);border:1px solid ${isSelected?'var(--clay)':ft?fc:'var(--ink-15)'};border-left:4px solid ${ft?fc:'var(--ink-15)'};border-radius:var(--r-sm);padding:12px 14px;margin-bottom:8px;cursor:pointer;box-shadow:var(--s1);transition:all .15s">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="font-weight:700;font-size:13px;color:var(--ink)">${c.name}</div>
+        ${ft?`<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:100px;background:${fc}18;color:${fc};border:1px solid ${fc}40">${ft.toUpperCase()}</span>`:'<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:100px;background:var(--ink-06);color:var(--ink-40)">ACTIVE</span>'}
+      </div>
+      <div style="font-size:10px;color:var(--ink-40);margin-top:3px">${c.phone} · Discharged ${c.discharge_date}</div>
+      <div style="font-size:10px;color:var(--ink-40);margin-top:5px">📤 ${sent}/3 checkpoints · 💬 ${c.conversations.length} messages</div>
+    </div>`;
+  }).join('');
+}
+
+function selectAlumniClient(id){
+  selectedAlumniId=id;
+  loadAlumniDB();
+  const c=alumniDB.clients.find(x=>x.id===id);
+  if(!c)return;
+  const el=x=>document.getElementById(x);
+  el('al-convo-name').textContent=c.name;
+  el('al-convo-sub').textContent=`${c.phone} · Discharged ${c.discharge_date}`;
+  // Flag badge
+  const ft=c.flag?.type;
+  const flagColors={crisis:'var(--danger)',relapse:'var(--danger)',interested:'var(--success)',concerning:'var(--warn)'};
+  el('al-convo-flag').innerHTML=ft?`<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;background:${flagColors[ft]}18;color:${flagColors[ft]};border:1px solid ${flagColors[ft]}40">${ft.toUpperCase()}</span>`:'';
+  // Timeline
+  const tl=el('al-timeline');const tlg=el('al-timeline-grid');
+  if(tl&&tlg){
+    tl.style.display='block';
+    const discharge=new Date(c.discharge_date);
+    const checks={h24:{label:'24 Hours',time:new Date(discharge.getTime()+24*3600000)},h72:{label:'72 Hours',time:new Date(discharge.getTime()+72*3600000)},d7:{label:'7 Days',time:new Date(discharge.getTime()+7*24*3600000)}};
+    tlg.innerHTML=Object.entries(checks).map(([k,v])=>{
+      const sent=(c.scheduled||{})[k];const due=new Date()>=v.time;
+      const col=sent?'var(--clay)':due?'var(--warn)':'var(--ink-40)';
+      const bg=sent?'var(--clay-soft)':due?'var(--warn-soft)':'var(--ink-06)';
+      return `<div style="text-align:center;padding:8px;background:${bg};border-radius:var(--r-xs);border:1px solid ${col}30">
+        <div style="font-size:10px;font-weight:700;color:${col};text-transform:uppercase;letter-spacing:.5px">${v.label}</div>
+        <div style="font-size:10px;color:${col};margin-top:2px">${sent?'✓ Sent':due?'Pending':'Scheduled'}</div>
+      </div>`;
+    }).join('');
+  }
+  // Messages
+  const msgs=el('al-messages');
+  if(msgs){
+    if(!c.conversations.length){msgs.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-40);font-size:12px;text-align:center;line-height:1.7">No messages yet.<br>First outreach fires 24hrs after discharge.</div>';
+    } else {
+      msgs.innerHTML=c.conversations.map(m=>{
+        const ts=(m.timestamp||'').slice(11,16);
+        if(m.role==='outbound'){
+          return `<div><div style="background:var(--clay);color:white;border-radius:16px 16px 4px 16px;padding:10px 14px;margin-left:40px;font-size:13px;line-height:1.5">${m.body}</div><div style="font-size:9px;color:var(--ink-40);text-align:right;margin:2px 4px">${ts}</div></div>`;
+        } else {
+          return `<div><div style="background:var(--ink-06);color:var(--ink);border-radius:16px 16px 16px 4px;padding:10px 14px;margin-right:40px;font-size:13px;line-height:1.5">${m.body}</div><div style="font-size:9px;color:var(--ink-40);margin:2px 4px">${ts}</div></div>`;
+        }
+      }).join('');
+      msgs.scrollTop=msgs.scrollHeight;
+    }
+  }
+  renderAlumniClients();
+}
+
+function sendManualMsg(){
+  const input=document.getElementById('al-manual-msg');
+  const text=input?.value.trim();
+  if(!text||!selectedAlumniId)return;
+  loadAlumniDB();
+  const c=alumniDB.clients.find(x=>x.id===selectedAlumniId);
+  if(!c)return;
+  // Add to local DB (actual Twilio send handled by Streamlit backend)
+  c.conversations.push({role:'outbound',body:text,timestamp:new Date().toISOString(),manual:true});
+  saveAlumniDB();
+  input.value='';
+  selectAlumniClient(selectedAlumniId);
+  // Notify Streamlit via postMessage to trigger actual SMS send
+  window.parent.postMessage({type:'apex-send-sms',clientId:selectedAlumniId,phone:c.phone,message:text},'*');
+}
+
+// Load alumni data on init
+loadAlumniDB();
+
+// Auto-init default caller type
 setCallerType("family_substance");
 </script>
 </body>
