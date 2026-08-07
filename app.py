@@ -40,10 +40,16 @@ with st.sidebar:
 
 dg = (dg_key or "").replace("`","").replace("$","").strip()
 cl = (claude_key or "").replace("`","").replace("$","").strip()
+t_sid = (twilio_sid or "").strip()
+t_token = (twilio_token or "").strip()
+t_from = (twilio_number or "").strip()
 
 html = open("ui.html", encoding="utf-8").read()
 html = html.replace("__DG__", dg).replace("__CL__", cl)
 html = html.replace("__LANG__", language)
 html = html.replace("__CI__", str(int(coach_interval)))
+html = html.replace("__TWILIO_SID__", t_sid)
+html = html.replace("__TWILIO_TOKEN__", t_token)
+html = html.replace("__TWILIO_FROM__", t_from)
 
 st.components.v1.html(html, height=5500, scrolling=True)

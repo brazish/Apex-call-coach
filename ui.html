@@ -872,6 +872,7 @@ html, body {
 <script>
 const DG="__DG__",CL="__CL__",LANG="__LANG__";
 const CI=(()=>{try{return __CI__;}catch(e){return 20;}})();
+const TWILIO_SID="__TWILIO_SID__",TWILIO_TOKEN="__TWILIO_TOKEN__",TWILIO_FROM="__TWILIO_FROM__";
 const _DG=DG.startsWith("__")||DG===""?"":DG;
 const _CL=CL.startsWith("__")||CL===""?"":CL;
 
@@ -1360,9 +1361,11 @@ function switchTab(tab){
     coach.style.display='none';alumni.style.display='block';
     tbCoach.classList.remove('active');tbAlumni.classList.add('active');
     renderAlumniClients();
+    startCheckpointPoller();
   } else {
     alumni.style.display='none';coach.style.display='grid';
     tbAlumni.classList.remove('active');tbCoach.classList.add('active');
+    stopCheckpointPoller();
   }
 }
 
@@ -1397,6 +1400,7 @@ function addAlumniClient(){
   const msg=document.getElementById('al-add-msg');msg.style.display='block';
   setTimeout(()=>{msg.style.display='none';},3000);
   renderAlumniClients();
+  setTimeout(()=>processAlumniCheckpoints(),800);
 }
 
 function renderAlumniClients(){
@@ -1489,20 +1493,129 @@ function selectAlumniClient(id){
   renderAlumniClients();
 }
 
-function sendManualMsg(){
+async function sendTwilioSMS(to, body){
+  if(!TWILIO_SID||TWILIO_SID.startsWith('__')||!TWILIO_TOKEN||TWILIO_TOKEN.startsWith('__')){
+    console.warn('Twilio not configured — message saved locally only');
+    return false;
+  }
+  const url=`https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/Messages.json`;
+  const params=new URLSearchParams({To:to,From:TWILIO_FROM,Body:body});
+  const resp=await fetch(url,{
+    method:'POST',
+    headers:{
+      'Authorization':'Basic '+btoa(TWILIO_SID+':'+TWILIO_TOKEN),
+      'Content-Type':'application/x-www-form-urlencoded'
+    },
+    body:params.toString()
+  });
+  if(!resp.ok){
+    const err=await resp.json();
+    throw new Error(err.message||'Twilio error '+resp.status);
+  }
+  return true;
+}
+
+async function sendManualMsg(){
   const input=document.getElementById('al-manual-msg');
   const text=input?.value.trim();
   if(!text||!selectedAlumniId)return;
   loadAlumniDB();
   const c=alumniDB.clients.find(x=>x.id===selectedAlumniId);
   if(!c)return;
-  // Add to local DB (actual Twilio send handled by Streamlit backend)
-  c.conversations.push({role:'outbound',body:text,timestamp:new Date().toISOString(),manual:true});
+  const btn=document.querySelector('#al-send-bar button')||document.querySelector('[onclick="sendManualMsg()"]');
+  if(btn){btn.textContent='Sending...';btn.disabled=true;}
+  try{
+    await sendTwilioSMS(c.phone,text);
+    c.conversations.push({role:'outbound',body:text,timestamp:new Date().toISOString(),manual:true});
+    saveAlumniDB();
+    input.value='';
+    selectAlumniClient(selectedAlumniId);
+  }catch(e){
+    alert('Failed to send: '+e.message);
+    // Still save locally so it's not lost
+    c.conversations.push({role:'outbound',body:text,timestamp:new Date().toISOString(),manual:true,failed:true});
+    saveAlumniDB();
+    selectAlumniClient(selectedAlumniId);
+  }finally{
+    if(btn){btn.textContent='Send';btn.disabled=false;}
+  }
+}
+
+// ── CHECKPOINT PROCESSOR ──────────────────────────────────────
+const CHECKPOINT_MS={h24:24*3600000,h72:72*3600000,d7:7*24*3600000};
+const CHECKPOINT_LABELS={h24:'24 Hours',h72:'72 Hours',d7:'7 Days'};
+
+async function claudeAlumniMessage(client,context){
+  if(!_CL||_CL.startsWith('__'))return null;
+  const firstName=client.name.split(' ')[0];
+  const sys=`You are a warm, caring support specialist for Pinnacle Peak Recovery in Scottsdale, AZ. You are texting a former client named ${firstName} who recently completed or left our program.
+
+Your role: Check in genuinely and warmly — like a caring human, not a bot. Keep messages SHORT (1-3 sentences). Conversational SMS style. Do NOT mention you are an AI. Do NOT be pushy or salesy.
+
+Context: ${context}
+Client notes: ${client.notes||'No notes'}
+
+If they mention relapse/using: respond with compassion, ask if they want support, flag as RELAPSE.
+If they express interest in returning: encourage them, flag as INTERESTED.
+If they seem in crisis: express concern, mention PPR (480-xxx-xxxx) or 988 crisis line, flag as CRISIS.
+
+Reply ONLY in JSON (straight quotes, no line breaks):
+{"message":"your SMS text here","flag":null}
+
+flag options: null, "RELAPSE", "CRISIS", "INTERESTED", "CONCERNING"`;
+
+  const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'x-api-key':_CL,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,system:sys,messages:[{role:'user',content:'Generate the message now.'}]})
+  });
+  const data=await resp.json();
+  const raw=(data.content?.[0]?.text||'').trim().replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/\r?\n/g,' ');
+  const match=raw.match(/\{[\s\S]*\}/);
+  if(!match)return{message:raw.slice(0,200),flag:null};
+  try{return JSON.parse(match[0]);}catch(e){return{message:raw.slice(0,200),flag:null};}
+}
+
+async function processAlumniCheckpoints(){
+  loadAlumniDB();
+  const now=new Date();
+  let anyProcessed=false;
+  for(const client of alumniDB.clients){
+    if(client.status!=='active')continue;
+    const discharge=new Date(client.discharge_date);
+    for(const [key,ms] of Object.entries(CHECKPOINT_MS)){
+      if(client.scheduled[key])continue;
+      const sendAt=new Date(discharge.getTime()+ms);
+      if(now<sendAt)continue;
+      // Due — generate and send
+      try{
+        const ctx=`It has been ${CHECKPOINT_LABELS[key]} since ${client.name.split(' ')[0]}'s discharge. This is a scheduled check-in. Do not mention it is scheduled.`;
+        const result=await claudeAlumniMessage(client,ctx);
+        if(!result?.message)continue;
+        await sendTwilioSMS(client.phone,result.message);
+        client.conversations.push({role:'outbound',body:result.message,timestamp:new Date().toISOString(),checkpoint:key});
+        client.scheduled[key]=true;
+        if(result.flag)client.flag={type:result.flag.toLowerCase(),message:'Auto-detected during '+CHECKPOINT_LABELS[key]+' check-in',at:new Date().toISOString()};
+        anyProcessed=true;
+      }catch(e){
+        console.error('Checkpoint error for',client.name,key,e.message);
+        client.scheduled[key]=true; // mark sent to avoid retry loop
+      }
+    }
+  }
   saveAlumniDB();
-  input.value='';
-  selectAlumniClient(selectedAlumniId);
-  // Notify Streamlit via postMessage to trigger actual SMS send
-  window.parent.postMessage({type:'apex-send-sms',clientId:selectedAlumniId,phone:c.phone,message:text},'*');
+  if(anyProcessed)renderAlumniClients();
+}
+
+// Poll for checkpoint processing every 5 minutes while alumni tab is open
+let checkpointPoller=null;
+function startCheckpointPoller(){
+  if(checkpointPoller)return;
+  processAlumniCheckpoints();
+  checkpointPoller=setInterval(()=>processAlumniCheckpoints(),5*60*1000);
+}
+function stopCheckpointPoller(){
+  if(checkpointPoller){clearInterval(checkpointPoller);checkpointPoller=null;}
 }
 
 // Load alumni data on init
